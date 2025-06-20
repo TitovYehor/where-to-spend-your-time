@@ -1,6 +1,0 @@
-@WhereToSpendYourTime.Api_HostAddress = http://localhost:5253
-
-GET {{WhereToSpendYourTime.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
