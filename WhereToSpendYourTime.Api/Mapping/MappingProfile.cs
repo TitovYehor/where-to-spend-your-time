@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Mapping;
@@ -11,6 +12,8 @@ public class MappingProfile : Profile
     {
         CreateMap<Category, CategoryDto>();
         CreateMap<Item, ItemDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category!.Name));
+        CreateMap<Review, ReviewDto>()
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
     }
 }
