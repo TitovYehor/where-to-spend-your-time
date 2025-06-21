@@ -17,8 +17,7 @@ public class Item
     public ItemStatus Status { get; set; } = ItemStatus.Pending;
 
     public int CategoryId { get; set; }
-
-    public Category Category { get; set; } = new Category();
+    public Category? Category { get; set; }
 
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

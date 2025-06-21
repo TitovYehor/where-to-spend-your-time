@@ -19,10 +19,10 @@ public class Review
     public int Rating { get; set; }
 
     public int ItemId { get; set; }
-    public Item Item { get; set; } = new Item();
+    public Item? Item { get; set; }
 
     public string UserId { get; set; } = string.Empty;
-    public ApplicationUser User { get; set; } = new ApplicationUser();
+    public ApplicationUser? User { get; set; }
 
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

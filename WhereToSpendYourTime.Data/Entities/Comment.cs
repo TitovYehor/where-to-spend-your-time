@@ -15,8 +15,8 @@ public class Comment
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public int ReviewId { get; set; }
-    public Review Review { get; set; } = new Review();
+    public Review? Review { get; set; }
 
     public string UserId { get; set; } = string.Empty;
-    public ApplicationUser User { get; set; } = new ApplicationUser();
+    public ApplicationUser? User { get; set; }
 }
