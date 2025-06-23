@@ -41,10 +41,20 @@ public class ReviewsController : ControllerBase
     public async Task<IActionResult> CreateReview(ReviewCreateRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
+
+        bool hasReviewed = await _db.Reviews
+            .AnyAsync(r => r.ItemId == request.ItemId && r.UserId == user!.Id);
+
+        if (hasReviewed)
+        {
+            return BadRequest("User already reviewed this item.");
+        }
+
         var review = new Review
         {
             Title = request.Title,
             Content = request.Content,
+            Rating = request.Rating,
             ItemId = request.ItemId,
             UserId = user!.Id,
             CreatedAt = DateTime.UtcNow
@@ -75,6 +85,7 @@ public class ReviewsController : ControllerBase
 
         review.Title = request.Title;
         review.Content = request.Content;
+        review.Rating = request.Rating;
 
         await _db.SaveChangesAsync();
         return NoContent();
