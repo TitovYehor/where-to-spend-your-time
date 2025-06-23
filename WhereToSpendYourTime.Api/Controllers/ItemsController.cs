@@ -21,6 +21,31 @@ public class ItemsController : ControllerBase
         this._mapper = mapper;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<ItemDto>> GetAllItems()
+    {
+        if (!ModelState.IsValid)
+        {
+            return NotFound();
+        }
+
+        var items = await _db.Items
+            .Include(i => i.Category)
+            .Include(i => i.Reviews)
+            .ToListAsync();
+
+        var itemDtos = items.Select(item =>
+        {
+            var dto = _mapper.Map<ItemDto>(item);
+            dto.AverageRating = item.Reviews.Count != 0
+                ? item.Reviews.Average(r => r.Rating)
+                : 0;
+            return dto;
+        }).ToList();
+
+        return Ok(itemDtos);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ItemDto>> GetItemById(int id)
     {
@@ -31,6 +56,7 @@ public class ItemsController : ControllerBase
 
         var item = await _db.Items
             .Include(i => i.Category)
+            .Include(i => i.Reviews)
             .FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
@@ -38,7 +64,13 @@ public class ItemsController : ControllerBase
             return NotFound();
         }
 
-        return Ok(_mapper.Map<ItemDto>(item));
+        var itemDto = _mapper.Map<ItemDto>(item);
+
+        itemDto.AverageRating = item.Reviews.Count != 0
+            ? item.Reviews.Average(r => r.Rating)
+            : 0;
+
+        return Ok(itemDto);
     }
 
     [Authorize(Roles = "Admin")]
