@@ -49,7 +49,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await DbInitializer.SeedRolesAndAdminAsync(services);
+    await DbInitializer.SeedAsync(services);
 }
 
 app.MapControllers();
