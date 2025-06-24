@@ -22,28 +22,48 @@ public class ItemsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ItemDto>> GetAllItems()
-    {
-        if (!ModelState.IsValid)
-        {
-            return NotFound();
-        }
-
-        var items = await _db.Items
+    public async Task<ActionResult> GetItems([FromQuery] ItemFilterRequest filter)
+    { 
+        var query = _db.Items
             .Include(i => i.Category)
             .Include(i => i.Reviews)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(i => i.Title.ToLower().Contains(filter.Search.ToLower()));
+        }
+
+        if (filter.CategoryId.HasValue)
+        {
+            query = query.Where(i => i.CategoryId == filter.CategoryId.Value);
+        }
+
+        query = filter.SortBy?.ToLower() switch
+        {
+            "title" => filter.Descending ? query.OrderByDescending(i => i.Title) : query.OrderBy(i => i.Title),
+            "rating" => filter.Descending
+                ? query.OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                : query.OrderBy(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0),
+            _ => query.OrderByDescending(i => i.Id)
+        };
+
+        int skip = (filter.Page - 1) * filter.PageSize;
+
+        var items = await query
+            .Skip(skip)
+            .Take(filter.PageSize)
             .ToListAsync();
 
-        var itemDtos = items.Select(item =>
+        var result = items.Select(i =>
         {
-            var dto = _mapper.Map<ItemDto>(item);
-            dto.AverageRating = item.Reviews.Count != 0
-                ? item.Reviews.Average(r => r.Rating)
-                : 0;
+            var dto = _mapper.Map<ItemDto>(i);
+            dto.CategoryName = i.Category?.Name ?? "Error during name retrieving";
+            dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
             return dto;
-        }).ToList();
+        });
 
-        return Ok(itemDtos);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
