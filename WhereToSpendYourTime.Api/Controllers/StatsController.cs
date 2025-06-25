@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.Stats;
+using WhereToSpendYourTime.Api.Services.Stats;
 using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Controllers;
@@ -11,72 +12,17 @@ namespace WhereToSpendYourTime.Api.Controllers;
 [Route("api/[controller]")]
 public class StatsController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IMapper _mapper;
+    private readonly IStatsService _statsService;
 
-    public StatsController(AppDbContext db, IMapper mapper)
+    public StatsController(IStatsService statsService)
     {
-        _db = db;
-        _mapper = mapper;
+        _statsService = statsService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetStats()
     {
-        var topRatedItems = await _db.Items
-            .Where(i => i.Reviews.Count >= 3)
-            .OrderByDescending(i => i.Reviews.Average(r => r.Rating))
-            .Take(5)
-            .Select(i => new ItemStatDto
-            {
-                Id = i.Id,
-                Title = i.Title,
-                Category = i.Category!.Name,
-                AverageRating = i.Reviews.Average(r => r.Rating),
-                ReviewCount = i.Reviews.Count
-            }).ToListAsync();
-
-        var mostReviewedItems = await _db.Items
-            .OrderByDescending(i => i.Reviews.Count)
-            .Take(5)
-            .Select(i => new ItemStatDto
-            {
-                Id = i.Id,
-                Title = i.Title,
-                Category = i.Category!.Name,
-                AverageRating = i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0,
-                ReviewCount = i.Reviews.Count
-            }).ToListAsync();
-
-        var topUsers = await _db.Users
-            .OrderByDescending(u => u.Reviews.Count)
-            .Take(5)
-            .Select(u => new UserStatDto
-            {
-                UserId = u.Id,
-                DisplayName = u.DisplayName,
-                ReviewCount = u.Reviews.Count
-            }).ToListAsync();
-
-        var recentReviews = await _db.Reviews
-            .Include(r => r.User)
-            .Include(r => r.Item)
-            .OrderByDescending(r => r.CreatedAt)
-            .Take(5)
-            .ToListAsync();
-
-        var stats = new StatsDto
-        {
-            TopRatedItems = topRatedItems,
-            MostReviewedItems = mostReviewedItems,
-            TopReviewers = topUsers,
-            RecentReviews = recentReviews.Select(r =>
-            {
-                var dto = _mapper.Map<ReviewDto>(r);
-                dto.Author = r.User!.DisplayName;
-                return dto;
-            }).ToList()
-        };
+        var stats = await _statsService.GetStatsAsync();
 
         return Ok(stats);
     }
