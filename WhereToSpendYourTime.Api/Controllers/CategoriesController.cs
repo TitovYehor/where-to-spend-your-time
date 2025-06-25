@@ -1,11 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Category;
-using WhereToSpendYourTime.Api.Models.Item;
-using WhereToSpendYourTime.Data;
-using WhereToSpendYourTime.Data.Entities;
+using WhereToSpendYourTime.Api.Services.Category;
 
 namespace WhereToSpendYourTime.Api.Controllers;
 
@@ -13,46 +9,46 @@ namespace WhereToSpendYourTime.Api.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IMapper _mapper;
+    private readonly ICategoryService _categoryService;
 
-    public CategoriesController(AppDbContext db, IMapper mapper)
+    public CategoriesController(ICategoryService categoryService)
     {
-        this._db = db;
-        this._mapper = mapper;
+        this._categoryService = categoryService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var categories = await _db.Categories.ToListAsync();
-        return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
+        var categories = await _categoryService.GetAllCategoriesAsync();
+
+        return Ok(categories);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCategoryById(int id)
+    {
+        var category = await _categoryService.GetByIdAsync(id);
+        return category == null ? NotFound() : Ok(category);
     }
 
     [HttpGet("{id}/items")]
-    public async Task<ActionResult<IEnumerable<ItemDto>>> GetItemsInCategory(int id)
+    public async Task<IActionResult> GetItemsInCategory(int id)
     {
         if (!ModelState.IsValid)
         {
             return NotFound();
         }
 
-        var items = await _db.Items
-            .Include(i => i.Category)
-            .Where(i => i.CategoryId == id)
-            .ToListAsync();
+        var items = await _categoryService.GetItemsByCategoryIdAsync(id);
 
-        return Ok(_mapper.Map<IEnumerable<ItemDto>>(items));
+        return Ok(items);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateCategory(CategoryCreateRequest request)
     {
-        var category = new Category { Name = request.Name };
-
-        _db.Categories.Add(category);
-        await _db.SaveChangesAsync();
+        var category = await _categoryService.CreateCategoryAsync(request);
 
         return CreatedAtAction(nameof(GetAll), new { id = category.Id }, category);
     }
@@ -61,14 +57,11 @@ public class CategoriesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCategory(int id, CategoryUpdateRequest request)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category == null)
+        var result = await _categoryService.UpdateCategoryAsync(id, request);
+        if (!result)
         {
             return NotFound();
         }
-
-        category.Name = request.Name;
-        await _db.SaveChangesAsync();
 
         return NoContent();
     }
@@ -77,14 +70,11 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category == null)
+        var result = await _categoryService.DeleteCategoryAsync(id);
+        if (!result)
         {
             return NotFound();
         }
-
-        _db.Categories.Remove(category);
-        await _db.SaveChangesAsync();
 
         return NoContent();
     }
