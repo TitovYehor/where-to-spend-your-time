@@ -1,10 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WhereToSpendYourTime.Api.Models.Review;
-using WhereToSpendYourTime.Api.Models.Stats;
+﻿using Microsoft.AspNetCore.Mvc;
 using WhereToSpendYourTime.Api.Services.Stats;
-using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Controllers;
 

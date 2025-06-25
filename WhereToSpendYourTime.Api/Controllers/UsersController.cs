@@ -1,13 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WhereToSpendYourTime.Api.Models.Comment;
-using WhereToSpendYourTime.Api.Models.Review;
-using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Api.Services.User;
-using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Controllers;

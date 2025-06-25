@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
 using WhereToSpendYourTime.Api.Models.Auth;
 using WhereToSpendYourTime.Api.Services.Auth;
 
