@@ -3,6 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using WhereToSpendYourTime.Api.Services.Auth;
+using WhereToSpendYourTime.Api.Services.Category;
+using WhereToSpendYourTime.Api.Services.Comment;
+using WhereToSpendYourTime.Api.Services.Item;
+using WhereToSpendYourTime.Api.Services.Review;
+using WhereToSpendYourTime.Api.Services.Stats;
+using WhereToSpendYourTime.Api.Services.User;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
 
@@ -15,6 +22,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
