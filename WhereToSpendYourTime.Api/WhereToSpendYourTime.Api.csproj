@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WhereToSpendYourTime.Data\WhereToSpendYourTime.Data.csproj" />
-    <ProjectReference Include="..\WhereToSpendYourTime.Core\WhereToSpendYourTime.Core.csproj" />
   </ItemGroup>
 
 </Project>
