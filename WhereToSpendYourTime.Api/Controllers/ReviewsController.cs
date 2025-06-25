@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Review;
-using WhereToSpendYourTime.Data;
+using WhereToSpendYourTime.Api.Services.Review;
 using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Controllers;
@@ -13,27 +11,21 @@ namespace WhereToSpendYourTime.Api.Controllers;
 [Route("api/[controller]")]
 public class ReviewsController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IMapper _mapper;
+    private readonly IReviewService _reviewService;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public ReviewsController(AppDbContext db, IMapper mapper, UserManager<ApplicationUser> userManager)
+    public ReviewsController(IReviewService reviewService, UserManager<ApplicationUser> userManager)
     {
-        _db = db;
-        _mapper = mapper;
-        _userManager = userManager;
+        this._reviewService = reviewService;
+        this._userManager = userManager;
     }
 
     [HttpGet("/api/items/{itemId}/reviews")]
     public async Task<IActionResult> GetReviewsForItem(int itemId)
     {
-        var reviews = await _db.Reviews
-            .Include(r => r.User)
-            .Where(r => r.ItemId == itemId)
-            .OrderByDescending(r => r.CreatedAt)
-            .ToListAsync();
+        var reviews = await _reviewService.GetReviewsForItemAsync(itemId);
 
-        return Ok(_mapper.Map<IEnumerable<ReviewDto>>(reviews));
+        return Ok(reviews);
     }
 
     [Authorize]
@@ -42,76 +34,33 @@ public class ReviewsController : ControllerBase
     {
         var user = await _userManager.GetUserAsync(User);
 
-        bool hasReviewed = await _db.Reviews
-            .AnyAsync(r => r.ItemId == request.ItemId && r.UserId == user!.Id);
-
-        if (hasReviewed)
+        var (success, reviewDto, error) = await _reviewService.CreateReviewAsync(user!.Id, request);
+        if (!success)
         {
-            return BadRequest("User already reviewed this item.");
+            return BadRequest(error);
         }
 
-        var review = new Review
-        {
-            Title = request.Title,
-            Content = request.Content,
-            Rating = request.Rating,
-            ItemId = request.ItemId,
-            UserId = user!.Id,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _db.Reviews.Add(review);
-        await _db.SaveChangesAsync();
-
-        return Ok(_mapper.Map<ReviewDto>(review));
+        return Ok(reviewDto);
     }
 
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateReview(int id, ReviewUpdateRequest request)
     {
-        var review = await _db.Reviews.FindAsync(id);
         var user = await _userManager.GetUserAsync(User);
+        var success = await _reviewService.UpdateReviewAsync(id, user!.Id, request);
 
-        if (review == null)
-        {
-            return NotFound();
-        }
-
-        if (review.UserId != user!.Id)
-        {
-            return Forbid();
-        }
-
-        review.Title = request.Title;
-        review.Content = request.Content;
-        review.Rating = request.Rating;
-
-        await _db.SaveChangesAsync();
-        return NoContent();
+        return success ? NoContent() : Forbid();
     }
 
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteReview(int id)
     {
-        var review = await _db.Reviews.FindAsync(id);
         var user = await _userManager.GetUserAsync(User);
         var isAdmin = await _userManager.IsInRoleAsync(user!, "Admin");
 
-        if (review == null)
-        {
-            return NotFound();
-        }
-
-        if (review.UserId != user!.Id && !isAdmin)
-        {
-            return Forbid();
-        }
-
-        _db.Reviews.Remove(review);
-        await _db.SaveChangesAsync();
-
-        return NoContent();
+        var success = await _reviewService.DeleteReviewAsync(id, user!.Id, isAdmin);
+        return success ? NoContent() : Forbid();
     }
 }
