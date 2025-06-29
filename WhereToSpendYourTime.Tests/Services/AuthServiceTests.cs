@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -15,21 +14,14 @@ public class AuthServiceTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<SignInManager<ApplicationUser>> _signInManagerMock;
-    private readonly Mock<IConfiguration> _configurationMock;
     private readonly AuthService _authService;
 
     public AuthServiceTests()
     {
         _userManagerMock = MockUserManager<ApplicationUser>();
         _signInManagerMock = MockSignInManager(_userManagerMock.Object);
-        _configurationMock = new Mock<IConfiguration>();
 
-        _configurationMock.Setup(c => c.GetSection("Jwt")["Key"]).Returns("this_is_a_very_long_test_key_1234567890!");
-        _configurationMock.Setup(c => c.GetSection("Jwt")["Issuer"]).Returns("TestIssuer");
-        _configurationMock.Setup(c => c.GetSection("Jwt")["Audience"]).Returns("TestAudience");
-        _configurationMock.Setup(c => c.GetSection("Jwt")["ExpireMinutes"]).Returns("60");
-
-        _authService = new AuthService(_userManagerMock.Object, _signInManagerMock.Object, _configurationMock.Object);
+        _authService = new AuthService(_userManagerMock.Object, _signInManagerMock.Object);
     }
 
     [Fact]
@@ -63,12 +55,12 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnAuthResponse_WhenCredentialsAreValid()
+    public async Task LoginAsync_ShouldReturnTrue_WhenCredentialsAreValid()
     {
         var user = new ApplicationUser { Id = "1", Email = "user@example.com", DisplayName = "User" };
 
         _userManagerMock.Setup(um => um.FindByEmailAsync(user.Email)).ReturnsAsync(user);
-        _signInManagerMock.Setup(sm => sm.CheckPasswordSignInAsync(user, It.IsAny<string>(), false))
+        _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
                           .ReturnsAsync(SignInResult.Success);
         _userManagerMock.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
 
@@ -76,14 +68,11 @@ public class AuthServiceTests
 
         var response = await _authService.LoginAsync(request);
 
-        Assert.NotNull(response);
-        Assert.Equal("User", response.Role);
-        Assert.Equal(user.DisplayName, response.DisplayName);
-        Assert.False(string.IsNullOrEmpty(response.Token));
+        Assert.True(response);
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnNull_WhenUserNotFound()
+    public async Task LoginAsync_ShouldReturnFalse_WhenUserNotFound()
     {
         _userManagerMock.Setup(um => um.FindByEmailAsync("unknown@example.com"))
                         .ReturnsAsync((ApplicationUser)null!);
@@ -92,22 +81,22 @@ public class AuthServiceTests
 
         var result = await _authService.LoginAsync(request);
 
-        Assert.Null(result);
+        Assert.False(result);
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnNull_WhenPasswordIsIncorrect()
+    public async Task LoginAsync_ShouldReturnFalse_WhenPasswordIsIncorrect()
     {
         var user = new ApplicationUser { Id = "1", Email = "user@example.com" };
         _userManagerMock.Setup(um => um.FindByEmailAsync(user.Email)).ReturnsAsync(user);
-        _signInManagerMock.Setup(sm => sm.CheckPasswordSignInAsync(user, It.IsAny<string>(), false))
+        _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
                           .ReturnsAsync(SignInResult.Failed);
 
         var request = new LoginRequest { Email = user.Email, Password = "WrongPass" };
 
         var result = await _authService.LoginAsync(request);
 
-        Assert.Null(result);
+        Assert.False(result);
     }
 
     private static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class
