@@ -30,12 +30,12 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var authResponse = await _authService.LoginAsync(request);
-        if (authResponse == null)
+        bool success = await _authService.LoginAsync(request);
+        if (!success)
         {
             return Unauthorized("Invalid credentials");
         }
 
-        return Ok(authResponse);
+        return Ok();
     }
 }

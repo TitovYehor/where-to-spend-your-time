@@ -7,5 +7,5 @@ public interface IAuthService
 {
     Task<(bool Succeeded, IEnumerable<IdentityError> Errors)> RegisterAsync(RegisterRequest request);
 
-    Task<AuthResponse?> LoginAsync(LoginRequest request);
+    Task<bool> LoginAsync(LoginRequest request);
 }
