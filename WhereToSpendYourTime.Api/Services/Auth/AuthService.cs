@@ -47,4 +47,9 @@ public class AuthService : IAuthService
         var result = await _signInManager.PasswordSignInAsync(user, request.Password, isPersistent: true, lockoutOnFailure: false);
         return result.Succeeded;
     }
+
+    public async Task LogoutAsync()
+    { 
+        await _signInManager.SignOutAsync();
+    }
 }

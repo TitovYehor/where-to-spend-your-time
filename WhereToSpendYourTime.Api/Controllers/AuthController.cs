@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WhereToSpendYourTime.Api.Models.Auth;
 using WhereToSpendYourTime.Api.Services.Auth;
 
@@ -36,6 +37,14 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid credentials");
         }
 
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync();
         return Ok();
     }
 }
