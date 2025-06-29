@@ -1,0 +1,71 @@
+import { createContext, useContext, useEffect, useState } from "react";
+
+export type AuthUser = {
+  id: string;
+  displayName: string;
+  email: string | null;
+};
+
+type AuthContextType = {
+  user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
+  logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("https://localhost:7005/api/users/me", {
+          credentials: "include",
+        });
+
+            
+        if (res.ok) {
+        const data = await res.json();
+        setUser({
+            id: data.id,
+            displayName: data.displayName,
+            email: data.email,
+        });
+        } else {
+            setUser(null);
+        }
+        
+      } catch {
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const logout = async () => {
+    try {
+      await fetch("https://localhost:7005/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, setUser, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+};
