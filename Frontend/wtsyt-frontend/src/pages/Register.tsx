@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 const Register = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
@@ -10,11 +13,34 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    if (displayName.trim().length < 2) {
+        setError("Display name must be at least 2 characters.");
+        return false;
+    }
+
+    if (!isValidEmail(email)) {
+        setError("Please enter a valid email address.");
+        return false;
+    }
+
+    if (password.length < 6) {
+        setError("Password must be at least 6 characters.");
+        return false;
+    }
+
+    return true;
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
+    if (!validate()) return;
+
+    setLoading(true);
     try {
       const response = await fetch("https://localhost:7005/api/auth/register", {
         method: "POST",
@@ -54,7 +80,9 @@ const Register = () => {
         throw new Error("Auto login failed after registration.");
       }
     } catch (err: any) {
-      setError(err.message || "Registration error");
+        setError(err.message || "Registration error");
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -91,8 +119,9 @@ const Register = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
         <p className="mt-4 text-center text-sm">
