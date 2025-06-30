@@ -14,20 +14,21 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   const validate = () => {
     if (displayName.trim().length < 2) {
-        setError("Display name must be at least 2 characters.");
+        setError("Display name must be at least 2 characters");
         return false;
     }
 
     if (!isValidEmail(email)) {
-        setError("Please enter a valid email address.");
+        setError("Please enter a valid email address");
         return false;
     }
 
     if (password.length < 6) {
-        setError("Password must be at least 6 characters.");
+        setError("Password must be at least 6 characters");
         return false;
     }
 
@@ -37,6 +38,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrorMessages([]);
 
     if (!validate()) return;
 
@@ -51,8 +53,17 @@ const Register = () => {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Registration failed");
+
+        if (Array.isArray(data)) {
+            setErrorMessages(data.map((err) => err.description));
+        } else {
+            setErrorMessages(["Registration failed"]);
+        }
+
+        return;
       }
+
+      setErrorMessages([]);
 
       const loginResponse = await fetch("https://localhost:7005/api/auth/login", {
         method: "POST",
@@ -77,10 +88,10 @@ const Register = () => {
 
         navigate("/");
       } else {
-        throw new Error("Auto login failed after registration.");
+        throw new Error("Auto login failed after registration");
       }
     } catch (err: any) {
-        setError(err.message || "Registration error");
+        setErrorMessages(["Network error. Please try again"]);
     } finally {
         setLoading(false);
     }
@@ -90,7 +101,14 @@ const Register = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {error && <ul className="mb-4 text-red-500 text-sm list-disc list-inside"><li>{error}</li></ul>}
+        {errorMessages.length > 0 && (
+        <ul className="mb-4 text-red-500 text-sm list-disc list-inside">
+            {errorMessages.map((msg, i) => (
+            <li key={i}>{msg}</li>
+            ))}
+        </ul>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
