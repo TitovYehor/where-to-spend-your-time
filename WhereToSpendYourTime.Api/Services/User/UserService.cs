@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Data;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.User;
 
@@ -11,11 +13,13 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public UserService(AppDbContext db, IMapper mapper)
+    public UserService(AppDbContext db, IMapper mapper, UserManager<ApplicationUser> userManager)
     {
-        _db = db;
-        _mapper = mapper;
+        this._db = db;
+        this._mapper = mapper;
+        this._userManager = userManager;
     }
 
     public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)
@@ -60,5 +64,30 @@ public class UserService : IUserService
         }
 
         return dto;
+    }
+
+    public async Task<bool> UpdateProfileAsync(string userId, string displayName)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.DisplayName = displayName;
+        var result = await _userManager.UpdateAsync(user);
+        return result.Succeeded;
+    }
+
+    public async Task<(bool Succeeded, IEnumerable<IdentityError> Errors)> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return (false, new[] { new IdentityError { Description = "User not found" } });
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        return (result.Succeeded, result.Errors);
     }
 }
