@@ -10,6 +10,7 @@ type AuthContextType = {
   user: AuthUser | null;
   setUser: (user: AuthUser | null) => void;
   logout: () => void;
+  refreshUser: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +45,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser();
   }, []);
 
+
+  const refreshUser = async () => {
+    try {
+      const response = await fetch("https://localhost:7005/api/users/me", {
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser({
+          id: data.id,
+          displayName: data.displayName,
+          email: data.email,
+        });
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    }
+  };
+
   const logout = async () => {
     try {
       await fetch("https://localhost:7005/api/auth/logout", {
@@ -58,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
