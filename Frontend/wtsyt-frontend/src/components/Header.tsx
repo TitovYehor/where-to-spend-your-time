@@ -41,10 +41,15 @@ export default function Header() {
               </button>
             </div>
           ) : (
+            <div className="ml-4 flex items-center space-x-3">
             <NavLink to="/login" className="text-blue-600 hover:underline ml-4">
               Login
             </NavLink>
-          )}
+            <NavLink to="/register" className="text-blue-600 hover:underline ml-4">
+              Register
+            </NavLink>
+          </div>
+        )}
         </nav>
       </div>
     </header>
