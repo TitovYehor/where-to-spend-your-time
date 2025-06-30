@@ -1,16 +1,17 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const navItems = [
-  { label: 'Home', path: '/' },
-  { label: 'Items', path: '/items' },
-  { label: 'Categories', path: '/categories' },
-  { label: 'Stats', path: '/stats' },
-];
-
 export default function Header() {
   const { user, logout } = useAuth();
   
+  const navItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Items', path: '/items' },
+    { label: 'Categories', path: '/categories' },
+    { label: 'Stats', path: '/stats' },
+    ...(user ? [{ label : 'Profile', path: '/profile' }] : []),
+  ];
+
   return (
     <header className="bg-white shadow mb-6">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
