@@ -27,6 +27,16 @@ public class ReviewService : IReviewService
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
+    public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
+    {
+        var review = await _db.Reviews
+            .Include(r => r.User)
+            .Include(r => r.Item)
+            .FirstOrDefaultAsync(r => r.ItemId == itemId && r.UserId == userId);
+
+        return _mapper.Map<ReviewDto>(review);
+    }
+
     public async Task<(bool Success, ReviewDto? Review, string? Error)> CreateReviewAsync(string userId, ReviewCreateRequest request)
     {
         bool hasReviewed = await _db.Reviews

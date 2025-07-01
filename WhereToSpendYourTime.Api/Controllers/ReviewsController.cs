@@ -8,7 +8,7 @@ using WhereToSpendYourTime.Data.Entities;
 namespace WhereToSpendYourTime.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api")]
 public class ReviewsController : ControllerBase
 {
     private readonly IReviewService _reviewService;
@@ -20,7 +20,7 @@ public class ReviewsController : ControllerBase
         this._userManager = userManager;
     }
 
-    [HttpGet("/api/items/{itemId}/reviews")]
+    [HttpGet("items/{itemId}/reviews")]
     public async Task<IActionResult> GetReviewsForItem(int itemId)
     {
         var reviews = await _reviewService.GetReviewsForItemAsync(itemId);
@@ -29,7 +29,18 @@ public class ReviewsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpGet("items/{itemId}/reviews/my")]
+    public async Task<IActionResult> GetMyReviewForItem(int itemId)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        var review = await _reviewService.GetMyReviewForItemAsync(user!.Id, itemId);
+
+        return Ok(review);
+    }
+
+    [Authorize]
+    [HttpPost("reviews")]
     public async Task<IActionResult> CreateReview(ReviewCreateRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -44,7 +55,7 @@ public class ReviewsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("{id}")]
+    [HttpPut("reviews/{id}")]
     public async Task<IActionResult> UpdateReview(int id, ReviewUpdateRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -54,7 +65,7 @@ public class ReviewsController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("{id}")]
+    [HttpDelete("reviews/{id}")]
     public async Task<IActionResult> DeleteReview(int id)
     {
         var user = await _userManager.GetUserAsync(User);
