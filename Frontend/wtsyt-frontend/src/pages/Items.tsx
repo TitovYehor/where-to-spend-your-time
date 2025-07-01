@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getItems, type ItemDto } from '../api/itemService.ts';
+import { Link } from 'react-router-dom';
 
 export default function Items() {
   const [items, setItems] = useState<ItemDto[]>([]);
@@ -23,7 +24,9 @@ export default function Items() {
             key={item.id}
             className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
           >
-            <h2 className="text-lg font-semibold">{item.title}</h2>
+            <Link to={`/items/${item.id}`}>
+              {item.title}
+            </Link>
             <p className="text-gray-600">{item.description}</p>
             <div className="text-sm text-gray-500 mt-1">
               Category: <span className="font-medium">{item.categoryName}</span> · Rating: <span className="font-medium">{item.averageRating.toFixed(1)}</span>
