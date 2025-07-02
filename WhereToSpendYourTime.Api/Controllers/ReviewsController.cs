@@ -39,6 +39,13 @@ public class ReviewsController : ControllerBase
         return Ok(review);
     }
 
+    [HttpGet("reviews/{id}")]
+    public async Task<IActionResult> GetReviewById(int id)
+    {
+        var review = await _reviewService.GetByIdAsync(id);
+        return review == null ? NotFound() : Ok(review);
+    }
+
     [Authorize]
     [HttpPost("reviews")]
     public async Task<IActionResult> CreateReview(ReviewCreateRequest request)
