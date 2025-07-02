@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Link } from 'react-router-dom';
 
 type Review = {
-  id: string;
+  id: number;
   title: string;
   content: string;
   rating: number;
@@ -137,7 +138,9 @@ export default function ItemDetails() {
                 </span>
               </div>
               <div className="font-medium text-yellow-500">Rating: {r.rating}/5</div>
-              <h4 className="font-semibold">{r.title}</h4>
+              <Link to={`/reviews/${r.id}`}>
+                {r.title}
+              </Link>
               <p>{r.content}</p>
             </li>
           ))}
