@@ -41,10 +41,17 @@ public class CategoryService : ICategoryService
     {
         var items = await _db.Items
             .Include(i => i.Category)
+            .Include(i => i.Reviews)
             .Where(i => i.CategoryId == categoryId)
             .ToListAsync();
 
-        return _mapper.Map<IEnumerable<ItemDto>>(items);
+        return items.Select(i =>
+        {
+            var dto = _mapper.Map<ItemDto>(i);
+            dto.CategoryName = i.Category?.Name ?? "Unknown";
+            dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
+            return dto;
+        });
     }
 
     public async Task<CategoryDto> CreateCategoryAsync(CategoryCreateRequest request)
