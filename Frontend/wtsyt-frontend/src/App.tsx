@@ -6,6 +6,7 @@ import Profile from './pages/Profile.tsx';
 import Items from './pages/Items.tsx';
 import ItemDetails from './pages/ItemDetails.tsx';
 import ReviewDetails from './pages/ReviewDetails.tsx';
+import Categories from './pages/Categories.tsx';
 import Header from './components/Header.tsx';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/items" element={<Items />} />
         <Route path="/items/:id" element={ <ItemDetails />} />
         <Route path="/reviews/:reviewId" element={ <ReviewDetails /> } />
+        <Route path="/categories" element={ <Categories />} />
       </Routes>
     </div>
   );

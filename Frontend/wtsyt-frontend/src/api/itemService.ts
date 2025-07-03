@@ -9,8 +9,6 @@ export interface ItemDto {
 }
 
 export const getItems = async (): Promise<ItemDto[]> => {
-  console.log('Fetching items from API...');
   const res = await api.get<ItemDto[]>('/items');
-  console.log('Received items:', res.data);
   return res.data;
 };
