@@ -163,29 +163,21 @@ export default function ReviewDetails() {
                 </div>
             </form>
           )}
-          {(isAuthor || isAdmin) && (
+          {(isAuthor || isAdmin) && !isEditing && (
             <div className="space-x-2 mb-6">
               {isAuthor && (
-                <div className="space-x-2 mb-6">
-                    <button
-                        onClick={() => {
-                        setEditTitle(review.title);
-                        setEditContent(review.content);
-                        setEditRating(review.rating);
-                        setIsEditing(true);
-                        }}
-                        className="bg-blue-600 text-white px-4 py-1 rounded"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={handleDeleteReview}
-                        className="bg-red-600 text-white px-4 py-1 rounded"
-                    >
-                        Delete
-                    </button>
-                </div>
-                )}
+                <button
+                  onClick={() => {
+                    setEditTitle(review.title);
+                    setEditContent(review.content);
+                    setEditRating(review.rating);
+                    setIsEditing(true);
+                  }}
+                  className="bg-blue-600 text-white px-4 py-1 rounded"
+                >
+                  Edit
+                </button>
+              )}
               <button
                 onClick={handleDeleteReview}
                 className="bg-red-600 text-white px-4 py-1 rounded"
