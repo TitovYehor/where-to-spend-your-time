@@ -10,23 +10,28 @@ export default function Categories() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async() => {
-    const res = await fetch(`https://localhost:7005/api/categories`, {
-        credentials: "include",
-    });
-
-    if (res.ok) {
-        const data = await res.json();
-        setCategories(data);
-    }
-
-    setLoading(false);
-  };
-
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`https://localhost:7005/api/categories`, {
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data);
+        } else {
+          console.error("Failed to fetch categories");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  });
+  }, []);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
