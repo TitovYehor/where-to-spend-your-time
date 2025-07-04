@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Register from './pages/Register.tsx';
 import Home from './pages/Home.tsx';
 import Profile from './pages/Profile.tsx';
+import PublicProfile from './pages/PublicProfilePage.tsx';
 import Items from './pages/Items.tsx';
 import ItemDetails from './pages/ItemDetails.tsx';
 import ReviewDetails from './pages/ReviewDetails.tsx';
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/register" element={ < Register /> } />
         <Route path="/" element={ < Home /> } />
         <Route path="/profile" element={ < Profile /> } />
+        <Route path="/users/:userId" element={ < PublicProfile /> } />
         <Route path="/items" element={ < Items /> } />
         <Route path="/items/:id" element={ < ItemDetails /> } />
         <Route path="/reviews/:reviewId" element={ < ReviewDetails /> } />

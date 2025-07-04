@@ -99,6 +99,9 @@ export default function Stats() {
           {stats.topReviewers.map((user) => (
             <li key={user.userId}>
               {user.displayName} - {user.reviewCount} reviews
+              <Link to={`/users/${user.userId}`}>
+                Go to '{user.displayName}' profile
+              </Link>
             </li>
           ))}
         </ul>
