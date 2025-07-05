@@ -35,8 +35,7 @@ export default function ReviewDetails() {
   const fetchData = async () => {
     const res = await fetch(`https://localhost:7005/api/reviews/${reviewId}`, {
         credentials: "include",
-    }
-    );
+    });
     if (res.ok) {
       const data = await res.json();
       setReview(data);
@@ -44,8 +43,7 @@ export default function ReviewDetails() {
 
     const commentsRes = await fetch(`https://localhost:7005/api/reviews/${reviewId}/comments`, {
         credentials: "include",
-    }
-    );
+    });
     if (commentsRes.ok) {
       const data = await commentsRes.json();
       setComments(data);
@@ -54,7 +52,7 @@ export default function ReviewDetails() {
 
   useEffect(() => {
     fetchData();
-  }, [reviewId]);
+  }, [reviewId, user]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,8 +88,27 @@ export default function ReviewDetails() {
     }
   };
 
+  const handleDeleteComment = async (commentId: number, isOwner: boolean) => {
+    if (!isAuthor && !isAdmin && !isOwner) return;
+
+    const confirmed = confirm("Are you sure you want to delete this comment?");
+    if (!confirmed) return;
+
+    const res = await fetch(`https://localhost:7005/api/comments/${commentId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      fetchData();
+    } else {
+      const err = await res.json();
+      setError(err.message || "Failed to delete comment");
+    }
+  };
+
   const isAuthor = user && review?.author === user.displayName;
-  const isAdmin = user?.email === "admin@example.com";
+  const isAdmin = user?.email == "admin@example.com";
 
   return (
     <div className="max-w-2xl mx-auto p-4 bg-white rounded-xl shadow">
@@ -195,6 +212,14 @@ export default function ReviewDetails() {
                   {c.author} • {new Date(c.createdAt).toLocaleString()}
                 </p>
                 <p>{c.content}</p>
+                {(isAdmin || (c.author == user?.displayName)) && (
+                  <button
+                    onClick={() => handleDeleteComment(c.id, c.author == user?.displayName)}
+                    className="bg-red-600 text-white px-4 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                )}
               </li>
             ))}
           </ul>
