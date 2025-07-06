@@ -35,6 +35,8 @@ public class UserService : IUserService
             return null;
 
         var dto = _mapper.Map<ApplicationUserDto>(user);
+        var userRoles = await _userManager.GetRolesAsync(user);
+        dto.Role = userRoles.FirstOrDefault();
 
         dto.Reviews = user.Reviews
             .OrderByDescending(r => r.CreatedAt)
@@ -61,6 +63,7 @@ public class UserService : IUserService
         if (!isSelf)
         {
             dto.Email = null;
+            dto.Role = null;
         }
 
         return dto;
