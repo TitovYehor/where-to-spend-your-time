@@ -79,11 +79,7 @@ const Register = () => {
 
         if (meResponse.ok) {
           const data = await meResponse.json();
-          setUser({
-            id: data.id,
-            displayName: data.displayName,
-            email: data.email,
-          });
+          setUser(data);
         }
 
         navigate("/");
