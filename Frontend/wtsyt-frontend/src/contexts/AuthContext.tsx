@@ -4,6 +4,7 @@ export type AuthUser = {
   id: string;
   displayName: string;
   email: string | null;
+  role: string | null;
 };
 
 type AuthContextType = {
@@ -25,18 +26,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           credentials: "include",
         });
 
-            
         if (res.ok) {
-        const data = await res.json();
-        setUser({
-            id: data.id,
-            displayName: data.displayName,
-            email: data.email,
-        });
+          const data = await res.json();
+          setUser(data);
         } else {
-            setUser(null);
+          setUser(null);
         }
-        
       } catch {
         setUser(null);
       }
@@ -54,11 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUser({
-          id: data.id,
-          displayName: data.displayName,
-          email: data.email,
-        });
+        setUser(data);
       } else {
         setUser(null);
       }

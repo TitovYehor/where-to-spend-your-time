@@ -108,7 +108,7 @@ export default function ReviewDetails() {
   };
 
   const isAuthor = user && review?.author === user.displayName;
-  const isAdmin = user?.email == "admin@example.com";
+  const isAdmin = user?.role == "Admin";
 
   return (
     <div className="max-w-2xl mx-auto p-4 bg-white rounded-xl shadow">
