@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Data;
-using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Item;
 
@@ -17,7 +16,7 @@ public class ItemService : IItemService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter)
+    public async Task<PagedItemResult> GetFilteredItemsAsync(ItemFilterRequest filter)
     {
         var query = _db.Items
             .Include(i => i.Category)
@@ -33,6 +32,8 @@ public class ItemService : IItemService
         {
             query = query.Where(i => i.CategoryId == filter.CategoryId.Value);
         }
+
+        var totalCount = await query.CountAsync();
 
         query = filter.SortBy?.ToLower() switch
         {
@@ -50,13 +51,19 @@ public class ItemService : IItemService
             .Take(filter.PageSize)
             .ToListAsync();
 
-        return items.Select(i =>
+        var mappedItems = items.Select(i =>
         {
             var dto = _mapper.Map<ItemDto>(i);
             dto.CategoryName = i.Category?.Name ?? "Unknown";
             dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
             return dto;
-        });
+        }).ToList();
+
+        return new PagedItemResult
+        {
+            Items = mappedItems,
+            TotalCount = totalCount,
+        };
     }
 
     public async Task<ItemDto?> GetByIdAsync(int id)

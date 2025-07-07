@@ -4,7 +4,7 @@ namespace WhereToSpendYourTime.Api.Services.Item;
 
 public interface IItemService
 {
-    Task<IEnumerable<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter);
+    Task<PagedItemResult> GetFilteredItemsAsync(ItemFilterRequest filter);
 
     Task<ItemDto?> GetByIdAsync(int id);
     
