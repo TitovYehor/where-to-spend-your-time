@@ -21,6 +21,10 @@ export default function Home() {
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const [descending, setDescending] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
 
   const fetchItems = async () => {
     const query = new URLSearchParams();
@@ -28,6 +32,8 @@ export default function Home() {
     if (categoryId !== undefined) query.append("categoryId", categoryId.toString());
     if (sortBy) query.append("sortBy", sortBy);
     query.append("descending", descending.toString());
+    query.append("page", page.toString());
+    query.append("pageSize", pageSize.toString());
 
     const res = await fetch(`https://localhost:7005/api/items?${query}`, {
       credentials: "include",
@@ -35,7 +41,9 @@ export default function Home() {
 
     if (res.ok) {
       const data = await res.json();
-      setItems(data);
+      setItems(data.items);
+      setTotalCount(data.totalCount);
+      setIsLastPage(data.totalCount <= page * pageSize);
     }
   };
 
@@ -56,18 +64,23 @@ export default function Home() {
 
   useEffect(() => {
     fetchItems();
-  }, [search, categoryId, sortBy, descending]);
+  }, [search, categoryId, sortBy, descending, page]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-4">Explore Items</h1>
-
+      
+      <div className="mb-4 text-gray-700">
+        {totalCount} item{totalCount !== 1 ? "s" : ""} found
+      </div>
+      
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
           placeholder="Search..."
           value={search}
           onChange={(e) => {
+            setPage(1);
             setSearch(e.target.value);
           }}
           className="border px-3 py-2 rounded w-full sm:w-auto"
@@ -77,6 +90,7 @@ export default function Home() {
           value={categoryId ?? ""}
           onChange={(e) => {
             const val = e.target.value;
+            setPage(1);
             setCategoryId(val === "" ? undefined : parseInt(val));
           }}
           className="border px-3 py-2 rounded"
@@ -92,6 +106,7 @@ export default function Home() {
         <select
           value={sortBy ?? ""}
           onChange={(e) => {
+            setPage(1);
             setSortBy(e.target.value || undefined);
           }}
           className="border px-3 py-2 rounded"
@@ -125,6 +140,29 @@ export default function Home() {
           ))}
         </ul>
       )}
-   </div>
+
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2">Page {page} / {Math.ceil(totalCount / pageSize)}</span>
+        <button
+          disabled={isLastPage}
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-200 rounded"
+        >
+          Next
+        </button>
+      </div>
+
+      <div className="text-sm text-gray-500">
+        Showing {Math.min((page - 1) * pageSize + 1, totalCount)}–
+        {Math.min(page * pageSize, totalCount)} of {totalCount}
+      </div>
+    </div>
   );
 }
