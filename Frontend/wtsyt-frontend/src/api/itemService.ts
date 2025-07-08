@@ -8,7 +8,13 @@ export interface ItemDto {
   averageRating: number;
 }
 
-export const getItems = async (): Promise<ItemDto[]> => {
-  const res = await api.get<ItemDto[]>('/items');
+export interface ItemsResult
+{
+  items: ItemDto[];
+  totalCount: number; 
+}
+
+export const getItems = async (): Promise<ItemsResult> => {
+  const res = await api.get<ItemsResult>('/items');
   return res.data;
 };

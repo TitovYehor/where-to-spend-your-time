@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getItems, type ItemDto } from '../api/itemService.ts';
+import { getItems, type ItemsResult } from '../api/itemService.ts';
 import { Link } from 'react-router-dom';
 
 export default function Items() {
-  const [items, setItems] = useState<ItemDto[]>([]);
+  const [itemsResult, setItems] = useState<ItemsResult>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +18,13 @@ export default function Items() {
   return (
     <div className="max-w-4xl mx-auto px-4">
       <h1 className="text-2xl font-bold mb-4">Items</h1>
+      
+      <div className="mb-4 text-gray-700">
+        {itemsResult?.totalCount} item{itemsResult?.totalCount !== 1 ? "s" : ""} found
+      </div>
+      <br/>
       <div className="grid gap-4">
-        {items.map(item => (
+        {itemsResult?.items.map(item => (
           <div
             key={item.id}
             className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
