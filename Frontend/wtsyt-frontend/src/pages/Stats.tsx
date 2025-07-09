@@ -71,6 +71,7 @@ export default function Stats() {
           {stats.topRatedItems.map((item) => (
             <li key={item.id}>
               {item.title} - {item.averageRating}/5 ({item.reviewCount} reviews)
+              <br />
               <Link to={`/items/${item.id}`}>
                 Go to '{item.title}' details
               </Link> 
@@ -85,6 +86,7 @@ export default function Stats() {
           {stats.mostReviewedItems.map((item) => (
             <li key={item.id}>
               {item.title} - {item.reviewCount} reviews
+              <br />
               <Link to={`/items/${item.id}`}>
                 Go to '{item.title}' details
               </Link>
@@ -99,6 +101,7 @@ export default function Stats() {
           {stats.topReviewers.map((user) => (
             <li key={user.userId}>
               {user.displayName} - {user.reviewCount} reviews
+              <br />
               <Link to={`/users/${user.userId}`}>
                 Go to '{user.displayName}' profile
               </Link>

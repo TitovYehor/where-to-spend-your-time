@@ -119,10 +119,10 @@ export default function ItemDetails() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
-      <p className="text-gray-700 mb-6">{item.description}</p>
-      <p className="text-gray-700 mb-6">{item.categoryName}</p>
-      <p className="text-gray-700 mb-6">{item.averageRating}</p>
+      <h1 className="text-3xl font-bold mb-2">Title: {item.title}</h1>
+      <p className="text-gray-700 mb-6">Description: {item.description}</p>
+      <p className="text-gray-700 mb-6">Category: {item.categoryName}</p>
+      <p className="text-gray-700 mb-6">Average rating: {item.averageRating}</p>
 
       <h2 className="text-xl font-semibold mb-4">Reviews</h2>
       {reviews.length === 0 ? (
@@ -132,7 +132,7 @@ export default function ItemDetails() {
           {reviews.map((r) => (
             <li key={r.id} className="bg-white p-4 rounded shadow">
               <div className="flex justify-between mb-1">
-                <strong>{r.author}</strong>
+                <strong>{r.author} </strong>
                 <span className="text-sm text-gray-500">
                   {new Date(r.createdAt).toLocaleDateString()}
                 </span>

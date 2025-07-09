@@ -149,11 +149,13 @@ const Profile = () => {
 
         <div>
             <label className="block mb-1">Display Name</label>
+            <br />
             <input
                 value={newDisplayName}
                 onChange={(e) => setNewDisplayName(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
+            <br />
             <button
                 onClick={handleProfileUpdate}
                 className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -161,24 +163,26 @@ const Profile = () => {
                 Save Display Name
             </button>
         </div>
-
+        <br />
         <div>
             <label className="block mb-1">Current Password</label>
+            <br />
             <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
-
+            <br />
             <label className="block mt-4 mb-1">New Password</label>
+            <br />
             <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
-
+            <br />
             <button
                 onClick={handlePasswordChange}
                 className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"

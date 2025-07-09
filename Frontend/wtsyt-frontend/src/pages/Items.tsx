@@ -36,6 +36,7 @@ export default function Items() {
             <div className="text-sm text-gray-500 mt-1">
               Category: <span className="font-medium">{item.categoryName}</span> · Rating: <span className="font-medium">{item.averageRating.toFixed(1)}</span>
             </div>
+            <br />
           </div>
         ))}
       </div>

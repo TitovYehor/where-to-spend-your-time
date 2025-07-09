@@ -56,7 +56,7 @@ export default function CategoryDetails() {
           {items.map((i) => (
             <li key={i.id} className="bg-white p-4 rounded shadow">
               <div className="flex justify-between mb-1">
-                <strong>{i.title}</strong>
+                <strong>{i.title} </strong>
                 <span className="text-sm text-gray-500">Rating: {i.averageRating}/5</span>
               </div>
               <div className="font-medium text-yellow-500">Description: {i.description}</div>

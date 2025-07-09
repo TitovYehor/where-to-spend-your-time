@@ -19,7 +19,7 @@ export default function Header() {
           WTSYT
         </Link>
 
-        <nav className="space-x-4 flex items-center">
+        <nav className="flex items-center gap-x-4">
           {navItems.map(({ label, path }) => (
             <NavLink
               key={path}
@@ -35,21 +35,21 @@ export default function Header() {
           ))}
 
           {user ? (
-            <div className="ml-4 flex items-center space-x-3">
+            <div className="flex items-center">
               <span className="text-sm text-gray-600">Hello, {user.displayName}</span>
               <button onClick={logout} className="text-red-500 text-sm hover:underline">
                 Logout
               </button>
             </div>
           ) : (
-            <div className="ml-4 flex items-center space-x-3">
-            <NavLink to="/login" className="text-blue-600 hover:underline ml-4">
-              Login
-            </NavLink>
-            <NavLink to="/register" className="text-blue-600 hover:underline ml-4">
-              Register
-            </NavLink>
-          </div>
+            <div className="flex items-center">
+              <NavLink to="/login" className="text-blue-600 hover:underline">
+                Login
+              </NavLink>
+              <NavLink to="/register" className="text-blue-600 hover:underline">
+                Register
+              </NavLink>
+            </div>
         )}
         </nav>
       </div>
