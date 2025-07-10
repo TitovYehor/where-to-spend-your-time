@@ -65,9 +65,9 @@ export default function Stats() {
     <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-4">Platform Statistics</h1>
 
-      <section className="mb-8">
+      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
         <h2 className="text-xl font-semibold mb-2">Top Rated Items</h2>
-        <ul>
+        <ul className="space-y-3">
           {stats.topRatedItems.map((item) => (
             <li key={item.id}>
               {item.title} - {item.averageRating}/5 ({item.reviewCount} reviews)
@@ -80,9 +80,9 @@ export default function Stats() {
         </ul>
       </section>
 
-      <section className="mb-8">
+      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
         <h2 className="text-xl font-semibold mb-2">Most Reviewed Items</h2>
-        <ul>
+        <ul className="space-y-3">
           {stats.mostReviewedItems.map((item) => (
             <li key={item.id}>
               {item.title} - {item.reviewCount} reviews
@@ -95,9 +95,9 @@ export default function Stats() {
         </ul>
       </section>
 
-      <section className="mb-8">
+      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
         <h2 className="text-xl font-semibold mb-2">Top Reviewers</h2>
-        <ul>
+        <ul className="space-y-3">
           {stats.topReviewers.map((user) => (
             <li key={user.userId}>
               {user.displayName} - {user.reviewCount} reviews
@@ -110,9 +110,9 @@ export default function Stats() {
         </ul>
       </section>
 
-      <section>
+      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
         <h2 className="text-xl font-semibold mb-2">Recent Reviews</h2>
-        <ul>
+        <ul className="space-y-3">
           {stats.recentReviews.map((review) => (
             <li key={review.id}>
               <strong>{review.title}</strong> by {review.author} -{" "}

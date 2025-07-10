@@ -130,12 +130,12 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
-      <div className="mb-8 bg-white shadow rounded-2xl p-6">
+      <div className="mb-8 bg-white shadow rounded-2xl p-6 space-y-3">
         <p><strong>Name:</strong> {user?.displayName}</p>
         <p><strong>Email:</strong> {user?.email ?? "Not available"}</p>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-3">
         <h2 className="text-xl font-semibold">Edit Profile</h2>
 
         {successMessage && <p className="text-green-600">{successMessage}</p>}
@@ -147,15 +147,13 @@ const Profile = () => {
         </ul>
         )}
 
-        <div>
-            <label className="block mb-1">Display Name</label>
-            <br />
+        <div className="space-y-3">
+            <label className="block">Display Name</label>
             <input
                 value={newDisplayName}
                 onChange={(e) => setNewDisplayName(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
-            <br />
             <button
                 onClick={handleProfileUpdate}
                 className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -163,26 +161,22 @@ const Profile = () => {
                 Save Display Name
             </button>
         </div>
-        <br />
-        <div>
+        
+        <div className="space-y-3">
             <label className="block mb-1">Current Password</label>
-            <br />
             <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
-            <br />
             <label className="block mt-4 mb-1">New Password</label>
-            <br />
             <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full border rounded-lg px-4 py-2"
             />
-            <br />
             <button
                 onClick={handlePasswordChange}
                 className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
@@ -192,7 +186,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Reviews</h2>
         {reviews.length === 0 ? (
           <p className="text-gray-600">You haven't written any reviews yet</p>
@@ -209,7 +203,7 @@ const Profile = () => {
         )}
       </div>
 
-      <div>
+      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Comments</h2>
         {comments.length === 0 ? (
           <p className="text-gray-600">You haven't written any comments yet</p>
