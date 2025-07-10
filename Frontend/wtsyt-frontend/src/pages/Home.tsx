@@ -153,7 +153,7 @@ export default function Home() {
         <button
           disabled={isLastPage}
           onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 bg-gray-200 rounded"
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
         >
           Next
         </button>

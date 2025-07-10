@@ -35,14 +35,14 @@ export default function Header() {
           ))}
 
           {user ? (
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-4">
               <span className="text-sm text-gray-600">Hello, {user.displayName}</span>
               <button onClick={logout} className="text-red-500 text-sm hover:underline">
                 Logout
               </button>
             </div>
           ) : (
-            <div className="flex items-center">
+            <div className="flex items-center gap-x-4">
               <NavLink to="/login" className="text-blue-600 hover:underline">
                 Login
               </NavLink>
