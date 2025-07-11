@@ -9,4 +9,6 @@ public class CommentDto
     public string Author { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public int ReviewId { get; set; }
 }

@@ -20,6 +20,7 @@ public class CommentService : ICommentService
     {
         var comments = await _db.Comments
             .Include(c => c.User)
+            .Include(c => c.Review)
             .Where(c => c.ReviewId == reviewId)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();

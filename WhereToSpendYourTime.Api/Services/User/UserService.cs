@@ -57,7 +57,8 @@ public class UserService : IUserService
                 Id = c.Id,
                 Content = c.Content,
                 Author = user.DisplayName,
-                CreatedAt = c.CreatedAt
+                CreatedAt = c.CreatedAt,
+                ReviewId = c.ReviewId
             }).ToList();
 
         if (!isSelf)
