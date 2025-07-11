@@ -53,15 +53,16 @@ export default function CategoryDetails() {
         <p className="text-gray-500 mb-6">No items yet</p>
       ) : (
         <ul className="space-y-4 mb-6">
-          {items.map((i) => (
-            <li key={i.id} className="bg-white p-4 rounded shadow">
-              <div className="flex justify-between mb-1">
-                <strong>{i.title} </strong>
-                <span className="text-sm text-gray-500">Rating: {i.averageRating}/5</span>
-              </div>
-              <div className="font-medium text-yellow-500">Description: {i.description}</div>
-              <Link to={`/items/${i.id}`}>
-                Go to '{i.title}' details page
+          {items.map((item) => (
+            <li key={item.id}>
+              <Link 
+                to={`/items/${item.id}`}
+                className="block bg-white rounded-xl shadow p-4 hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
+                <p className="text-gray-800">Description: {item.description}</p>
+                <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
               </Link>
             </li>
           ))}

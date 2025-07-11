@@ -129,19 +129,19 @@ export default function ItemDetails() {
         <p className="text-gray-500 mb-6">No reviews yet</p>
       ) : (
         <ul className="space-y-4 mb-6">
-          {reviews.map((r) => (
-            <li key={r.id} className="bg-white p-4 rounded shadow">
-              <div className="flex justify-between mb-1">
-                <strong>{r.author} </strong>
-                <span className="text-sm text-gray-500">
-                  {new Date(r.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="font-medium text-yellow-500">Rating: {r.rating}/5</div>
-              <Link to={`/reviews/${r.id}`}>
-                {r.title}
+          {reviews.map((review) => (
+            <li key={review.id}>
+              <Link 
+                to={`/reviews/${review.id}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{review.title}</h3>
+                <p className="text-sm text-gray-600">Content: {review.content}</p>
+                <p className="text-yellow-500">Rating: {review.rating}/5</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(review.createdAt).toLocaleDateString()}
+                </p>
               </Link>
-              <p>{r.content}</p>
             </li>
           ))}
         </ul>
