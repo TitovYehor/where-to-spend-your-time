@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 type ReviewDto = {
   id: string;
@@ -193,10 +194,18 @@ const Profile = () => {
         ) : (
           <ul className="space-y-4">
             {reviews.map((review) => (
-              <li key={review.id} className="bg-white p-4 rounded-xl shadow">
-                <h3 className="font-bold text-lg">{review.title}</h3>
-                <p className="text-gray-700">{review.content}</p>
-                <p className="text-sm text-gray-500">Rating: {review.rating} • {new Date(review.createdAt).toLocaleString()}</p>
+              <li key={review.id}>
+                <Link
+                  to={`/reviews/${review.id}`}
+                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+                >
+                  <h3 className="text-lg font-semibold">{review.title}</h3>
+                  <p className="text-sm text-gray-600">Content: {review.content}</p>
+                  <p className="text-yellow-500">Rating: {review.rating}/5</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>
@@ -212,7 +221,7 @@ const Profile = () => {
             {comments.map((comment) => (
               <li key={comment.id} className="bg-white p-4 rounded-xl shadow">
                 <p className="text-gray-800">{comment.content}</p>
-                <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</p>
+                <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</p>
               </li>
             ))}
           </ul>

@@ -22,22 +22,18 @@ export default function Items() {
       <div className="mb-4 text-gray-700">
         {itemsResult?.totalCount} item{itemsResult?.totalCount !== 1 ? "s" : ""} found
       </div>
-      <br/>
       <div className="grid gap-4">
         {itemsResult?.items.map(item => (
-          <div
+          <Link
             key={item.id}
-            className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
+            to={`/items/${item.id}`}
+            className="block bg-white rounded-xl shadow p-4 hover:shadow-md transition"
           >
-            <Link to={`/items/${item.id}`}>
-              {item.title}
-            </Link>
-            <p className="text-gray-600">{item.description}</p>
-            <div className="text-sm text-gray-500 mt-1">
-              Category: <span className="font-medium">{item.categoryName}</span> · Rating: <span className="font-medium">{item.averageRating.toFixed(1)}</span>
-            </div>
-            <br />
-          </div>
+            <h3 className="text-lg font-semibold">{item.title}</h3>
+            <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
+            <p className="text-gray-800">Description: {item.description}</p>
+            <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
+          </Link>
         ))}
       </div>
     </div>

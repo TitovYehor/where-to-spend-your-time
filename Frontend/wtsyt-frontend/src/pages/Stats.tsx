@@ -70,11 +70,14 @@ export default function Stats() {
         <ul className="space-y-3">
           {stats.topRatedItems.map((item) => (
             <li key={item.id}>
-              {item.title} - {item.averageRating}/5 ({item.reviewCount} reviews)
-              <br />
-              <Link to={`/items/${item.id}`}>
-                Go to '{item.title}' details
-              </Link> 
+              <Link
+                to={`/items/${item.id}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-600">Category: {item.category}</p>
+                <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
+              </Link>
             </li>
           ))}
         </ul>
@@ -85,10 +88,13 @@ export default function Stats() {
         <ul className="space-y-3">
           {stats.mostReviewedItems.map((item) => (
             <li key={item.id}>
-              {item.title} - {item.reviewCount} reviews
-              <br />
-              <Link to={`/items/${item.id}`}>
-                Go to '{item.title}' details
+              <Link 
+                to={`/items/${item.id}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-600">Category: {item.category}</p>
+                <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
               </Link>
             </li>
           ))}
@@ -100,10 +106,11 @@ export default function Stats() {
         <ul className="space-y-3">
           {stats.topReviewers.map((user) => (
             <li key={user.userId}>
-              {user.displayName} - {user.reviewCount} reviews
-              <br />
-              <Link to={`/users/${user.userId}`}>
-                Go to '{user.displayName}' profile
+              <Link 
+                to={`/users/${user.userId}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h2 className="text-lg font-semibold">{user.displayName} - {user.reviewCount} reviews</h2>
               </Link>
             </li>
           ))}
@@ -115,14 +122,16 @@ export default function Stats() {
         <ul className="space-y-3">
           {stats.recentReviews.map((review) => (
             <li key={review.id}>
-              <strong>{review.title}</strong> by {review.author} -{" "}
-              {review.rating}/5
-              <p>{review.content}</p>
-              <p className="text-sm text-gray-500">
-                {new Date(review.createdAt).toLocaleString()}
-              </p>
-              <Link to={`/reviews/${review.id}`}>
-                Go to '{review.title}' details
+              <Link 
+                to={`/reviews/${review.id}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{review.title}</h3>
+                <p className="text-sm text-gray-600">By {review.author}</p>
+                <p className="text-yellow-500">Rating: {review.rating}/5</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(review.createdAt).toLocaleDateString()}
+                </p>
               </Link>
             </li>
           ))}

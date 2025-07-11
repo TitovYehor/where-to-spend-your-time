@@ -40,15 +40,13 @@ export default function Categories() {
       <h1 className="text-2xl font-bold mb-4">Categories</h1>
       <div className="grid gap-4">
         {categories.map(cat => (
-          <div
+          <Link
             key={cat.id}
+            to={`/categories/${cat.id}`}
             className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
           >
-            <p className="text-gray-600">{cat.name}</p>
-            <Link to={`/categories/${cat.id}`}>
-              Items in '{cat.name}' category
-            </Link>
-          </div>
+            <h3 className="text-lg font-semibold">{cat.name}</h3>
+          </Link>
         ))}
       </div>
     </div>

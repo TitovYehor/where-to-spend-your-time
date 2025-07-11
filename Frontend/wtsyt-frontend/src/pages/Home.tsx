@@ -129,13 +129,16 @@ export default function Home() {
       ) : (
         <ul className="space-y-4">
           {items.map((item) => (
-            <li key={item.id} className="p-4 bg-white rounded shadow">
-              <Link to={`/items/${item.id}`}>
-                {item.title}
+            <li key={item.id}>
+              <Link
+                to={`/items/${item.id}`}
+                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
+                <p className="text-gray-800">Description: {item.description}</p>
+                <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
               </Link>
-              <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
-              <p className="text-gray-800">Description: {item.description}</p>
-              <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
             </li>
           ))}
         </ul>
