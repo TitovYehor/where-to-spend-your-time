@@ -13,6 +13,7 @@ type CommentDto = {
   id: string;
   content: string;
   createdAt: string;
+  reviewId: number;
 };
 
 type ApplicationUser = {
@@ -88,9 +89,14 @@ export default function PublicProfile() {
         ) : (
           <ul className="space-y-4">
             {user?.comments.map((comment) => (
-              <li key={comment.id} className="bg-white p-4 rounded-xl shadow">
-                <p className="text-gray-800">{comment.content}</p>
-                <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</p>
+              <li key={comment.id}>
+                <Link
+                  to={`/reviews/${comment.reviewId}`}
+                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+                >
+                  <p className="text-gray-800">{comment.content}</p>
+                  <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</p>
+                </Link>
               </li>
             ))}
           </ul>
