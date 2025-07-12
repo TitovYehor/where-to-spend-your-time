@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-type CategoryDto = {
-  id: number;
-  name: string;  
-};
+import type { Category } from '../types/Category';
 
 export default function Categories() {
-  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

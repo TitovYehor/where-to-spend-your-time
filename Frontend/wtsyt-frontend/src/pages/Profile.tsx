@@ -1,28 +1,15 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
-
-type ReviewDto = {
-  id: string;
-  title: string;
-  content: string;
-  rating: number;
-  createdAt: string;
-};
-
-type CommentDto = {
-  id: string;
-  content: string;
-  createdAt: string;
-  reviewId: number;
-};
+import type { Review } from "../types/review";
+import type { Comment } from "../types/comment";
 
 const Profile = () => {
   const { user } = useAuth();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<ReviewDto[]>([]);
-  const [comments, setComments] = useState<CommentDto[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newDisplayName, setNewDisplayName] = useState(user?.displayName ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

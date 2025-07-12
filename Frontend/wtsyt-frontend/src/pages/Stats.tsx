@@ -1,35 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-type ItemStat = {
-  id: number;
-  title: string;
-  category: string;
-  averageRating: number;
-  reviewCount: number;
-};
-
-type UserStat = {
-    userId: string;
-    displayName: string;
-    reviewCount: number;
-};
-
-type Review = {
-  id: number;
-  title: string;
-  content: string;
-  rating: number;
-  createdAt: string;
-  author: string;
-};
-
-type Stats = {
-  topRatedItems: ItemStat[];
-  mostReviewedItems: ItemStat[];
-  topReviewers: UserStat[];
-  recentReviews: Review[];
-};
+import type { Stats } from '../types/stats';
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>();

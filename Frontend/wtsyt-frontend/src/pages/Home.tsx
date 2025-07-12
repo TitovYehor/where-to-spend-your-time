@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-type Item = {
-  id: number;
-  title: string;
-  description: string;
-  averageRating: number;
-  categoryName: string;
-};
-
-type Category = {
-  id: number;
-  name: string;
-};
+import type { Category } from "../types/Category";
+import type { Item } from "../types/item";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);

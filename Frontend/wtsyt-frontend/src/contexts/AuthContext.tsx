@@ -1,11 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-
-export type AuthUser = {
-  id: string;
-  displayName: string;
-  email: string | null;
-  role: string | null;
-};
+import type { AuthUser } from "../types/authUser";
 
 type AuthContextType = {
   user: AuthUser | null;

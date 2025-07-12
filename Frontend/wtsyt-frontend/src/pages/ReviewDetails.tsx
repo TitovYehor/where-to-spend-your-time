@@ -1,22 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-
-type Review = {
-  id: number;
-  title: string;
-  content: string;
-  rating: number;
-  createdAt: string;
-  author: string;
-};
-
-type Comment = {
-  id: number;
-  content: string;
-  author: string;
-  createdAt: string;
-};
+import type { Review } from "../types/review";
+import type { Comment } from "../types/comment";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();

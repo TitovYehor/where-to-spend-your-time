@@ -1,19 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from 'react-router-dom';
-
-type Category = {
-  id: number;
-  name: string;
-};
-
-type Item = {
-  id: number;
-  title: string;
-  description: string;
-  categoryName: string;
-  averageRating: number;
-};
+import type { Category } from "../types/Category";
+import type { Item } from "../types/item";
 
 export default function CategoryDetails() {
   const { categoryId } = useParams<{ categoryId: string }>();

@@ -1,34 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-type ReviewDto = {
-  id: string;
-  title: string;
-  content: string;
-  rating: number;
-  createdAt: string;
-};
-
-type CommentDto = {
-  id: string;
-  content: string;
-  createdAt: string;
-  reviewId: number;
-};
-
-type ApplicationUser = {
-    userId: string;
-    displayName: string;
-
-    reviews: ReviewDto[];
-    comments: CommentDto[];
-};
+import type { AuthUser } from "../types/authUser";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
 
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<ApplicationUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
