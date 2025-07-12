@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import Layout from "./components/Layout.js";
 import Login from "./pages/Login";
 import Register from './pages/Register.tsx';
 import Home from './pages/Home.tsx';
@@ -20,14 +21,17 @@ export default function App() {
         <Route path="/login" element={ < Login /> } />
         <Route path="/register" element={ < Register /> } />
         <Route path="/" element={ < Home /> } />
-        <Route path="/profile" element={ < Profile /> } />
-        <Route path="/users/:userId" element={ < PublicProfile /> } />
-        <Route path="/items" element={ < Items /> } />
-        <Route path="/items/:id" element={ < ItemDetails /> } />
-        <Route path="/reviews/:reviewId" element={ < ReviewDetails /> } />
-        <Route path="/categories" element={ < Categories />} />
-        <Route path="/categories/:categoryId" element={ < CategoryDetails /> } />
-        <Route path="/stats" element={ < Stats /> } />
+        
+        <Route element={ < Layout /> }>
+          <Route path="/profile" element={ < Profile /> } />
+          <Route path="/users/:userId" element={ < PublicProfile /> } />
+          <Route path="/items" element={ < Items /> } />
+          <Route path="/items/:id" element={ < ItemDetails /> } />
+          <Route path="/reviews/:reviewId" element={ < ReviewDetails /> } />
+          <Route path="/categories" element={ < Categories />} />
+          <Route path="/categories/:categoryId" element={ < CategoryDetails /> } />
+          <Route path="/stats" element={ < Stats /> } />
+        </Route>
       </Routes>
     </div>
   );
