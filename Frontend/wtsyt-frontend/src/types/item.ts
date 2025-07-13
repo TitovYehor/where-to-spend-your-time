@@ -5,3 +5,20 @@ export type Item = {
   categoryName: string;
   averageRating: number;
 };
+
+export type ItemsResult = {
+  items: Item[];
+  totalCount: number; 
+};
+
+export type ItemCreateRequest = {
+  title: string;
+  description: string;
+  categoryId: number;
+};
+
+export type ItemUpdateRequest = {
+  title: string;
+  description: string;
+  categoryId: number;
+};

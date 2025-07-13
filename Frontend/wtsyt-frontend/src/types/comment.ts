@@ -5,3 +5,11 @@ export type Comment = {
   author: string;
   reviewId: number;
 };
+
+export type CommentCreateRequest = {
+    content: string;
+};
+
+export type CommentUpdateRequest = {
+    content: string;
+};
