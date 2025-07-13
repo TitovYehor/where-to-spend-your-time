@@ -50,7 +50,9 @@ public class CategoriesController : ControllerBase
     {
         var category = await _categoryService.CreateCategoryAsync(request);
 
-        return CreatedAtAction(nameof(GetAll), new { id = category.Id }, category);
+        return category == null
+            ? BadRequest("Error during category creation") 
+            : CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
     }
 
     [Authorize(Roles = "Admin")]

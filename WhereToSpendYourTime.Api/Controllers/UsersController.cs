@@ -77,6 +77,6 @@ public class UsersController : ControllerBase
             return BadRequest(errors);
         }
 
-        return NoContent();
+        return succeeded ? NoContent() : BadRequest("Failed to update password");
     }
 }
