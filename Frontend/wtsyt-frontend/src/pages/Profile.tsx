@@ -3,6 +3,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
+import { getMyProfile } from "../services/userService";
+import { updatePassword, updateProfile } from "../services/userService";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -18,19 +20,13 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const response = await fetch("https://localhost:7005/api/users/me", {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setReviews(data.reviews);
-          setComments(data.comments);
-        }
-      } finally {
-        setLoading(false);
-      }
+      await getMyProfile()
+        .then(data => {
+          setReviews(data.reviews)
+          setComments(data.comments)
+        })
+        .catch((e) => console.error('Failed to fetch profile', e))
+        .finally(() => setLoading(false));
     };
 
     if (user) {
@@ -57,23 +53,12 @@ const Profile = () => {
         }
 
         try {
-            const res = await fetch("https://localhost:7005/api/users/me", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({ displayName: newDisplayName }),
-            });
-
-            if (res.ok) {
-                setSuccessMessage("Profile updated successfully!");
-                await refreshUser();
-            } else {
-                setErrorMessages(["Failed to update profile"]);
-            }
-        } catch {
-            setErrorMessages(["Something went wrong"]);
+          await updateProfile({displayName: newDisplayName});
+          
+          setSuccessMessage("Profile updated successfully!");
+          await refreshUser();
+        } catch (err: any) {
+            setErrorMessages([err?.response?.data?.message || "Failed to update profile"]);
         }
     };
 
@@ -86,32 +71,14 @@ const Profile = () => {
         }
 
         try {
-            const res = await fetch("https://localhost:7005/api/users/me/change-password", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    currentPassword,
-                    newPassword,
-                }),
-            });
-
-            if (res.ok) {
-                setSuccessMessage("Password changed successfully!");
-                setCurrentPassword("");
-                setNewPassword("");
-            } else {
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    setErrorMessages(data.map((err) => err.description));
-                } else {
-                    setErrorMessages(["Registration failed"]);
-                }
-            }
-        } catch {
-            setErrorMessages(["Something went wrong"]);
+          await updatePassword({currentPassword, newPassword});
+          
+          setSuccessMessage("Password changed successfully!");
+          setCurrentPassword("");
+          setNewPassword("");
+        } catch (err: any) {
+          const messages = err?.response?.data;
+          setErrorMessages(Array.isArray(messages) ? messages : [messages?.message || "Failed to update profile"]);
         }
     };
 

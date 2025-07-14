@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
+import { getProfileById } from "../services/userService";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -10,18 +11,10 @@ export default function PublicProfile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const response = await fetch(`https://localhost:7005/api/users/${userId}`, {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-        }
-      } finally {
-        setLoading(false);
-      }
+      await getProfileById(userId ?? "")
+        .then(setUser)
+        .catch((e) => console.error('Failed to fetch profile', e))
+        .finally(() => setLoading(false))
     };
 
     fetchProfile();

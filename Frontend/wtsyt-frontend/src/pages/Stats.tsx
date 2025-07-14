@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Stats } from '../types/stats';
+import { getStats } from '../services/statsService';
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>();
@@ -8,22 +9,10 @@ export default function Stats() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const res = await fetch(`https://localhost:7005/api/stats`, {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        } else {
-          console.error("Failed to fetch stats");
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
+      await getStats()
+        .then(setStats)
+        .catch((e) => console.error('Failed to fetch stats', e))
+        .finally(() => setLoading(false));
     };
 
     fetchData();

@@ -1,32 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { Category } from '../types/Category';
+import type { Category } from '../types/category';
+import { getCategories } from '../services/categoryService';
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`https://localhost:7005/api/categories`, {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setCategories(data);
-        } else {
-          console.error("Failed to fetch categories");
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    getCategories()
+      .then(setCategories)
+      .catch((e) => console.error('Failed to fetch items', e))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;

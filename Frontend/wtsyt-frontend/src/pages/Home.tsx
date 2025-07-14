@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type { Category } from "../types/Category";
+import type { Category } from "../types/category";
 import type { Item } from "../types/item";
+import { getItems } from "../services/itemService";
+import { getCategories } from "../services/categoryService";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -16,42 +18,32 @@ export default function Home() {
   const [isLastPage, setIsLastPage] = useState(false);
 
   const fetchItems = async () => {
-    const query = new URLSearchParams();
-    if (search) query.append("search", search);
-    if (categoryId !== undefined) query.append("categoryId", categoryId.toString());
-    if (sortBy) query.append("sortBy", sortBy);
-    query.append("descending", descending.toString());
-    query.append("page", page.toString());
-    query.append("pageSize", pageSize.toString());
-
-    const res = await fetch(`https://localhost:7005/api/items?${query}`, {
-      credentials: "include",
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      setItems(data.items);
-      setTotalCount(data.totalCount);
-      setIsLastPage(data.totalCount <= page * pageSize);
-    }
+    getItems({
+      search: search,
+      categoryId: categoryId,
+      sortBy: sortBy,
+      descending: descending,
+      page: page,
+      pageSize: pageSize,
+    })
+      .then(data => {
+        setItems(data.items)
+        setTotalCount(data.totalCount)
+        setIsLastPage(data.totalCount <= page * pageSize)
+      })
+      .catch((e) => {
+        console.error("Failed to fetch items", e);
+      });
   };
 
   const fetchCategories = async () => {
-    const res = await fetch(`https://localhost:7005/api/categories`, {
-      credentials: "include",
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      setCategories(data);
-    }
+    getCategories()
+      .then(setCategories)
+      .catch((e) => console.error("Failed to fetch categories", e));
   };
 
   useEffect(() => {
     fetchCategories();
-  }, []);
-
-  useEffect(() => {
     fetchItems();
   }, [search, categoryId, sortBy, descending, page]);
 

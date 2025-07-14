@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getItems, type ItemsResult } from '../api/itemService.ts';
+import type { ItemsResult } from '../types/item.ts';
+import { getItems } from '../services/itemService.ts';
 import { Link } from 'react-router-dom';
 
 export default function Items() {
@@ -7,7 +8,7 @@ export default function Items() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getItems()
+    getItems({})
       .then(setItems)
       .catch((e) => console.error('Failed to fetch items', e))
       .finally(() => setLoading(false));
