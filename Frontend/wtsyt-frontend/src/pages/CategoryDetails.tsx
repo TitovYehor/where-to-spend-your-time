@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from 'react-router-dom';
-import type { Category } from "../types/Category";
+import type { Category } from "../types/category";
 import type { Item } from "../types/item";
+import { getCategoryById, getItemsInCategory } from "../services/categoryService";
 
 export default function CategoryDetails() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -10,25 +11,19 @@ export default function CategoryDetails() {
   const [category, setCategory] = useState<Category | null>(null);
   const [items, setItems] = useState<Item[]>([]);
 
-  const fetchData = async () => {
-    const [catRes, itemsRes] = await Promise.all([
-      fetch(`https://localhost:7005/api/categories/${categoryId}`),
-      fetch(`https://localhost:7005/api/categories/${categoryId}/items`),
-    ]);
-
-    if (catRes.ok) {
-      const catData = await catRes.json();
-      setCategory(catData);
-    }
-
-    if (itemsRes.ok) {
-      const itemsData = await itemsRes.json();
-      setItems(itemsData);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    const catId = Number(categoryId);
+    if (!isNaN(catId)) {
+      getCategoryById(catId)
+        .then(setCategory)
+        .catch((e) => console.error('Failed to fetch category', e))
+    
+      getItemsInCategory(catId)
+        .then(setItems)
+        .catch((e) => console.error('Failed to fetch items', e))
+    } else {
+      console.error('Invalid category id', categoryId)
+    }
   }, [categoryId]);
 
   if (!category) return <div className="p-6">Loading category...</div>;

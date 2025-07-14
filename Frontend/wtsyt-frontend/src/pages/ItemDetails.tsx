@@ -4,6 +4,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from 'react-router-dom';
 import type { Item } from "../types/item";
 import type { Review } from "../types/review";
+import { getItemById } from "../services/itemService";
+import { getMyReviewForItem, getReviewsForItem, addReview, updateReview, deleteReview } from "../services/reviewService";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -18,85 +20,72 @@ export default function ItemDetails() {
   const [rating, setRating] = useState(0);
   const [error, setError] = useState("");
 
-  const fetchData = async () => {
-    const [itemRes, reviewsRes] = await Promise.all([
-      fetch(`https://localhost:7005/api/items/${id}`),
-      fetch(`https://localhost:7005/api/items/${id}/reviews`),
-    ]);
+  const fetchData = async (itemId: string | undefined) => {
+    const id = Number(itemId);
+    if (!isNaN(id)) {
+      getItemById(id)
+        .then(setItem)
+        .catch((e) => console.error('Failed to fetch item', e))
+    
+      getReviewsForItem(id)
+        .then(setReviews)
+        .catch((e) => console.error('Failed to fetch reviews', e))
 
-    if (itemRes.ok) {
-      const itemData = await itemRes.json();
-      setItem(itemData);
-    }
-
-    if (reviewsRes.ok) {
-      const reviewData = await reviewsRes.json();
-      setReviews(reviewData);
-    }
-
-    if (user) {
-      const myReviewRes = await fetch(
-        `https://localhost:7005/api/items/${id}/reviews/my`,
-        { credentials: "include" }
-      );
-      if (myReviewRes.ok) {
-        const r = await myReviewRes.json();
-        setMyReview(r);
-        setTitle(r.title);
-        setContent(r.content);
-        setRating(r.rating);
+      if (user) {
+        getMyReviewForItem(id)
+          .then(data => {
+            setMyReview(data)
+            setTitle(data.title)
+            setContent(data.content)
+            setRating(data.rating)
+          })
+          .catch((e) => console.error('Failed to fetch user review for item', e))
       }
+    } else {
+      console.error('Invalid item id', itemId);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(id);
   }, [id, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    const isEditing = !!myReview;
-    const method = isEditing ? "PUT" : "POST";
-    const url = isEditing
-        ? `https://localhost:7005/api/reviews/${myReview.id}`
-        : `https://localhost:7005/api/reviews`;
+    try {
+      if (myReview) {
+        await updateReview(myReview.id, {title, content, rating});
+      } else {
+        const itemId = Number(id);
+        if (!isNaN(itemId)) {
+          console.error('Invalid item id', itemId);
+        } else {
+          await addReview({itemId, title, content, rating});
+        }
 
-    const body = isEditing
-        ? { title, content, rating }
-        : { itemId: id, title, content, rating };
-
-    const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        const data = await response.json();
-        setError(data.message || "Failed to submit review");
-    } else {
-        await fetchData();
+        await fetchData(id);
+      }
+    } catch (e: any) {
+      setError(e?.response?.data?.message || "Failed to submit review");
     }
   };
 
   const handleDelete = async () => {
-    const res = await fetch(
-      `https://localhost:7005/api/reviews/${myReview ? myReview.id : 0}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      }
-    );
-
-    if (res.ok) {
-      setMyReview(null);
-      setTitle("");
-      setContent("");
-      setRating(0);
-      await fetchData();
+    var deleteRevId = myReview ? myReview.id : 0; 
+    if (deleteRevId == 0) {
+      console.error('Invalid review id');
+    } else {
+      deleteReview(deleteRevId)
+        .then(() => {
+          setMyReview(null);
+          setTitle("");
+          setContent("");
+          setRating(0);
+          fetchData(id);
+        })
+        .catch((e) => console.error('Failed to delete review', e))
     }
   };
 

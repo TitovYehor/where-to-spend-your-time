@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
+import { deleteReview, getReviewById } from "../services/reviewService";
+import { getCommentsForReview, addComment, deleteComment } from "../services/commentService";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -19,20 +21,17 @@ export default function ReviewDetails() {
   const [editRating, setEditRating] = useState(5);
 
   const fetchData = async () => {
-    const res = await fetch(`https://localhost:7005/api/reviews/${reviewId}`, {
-        credentials: "include",
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setReview(data);
-    }
+    const id = Number(reviewId);
+    if (!isNaN(id)) {
+      console.error('Invalid review id', reviewId);
+    } else {
+      await getReviewById(id)
+        .then(setReview)
+        .catch((e) => console.error('Failed to fetch review', e))
 
-    const commentsRes = await fetch(`https://localhost:7005/api/reviews/${reviewId}/comments`, {
-        credentials: "include",
-    });
-    if (commentsRes.ok) {
-      const data = await commentsRes.json();
-      setComments(data);
+      await getCommentsForReview(id)
+        .then(setComments)
+        .catch((e) => console.error('Failed to fetch comments', e))
     }
   };
 
@@ -44,18 +43,16 @@ export default function ReviewDetails() {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const res = await fetch(`https://localhost:7005/api/reviews/${review?.id}/comments`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reviewId, content: newComment }),
-    });
+    try {
+      const id = Number(reviewId);
+      if (!isNaN(id)) {
+        console.error('Invalid review id', reviewId);
+      } else {
+        await addComment(id, {content: newComment});
 
-    if (res.ok) {
-      setNewComment("");
-      fetchData();
-    } else {
-      const err = await res.json();
+        await fetchData();
+      }
+    } catch (err: any) {
       setError(err.message || "Failed to add comment");
     }
   };
@@ -64,13 +61,17 @@ export default function ReviewDetails() {
     const confirmed = confirm("Are you sure you want to delete this review?");
     if (!confirmed) return;
 
-    const res = await fetch(`https://localhost:7005/api/reviews/${reviewId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    try {
+      const id = Number(reviewId);
+      if (!isNaN(id)) {
+        console.error('Invalid review id', reviewId);
+      } else {
+        await deleteReview(id);
 
-    if (res.ok) {
-      window.location.href = "/items";
+        window.location.href = "/items";
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to delete review"); 
     }
   };
 
@@ -80,16 +81,11 @@ export default function ReviewDetails() {
     const confirmed = confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
 
-    const res = await fetch(`https://localhost:7005/api/comments/${commentId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) {
-      fetchData();
-    } else {
-      const err = await res.json();
-      setError(err.message || "Failed to delete comment");
+    try {
+      await deleteComment(commentId);
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete comment"); 
     }
   };
 
