@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { AuthUser } from "../types/authUser";
+import { getMyProfile } from "../services/userService";
+import { logout } from "../services/authService";
 
 type AuthContextType = {
   user: AuthUser | null;
   setUser: (user: AuthUser | null) => void;
-  logout: () => void;
+  userLogout: () => void;
   refreshUser: () => void;
 };
 
@@ -15,20 +17,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const res = await fetch("https://localhost:7005/api/users/me", {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
+      await getMyProfile()
+        .then(setUser)
+        .catch(() => setUser(null))
     };
 
     fetchUser();
@@ -36,37 +27,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
   const refreshUser = async () => {
-    try {
-      const response = await fetch("https://localhost:7005/api/users/me", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      } else {
-        setUser(null);
-      }
-    } catch {
-      setUser(null);
-    }
+    await getMyProfile()
+      .then(setUser)
+      .catch(() => setUser(null))
   };
 
-  const logout = async () => {
-    try {
-      await fetch("https://localhost:7005/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      setUser(null);
-    }
+  const userLogout = async () => {
+    await logout()
+      .catch((e) => console.error("Logout failed", e))
+      .finally(() => setUser(null))
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, setUser, userLogout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

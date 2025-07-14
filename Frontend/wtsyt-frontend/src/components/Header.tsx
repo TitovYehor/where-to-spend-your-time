@@ -2,7 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, userLogout } = useAuth();
   
   const navItems = [
     { label: 'Home', path: '/' },
@@ -37,7 +37,7 @@ export default function Header() {
           {user ? (
             <div className="flex items-center gap-x-4">
               <span className="text-sm text-gray-600">Hello, {user.displayName}</span>
-              <button onClick={logout} className="text-red-500 text-sm hover:underline">
+              <button onClick={userLogout} className="text-red-500 text-sm hover:underline">
                 Logout
               </button>
             </div>
