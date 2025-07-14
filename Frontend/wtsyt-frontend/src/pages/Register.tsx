@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { login, register } from "../services/authService";
+import { getMyProfile } from "../services/userService";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -44,52 +46,20 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("https://localhost:7005/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ displayName, email, password }),
-      });
+      await register({displayName, email, password});
 
-      if (!response.ok) {
-        const data = await response.json();
+      await login({email, password});
 
-        if (Array.isArray(data)) {
-            setErrorMessages(data.map((err) => err.description));
-        } else {
-            setErrorMessages(["Registration failed"]);
-        }
-
-        return;
-      }
-
-      setErrorMessages([]);
-
-      const loginResponse = await fetch("https://localhost:7005/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (loginResponse.ok) {
-        const meResponse = await fetch("https://localhost:7005/api/users/me", {
-          credentials: "include",
-        });
-
-        if (meResponse.ok) {
-          const data = await meResponse.json();
-          setUser(data);
-        }
-
-        navigate("/");
-      } else {
-        throw new Error("Auto login failed after registration");
-      }
+      await getMyProfile()
+        .then(setUser)
+        .catch((e) => console.error('Failed to fetch reviews', e));
+      
+      navigate("/");
     } catch (err: any) {
-        setErrorMessages(["Network error. Please try again"]);
+      const messages = err?.response?.data;
+      setErrorMessages(Array.isArray(messages) ? messages : [messages?.message || "Failed to register"]);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 

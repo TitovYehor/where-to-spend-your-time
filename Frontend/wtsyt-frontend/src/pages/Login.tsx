@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { login } from "../services/authService";
+import { getMyProfile } from "../services/userService";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,34 +17,15 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("https://localhost:7005/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-    });
+      await login({email, password});
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
+      await getMyProfile()
+        .then(setUser)
+        .catch((e) => console.error('Failed to fetch reviews', e));
 
-      if (response.ok) {
-            const meResponse = await fetch("https://localhost:7005/api/users/me", {
-                credentials: "include",
-            });
-
-            if (meResponse.ok) {
-                const data = await meResponse.json();
-                setUser(data);
-            }
-
-            navigate("/");
-       }
+      navigate("/");
     } catch (err: any) {
-      setError(err.message || "Login error");
+      setError(err?.response?.data?.message || err.message || "Login error");
     }
   };
 
