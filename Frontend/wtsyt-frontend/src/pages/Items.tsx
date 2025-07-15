@@ -2,19 +2,37 @@ import { useEffect, useState } from 'react';
 import type { ItemsResult } from '../types/item.ts';
 import { getItems } from '../services/itemService.ts';
 import { Link } from 'react-router-dom';
+import { handleApiError } from '../utils/handleApi.ts';
 
 export default function Items() {
   const [itemsResult, setItems] = useState<ItemsResult>();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getItems({})
-      .then(setItems)
-      .catch((e) => console.error('Failed to fetch items', e))
-      .finally(() => setLoading(false));
+    const fetchItems = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const result = await getItems({});
+        setItems(result);
+      } catch (e) {
+        handleApiError(e);
+        setError("Failed to load items.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
   }, []);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
+  if (!itemsResult || itemsResult.totalCount === 0) {
+    return <p className="text-center mt-10 text-gray-600">No items found.</p>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4">

@@ -6,6 +6,7 @@ import type { Item } from "../types/item";
 import type { Review } from "../types/review";
 import { getItemById } from "../services/itemService";
 import { getMyReviewForItem, getReviewsForItem, addReview, updateReview, deleteReview } from "../services/reviewService";
+import { handleApiError } from "../utils/handleApi";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -20,72 +21,81 @@ export default function ItemDetails() {
   const [rating, setRating] = useState(0);
   const [error, setError] = useState("");
 
-  const fetchData = async (itemId: string | undefined) => {
-    const id = Number(itemId);
-    if (!isNaN(id)) {
-      getItemById(id)
-        .then(setItem)
-        .catch((e) => console.error('Failed to fetch item', e))
-    
-      getReviewsForItem(id)
-        .then(setReviews)
-        .catch((e) => console.error('Failed to fetch reviews', e))
+  const itemId = Number(id);
 
-      if (user) {
-        getMyReviewForItem(id)
-          .then(data => {
-            setMyReview(data)
-            setTitle(data.title)
-            setContent(data.content)
-            setRating(data.rating)
-          })
-          .catch((e) => console.error('Failed to fetch user review for item', e))
+  const fetchData = async () => {
+    if (isNaN(itemId)) {
+      console.error("Invalid item id", id);
+      return;
+    }
+
+    try {
+      const [itemData, reviewsData] = await Promise.all([
+        getItemById(itemId),
+        getReviewsForItem(itemId),
+      ]);
+      setItem(itemData);
+      setReviews(reviewsData);
+    } catch (e) {
+      handleApiError(e);
+      return;
+    }
+
+    if (user) {
+      try {
+        const myReviewData = await getMyReviewForItem(itemId);
+        setMyReview(myReviewData);
+        setTitle(myReviewData.title);
+        setContent(myReviewData.content);
+        setRating(myReviewData.rating);
+      } catch {
+        setMyReview(null);
+        setTitle("");
+        setContent("");
+        setRating(0);
       }
-    } else {
-      console.error('Invalid item id', itemId);
     }
   };
 
   useEffect(() => {
-    fetchData(id);
+    fetchData();
   }, [id, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
+    if (isNaN(itemId)) {
+      setError("Invalid item ID");
+      return;
+    }
+
     try {
       if (myReview) {
-        await updateReview(myReview.id, {title, content, rating});
+        await updateReview(myReview.id, { title, content, rating });
       } else {
-        const itemId = Number(id);
-        if (!isNaN(itemId)) {
-          console.error('Invalid item id', itemId);
-        } else {
-          await addReview({itemId, title, content, rating});
-        }
-
-        await fetchData(id);
+        await addReview({ itemId, title, content, rating });
       }
+
+      await fetchData();
     } catch (e: any) {
       setError(e?.response?.data?.message || "Failed to submit review");
     }
   };
 
   const handleDelete = async () => {
-    var deleteRevId = myReview ? myReview.id : 0; 
-    if (deleteRevId == 0) {
-      console.error('Invalid review id');
-    } else {
-      deleteReview(deleteRevId)
-        .then(() => {
-          setMyReview(null);
-          setTitle("");
-          setContent("");
-          setRating(0);
-          fetchData(id);
-        })
-        .catch((e) => console.error('Failed to delete review', e))
+    if (!myReview) return;
+
+    try {
+      await deleteReview(myReview.id);
+      setMyReview(null);
+      setTitle("");
+      setContent("");
+      setRating(0);
+
+      await fetchData();
+    } catch (e) {
+      handleApiError(e);
     }
   };
 
@@ -128,12 +138,7 @@ export default function ItemDetails() {
           </h3>
           {error && <p className="text-red-500 mb-2">{error}</p>}
           <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-                type="number"
-                value={item.id}
-                readOnly
-                hidden
-            />
+            <input type="hidden" value={item.id} readOnly />
             <input
               type="text"
               placeholder="Title"
