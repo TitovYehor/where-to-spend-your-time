@@ -4,6 +4,7 @@ import type { Category } from "../types/category";
 import type { Item } from "../types/item";
 import { getItems } from "../services/itemService";
 import { getCategories } from "../services/categoryService";
+import { handleApiError } from "../utils/handleApi";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -15,37 +16,41 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
-  const [isLastPage, setIsLastPage] = useState(false);
-
-  const fetchItems = async () => {
-    getItems({
-      search: search,
-      categoryId: categoryId,
-      sortBy: sortBy,
-      descending: descending,
-      page: page,
-      pageSize: pageSize,
-    })
-      .then(data => {
-        setItems(data.items)
-        setTotalCount(data.totalCount)
-        setIsLastPage(data.totalCount <= page * pageSize)
-      })
-      .catch((e) => {
-        console.error("Failed to fetch items", e);
-      });
-  };
-
-  const fetchCategories = async () => {
-    getCategories()
-      .then(setCategories)
-      .catch((e) => console.error("Failed to fetch categories", e));
-  };
+  const isLastPage = totalCount <= page * pageSize;
 
   useEffect(() => {
-    fetchCategories();
-    fetchItems();
+    const fetchData = async () => {
+      try {
+        const result = await getItems({
+            search: search,
+            categoryId: categoryId,
+            sortBy: sortBy,
+            descending: descending,
+            page: page,
+            pageSize: pageSize,
+          });
+        setItems(result.items);
+        setTotalCount(result.totalCount);
+      } catch (e) {
+        handleApiError(e);
+      }
+    };
+
+    fetchData();
   }, [search, categoryId, sortBy, descending, page]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getCategories();
+        setCategories(result);
+      } catch (e) {
+        handleApiError(e);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
