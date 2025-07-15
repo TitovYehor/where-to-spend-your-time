@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
 import { getCategoryById, getItemsInCategory } from "../services/categoryService";
+import { handleApiError } from "../utils/handleApi";
 
 export default function CategoryDetails() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -14,13 +15,20 @@ export default function CategoryDetails() {
   useEffect(() => {
     const catId = Number(categoryId);
     if (!isNaN(catId)) {
-      getCategoryById(catId)
-        .then(setCategory)
-        .catch((e) => console.error('Failed to fetch category', e))
-    
-      getItemsInCategory(catId)
-        .then(setItems)
-        .catch((e) => console.error('Failed to fetch items', e))
+      const fetchData = async () => {
+        try {
+          const [category, items] = await Promise.all([
+            getCategoryById(catId),
+            getItemsInCategory(catId),
+          ]);
+          setCategory(category);
+          setItems(items);
+        } catch (e) {
+          handleApiError(e);
+        }
+      };
+
+      fetchData();
     } else {
       console.error('Invalid category id', categoryId)
     }
@@ -30,7 +38,7 @@ export default function CategoryDetails() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-2">'{category.name}' category</h1>
+      <h1 className="text-3xl font-bold mb-2">{category.name} category</h1>
 
       <h2 className="text-xl font-semibold mb-4">Items</h2>
       {items.length === 0 ? (
