@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { login } from "../services/authService";
 import { getMyProfile } from "../services/userService";
+import { handleApiError } from "../utils/handleApi";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,15 +18,19 @@ const Login = () => {
     setError("");
 
     try {
-      await login({email, password});
-
-      await getMyProfile()
-        .then(setUser)
-        .catch((e) => console.error('Failed to fetch reviews', e));
+      await login({ email: email.trim(), password: password.trim() });
+      
+      const profile = await getMyProfile();
+      setUser(profile);
 
       navigate("/");
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || "Login error");
+      handleApiError(err);
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Please try again."
+      );
     }
   };
 
@@ -59,7 +64,7 @@ const Login = () => {
           </button>
         </form>
         <p className="mt-4 text-center text-sm">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <a href="/register" className="text-blue-600 hover:underline">
             Register
           </a>
