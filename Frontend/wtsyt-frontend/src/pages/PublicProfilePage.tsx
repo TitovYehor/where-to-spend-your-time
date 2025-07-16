@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
 import { getProfileById } from "../services/userService";
+import { handleApiError } from "../utils/handleApi";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -11,10 +12,16 @@ export default function PublicProfile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      await getProfileById(userId ?? "")
-        .then(setUser)
-        .catch((e) => console.error('Failed to fetch profile', e))
-        .finally(() => setLoading(false))
+      if (!userId) return;
+
+      try {
+        const data = await getProfileById(userId);
+        setUser(data);
+      } catch (err) {
+        handleApiError(err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchProfile();
@@ -24,9 +31,13 @@ export default function PublicProfile() {
     return <p className="text-center mt-8">Loading...</p>;
   }
 
+  if (!user) {
+    return <p className="text-center mt-8 text-red-500">User not found.</p>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">'{user?.displayName}' Profile</h1>
+      <h1 className="text-3xl font-bold mb-6">{user?.displayName}'s Profile</h1>
 
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">User Reviews</h2>
@@ -34,7 +45,7 @@ export default function PublicProfile() {
           <p className="text-gray-600">User haven't written any reviews yet</p>
         ) : (
           <ul className="space-y-4">
-            {user?.reviews.map((review) => (
+            {user.reviews.map((review) => (
               <li key={review.id}>
                 <Link 
                   to={`/reviews/${review.id}`}
@@ -59,7 +70,7 @@ export default function PublicProfile() {
           <p className="text-gray-600">User haven't written any comments yet</p>
         ) : (
           <ul className="space-y-4">
-            {user?.comments.map((comment) => (
+            {user.comments.map((comment) => (
               <li key={comment.id}>
                 <Link
                   to={`/reviews/${comment.reviewId}`}

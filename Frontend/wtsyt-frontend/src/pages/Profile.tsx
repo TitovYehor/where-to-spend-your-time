@@ -5,28 +5,34 @@ import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
 import { getMyProfile } from "../services/userService";
 import { updatePassword, updateProfile } from "../services/userService";
+import { handleApiError } from "../utils/handleApi";
 
 const Profile = () => {
-  const { user } = useAuth();
-  const { refreshUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  
   const [newDisplayName, setNewDisplayName] = useState(user?.displayName ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      await getMyProfile()
-        .then(data => {
-          setReviews(data.reviews)
-          setComments(data.comments)
-        })
-        .catch((e) => console.error('Failed to fetch profile', e))
-        .finally(() => setLoading(false));
+      setLoading(true);
+      try {
+        const data = await getMyProfile();
+        setReviews(data.reviews);
+        setComments(data.comments);
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (user) {
@@ -45,42 +51,54 @@ const Profile = () => {
   }
 
   const handleProfileUpdate = async () => {
-        setErrorMessages([]);
+    setSuccessMessage("");
+    setErrorMessages([]);
 
-        if (newDisplayName.trim().length < 2) {
-            setErrorMessages(["Display name must be at least 2 characters"]);
-            return;
-        }
+    const trimmedName = newDisplayName.trim();
 
-        try {
-          await updateProfile({displayName: newDisplayName});
-          
-          setSuccessMessage("Profile updated successfully!");
-          await refreshUser();
-        } catch (err: any) {
-            setErrorMessages([err?.response?.data?.message || "Failed to update profile"]);
-        }
-    };
+    if (trimmedName.length < 2) {
+      setErrorMessages(["Display name must be at least 2 characters."]);
+      return;
+    }
 
-    const handlePasswordChange = async () => {
-        setErrorMessages([]);
-        
-        if (newPassword == null || newPassword.length < 6) {
-            setErrorMessages(["Password must be at least 6 characters"]);
-            return;
-        }
+    if (trimmedName === user?.displayName) {
+      return setSuccessMessage("No changes to update.");
+    }
 
-        try {
-          await updatePassword({currentPassword, newPassword});
-          
-          setSuccessMessage("Password changed successfully!");
-          setCurrentPassword("");
-          setNewPassword("");
-        } catch (err: any) {
-          const messages = err?.response?.data;
-          setErrorMessages(Array.isArray(messages) ? messages : [messages?.message || "Failed to update profile"]);
-        }
-    };
+    try {
+      await updateProfile({ displayName: trimmedName });
+      await refreshUser();
+
+      setSuccessMessage("Profile updated successfully!");
+    } catch (err: any) {
+      handleApiError(err);
+      setErrorMessages([
+        err?.response?.data?.message || "Failed to update profile.",
+      ]);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+      setSuccessMessage("");
+      setErrorMessages([]);
+
+      if (!newPassword || newPassword.length < 6) {
+        setErrorMessages(["Password must be at least 6 characters."]);
+        return;
+      }
+
+      try {
+        await updatePassword({ currentPassword, newPassword });
+        setSuccessMessage("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+      } catch (err: any) {
+        handleApiError(err);
+        const data = err?.response?.data;
+        const errors = Array.isArray(data) ? data : [data?.message || "Failed to change password."];
+        setErrorMessages(errors);
+      }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -96,18 +114,21 @@ const Profile = () => {
 
         {successMessage && <p className="text-green-600">{successMessage}</p>}
         {errorMessages.length > 0 && (
-        <ul className="mb-4 text-red-500 text-sm list-disc list-inside">
-            {errorMessages.map((msg, i) => (
-            <li key={i}>{msg}</li>
-            ))}
-        </ul>
+          <ul className="mb-4 text-red-500 text-sm list-disc list-inside">
+              {errorMessages.map((msg, i) => (
+              <li key={i}>{msg}</li>
+              ))}
+          </ul>
         )}
 
         <div className="space-y-3">
             <label className="block">Display Name</label>
             <input
                 value={newDisplayName}
-                onChange={(e) => setNewDisplayName(e.target.value)}
+                onChange={(e) => {
+                  setNewDisplayName(e.target.value)
+                  setSuccessMessage("");
+                }}
                 className="w-full border rounded-lg px-4 py-2"
             />
             <button
@@ -123,14 +144,20 @@ const Profile = () => {
             <input
                 type="password"
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value)
+                  setSuccessMessage("");
+                }}
                 className="w-full border rounded-lg px-4 py-2"
             />
             <label className="block mt-4 mb-1">New Password</label>
             <input
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  setNewPassword(e.target.value)
+                  setSuccessMessage("");
+                }}
                 className="w-full border rounded-lg px-4 py-2"
             />
             <button
