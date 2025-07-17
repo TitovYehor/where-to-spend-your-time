@@ -52,10 +52,10 @@ public class ItemServiceTests
             Descending = true
         };
 
-        var result = (await _service.GetFilteredItemsAsync(filter)).ToList();
+        var result = (await _service.GetFilteredItemsAsync(filter));
 
-        Assert.Equal(2, result.Count);
-        Assert.Equal("Second", result[0].Title);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal("Second", result.Items[0].Title);
     }
 
     [Fact]

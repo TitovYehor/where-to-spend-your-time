@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.User;
@@ -14,9 +18,12 @@ public class UserServiceTests
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
     private readonly UserService _service;
+    private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
 
     public UserServiceTests()
     {
+        _userManagerMock = MockUserManager<ApplicationUser>();
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
@@ -32,7 +39,7 @@ public class UserServiceTests
         });
         _mapper = config.CreateMapper();
 
-        _service = new UserService(_db, _mapper);
+        _service = new UserService(_db, _mapper, _userManagerMock.Object);
     }
 
     [Fact]
@@ -115,5 +122,21 @@ public class UserServiceTests
 
         Assert.NotNull(result);
         Assert.Null(result.Email);
+    }
+
+    private static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class
+    {
+        var store = new Mock<IUserStore<TUser>>();
+        return new Mock<UserManager<TUser>>(
+            store.Object,
+            new Mock<IOptions<IdentityOptions>>().Object,
+            new Mock<IPasswordHasher<TUser>>().Object,
+            Array.Empty<IUserValidator<TUser>>(),
+            Array.Empty<IPasswordValidator<TUser>>(),
+            new Mock<ILookupNormalizer>().Object,
+            new Mock<IdentityErrorDescriber>().Object,
+            new Mock<IServiceProvider>().Object,
+            new Mock<ILogger<UserManager<TUser>>>().Object
+        );
     }
 }
