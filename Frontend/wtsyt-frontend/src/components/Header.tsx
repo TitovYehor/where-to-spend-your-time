@@ -19,6 +19,14 @@ export default function Header() {
           WTSYT
         </Link>
 
+        {user?.role === "Admin" && (
+          <div className="flex items-center gap-x-4">
+            <Link to="/admin" className="text-bg font-bold text-indigo-600 hover:underline">
+              Admin Panel
+            </Link>
+          </div>
+        )}
+
         <nav className="flex items-center gap-x-4">
           {navItems.map(({ label, path }) => (
             <NavLink
