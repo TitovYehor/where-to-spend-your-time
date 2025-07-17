@@ -36,7 +36,7 @@ public class UserService : IUserService
 
         var dto = _mapper.Map<ApplicationUserDto>(user);
         var userRoles = await _userManager.GetRolesAsync(user);
-        dto.Role = userRoles.FirstOrDefault();
+        dto.Role = userRoles?.FirstOrDefault();
 
         dto.Reviews = user.Reviews
             .OrderByDescending(r => r.CreatedAt)
