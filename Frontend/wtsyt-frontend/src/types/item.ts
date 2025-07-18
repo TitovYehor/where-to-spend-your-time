@@ -2,6 +2,7 @@ export type Item = {
   id: number;
   title: string;
   description: string;
+  categoryId: number;
   categoryName: string;
   averageRating: number;
 };
