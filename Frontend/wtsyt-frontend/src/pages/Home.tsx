@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
 import { getItems } from "../services/itemService";
@@ -9,12 +9,17 @@ import { handleApiError } from "../utils/handleApi";
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  const [searchParams] = useSearchParams();
+  const categoryIdParam = searchParams.get("categoryId");
   const [search, setSearch] = useState("");
-  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
+  const [categoryId, setCategoryId] = useState<number | undefined>(
+    categoryIdParam ? parseInt(categoryIdParam) : undefined);
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const [descending, setDescending] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
+
   const [totalCount, setTotalCount] = useState(0);
   const isLastPage = totalCount <= page * pageSize;
 
