@@ -41,7 +41,7 @@ export default function Categories() {
         {categories.map(cat => (
           <Link
             key={cat.id}
-            to={`/categories/${cat.id}`}
+            to={`/?categoryId=${cat.id}`}
             className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
           >
             <h3 className="text-lg font-semibold">{cat.name}</h3>
