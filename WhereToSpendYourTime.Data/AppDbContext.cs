@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Data;
@@ -18,6 +13,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Comment> Comments { get; set; }
 
+    public DbSet<Tag> Tags { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -25,5 +22,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Category>()
             .HasIndex(c => c.Name)
             .IsUnique();
+
+        builder.Entity<ItemTag>()
+            .HasKey(it => new { it.ItemId, it.TagId });
+
+        builder.Entity<ItemTag>()
+            .HasOne(it => it.Item)
+            .WithMany(i => i.ItemTags)
+            .HasForeignKey(it => it.ItemId);
+
+        builder.Entity<ItemTag>()
+            .HasOne(it => it.Tag)
+            .WithMany(t => t.ItemTags)
+            .HasForeignKey(it => it.TagId);
     }
 }
