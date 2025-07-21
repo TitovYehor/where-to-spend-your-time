@@ -20,6 +20,8 @@ public class Item
     public Category? Category { get; set; }
 
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public ICollection<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
 }
 
 public enum ItemStatus
