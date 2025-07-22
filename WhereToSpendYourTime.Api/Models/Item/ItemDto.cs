@@ -1,4 +1,6 @@
-﻿namespace WhereToSpendYourTime.Api.Models.Item;
+﻿using WhereToSpendYourTime.Api.Models.Tags;
+
+namespace WhereToSpendYourTime.Api.Models.Item;
 
 public class ItemDto
 {
@@ -13,4 +15,6 @@ public class ItemDto
     public string CategoryName { get; set; } = string.Empty;
 
     public double AverageRating { get; set; }
+
+    public List<TagDto> Tags { get; set; } = [];
 }
