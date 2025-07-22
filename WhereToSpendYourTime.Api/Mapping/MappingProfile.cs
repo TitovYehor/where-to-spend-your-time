@@ -3,6 +3,7 @@ using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Api.Models.Review;
+using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Data.Entities;
 
@@ -13,6 +14,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<Category, CategoryDto>();
+        CreateMap<Tag, TagDto>();
         CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category!.Name));
         CreateMap<Review, ReviewDto>()
