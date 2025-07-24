@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Data;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Item;
 
@@ -31,6 +32,11 @@ public class ItemService : IItemService
         if (filter.CategoryId.HasValue)
         {
             query = query.Where(i => i.CategoryId == filter.CategoryId.Value);
+        }
+
+        if (filter.TagIds[0].HasValue)
+        {
+            query = query.Where(i => i.ItemTags.Any(it => filter.TagIds.Contains(it.Tag.Id)));
         }
 
         var totalCount = await query.CountAsync();
@@ -82,6 +88,85 @@ public class ItemService : IItemService
         dto.CategoryName = item.Category?.Name ?? "Unknown";
         dto.AverageRating = item.Reviews.Count != 0 ? item.Reviews.Average(r => r.Rating) : 0;
         return dto;
+    }
+
+    public async Task<bool> AddTagForItem(int id, string tagName)
+    {
+        var item = await _db.Items
+            .Include(i => i.ItemTags)
+            .ThenInclude(it => it.Tag)
+            .FirstOrDefaultAsync(i => i.Id == id);
+
+        if (item == null)
+        {
+            return false;
+        }
+
+        tagName = tagName.Trim();
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return false;
+        }
+
+        var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
+        if (tag == null)
+        {
+            tag = new Tag { Name = tagName };
+            await _db.Tags.AddAsync(tag);
+            await _db.SaveChangesAsync();
+        }
+
+        bool alreadyTagged = item.ItemTags.Any(it => it.TagId == tag.Id);
+        if (alreadyTagged)
+        {
+            return false;
+        }
+
+        item.ItemTags.Add(new ItemTag
+        {
+            ItemId = item.Id,
+            TagId = tag.Id
+        });
+
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> RemoveTagFromItem(int id, string tagName)
+    {
+        var item = await _db.Items
+            .Include(i => i.ItemTags)
+            .ThenInclude(it => it.Tag)
+            .FirstOrDefaultAsync(i => i.Id == id);
+
+        if (item == null)
+        {
+            return false;
+        }
+
+        tagName = tagName.Trim();
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return false;
+        }
+
+        var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
+        if (tag == null)
+        {
+            return false;
+        }
+
+        var itemTag = item.ItemTags.FirstOrDefault(it => it.TagId == tag.Id);
+        if (itemTag == null)
+        {
+            return false;
+        }
+
+        item.ItemTags.Remove(itemTag);
+
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<ItemDto?> CreateAsync(ItemCreateRequest request)
