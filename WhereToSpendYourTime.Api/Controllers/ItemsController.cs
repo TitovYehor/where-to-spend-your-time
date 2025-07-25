@@ -55,4 +55,20 @@ public class ItemsController : ControllerBase
         var result = await _itemService.DeleteAsync(id);
         return result ? NoContent() : NotFound();
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id}/tags")]
+    public async Task<IActionResult> AddTagForItem(int id, [FromBody] string tagName) 
+    {
+        var result = await _itemService.AddTagForItem(id, tagName);
+        return result ? NoContent() : BadRequest("Could not add tag to the item");
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}/tags/{tagName}")]
+    public async Task<IActionResult> RemoveTagFromItem(int id, [FromBody] string tagName)
+    {
+        var result = await _itemService.RemoveTagFromItem(id, tagName);
+        return result ? NoContent() : NotFound("Tag or item not found, or tag is not associated with item");
+    } 
 }
