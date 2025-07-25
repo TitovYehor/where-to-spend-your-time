@@ -12,8 +12,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Item> Items { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Comment> Comments { get; set; }
-
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<ItemTag> ItemTags { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -23,17 +23,23 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(c => c.Name)
             .IsUnique();
 
+        builder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
+
         builder.Entity<ItemTag>()
             .HasKey(it => new { it.ItemId, it.TagId });
 
         builder.Entity<ItemTag>()
             .HasOne(it => it.Item)
             .WithMany(i => i.ItemTags)
-            .HasForeignKey(it => it.ItemId);
+            .HasForeignKey(it => it.ItemId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<ItemTag>()
             .HasOne(it => it.Tag)
             .WithMany(t => t.ItemTags)
-            .HasForeignKey(it => it.TagId);
+            .HasForeignKey(it => it.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
