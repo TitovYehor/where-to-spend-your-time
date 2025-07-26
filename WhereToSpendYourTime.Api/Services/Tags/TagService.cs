@@ -43,7 +43,7 @@ public class TagService : ITagService
             return null;
         }
 
-        var existing = await _db.Tags.AnyAsync(t => t.Name == request.Name);
+        var existing = await _db.Tags.AnyAsync(t => t.Name.ToLower() == request.Name.ToLower());
         if (existing)
         {
             return null;
