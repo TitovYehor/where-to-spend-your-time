@@ -34,9 +34,9 @@ public class ItemService : IItemService
             query = query.Where(i => i.CategoryId == filter.CategoryId.Value);
         }
 
-        if (filter.TagIds[0].HasValue)
+        if (filter.TagsIds.Count > 0)
         {
-            query = query.Where(i => i.ItemTags.Any(it => filter.TagIds.Contains(it.Tag.Id)));
+            query = query.Where(i => i.ItemTags.Any(it => filter.TagsIds.Contains(it.Tag.Id)));
         }
 
         var totalCount = await query.CountAsync();
