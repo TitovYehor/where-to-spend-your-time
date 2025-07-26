@@ -21,6 +21,14 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold mb-2">Manage Items</h2>
           <p className="text-sm text-gray-600">Create, update, or delete items</p>
         </Link>
+
+        <Link
+          to="/admin/tags"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition text-center"
+        >
+          <h2 className="text-xl font-semibold mb-2">Manage Tags</h2>
+          <p className="text-sm text-gray-600">Create, update, or delete tags</p>
+        </Link>
       </div>
     </div>
   );

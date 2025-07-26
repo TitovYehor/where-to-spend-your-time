@@ -16,6 +16,7 @@ import RequireAdmin from './components/RequireAdmin.tsx';
 import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 import AdminCategories from './pages/admin/AdminCategories.tsx';
 import AdminItems from './pages/admin/AdminItems.tsx';
+import AdminTags from './pages/admin/AdminTags.tsx';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/admin" element={ <RequireAdmin><AdminDashboard/></RequireAdmin> } />
           <Route path="/admin/categories" element={ <RequireAdmin><AdminCategories/></RequireAdmin> } />
           <Route path="/admin/items" element={ <RequireAdmin><AdminItems/></RequireAdmin> } />
+          <Route path="/admin/tags" element={ <RequireAdmin><AdminTags/></RequireAdmin> } />
 
           <Route path="/profile" element={ <Profile/> } />
           <Route path="/users/:userId" element={ <PublicProfile/> } />
