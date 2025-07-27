@@ -1,4 +1,5 @@
 ﻿using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Tags;
 
 namespace WhereToSpendYourTime.Api.Services.Item;
 
@@ -8,7 +9,7 @@ public interface IItemService
 
     Task<ItemDto?> GetByIdAsync(int id);
 
-    Task<bool> AddTagForItem(int id, string tagName);
+    Task<TagDto?> AddTagForItem(int id, string tagName);
 
     Task<bool> RemoveTagFromItem(int id, string tagName);
 

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
 
@@ -22,6 +23,8 @@ public class ItemService : IItemService
         var query = _db.Items
             .Include(i => i.Category)
             .Include(i => i.Reviews)
+            .Include(i => i.ItemTags)
+                .ThenInclude(it => it.Tag)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
@@ -77,6 +80,8 @@ public class ItemService : IItemService
         var item = await _db.Items
             .Include(i => i.Category)
             .Include(i => i.Reviews)
+            .Include(i => i.ItemTags)
+                .ThenInclude(it => it.Tag)
             .FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
@@ -90,7 +95,7 @@ public class ItemService : IItemService
         return dto;
     }
 
-    public async Task<bool> AddTagForItem(int id, string tagName)
+    public async Task<TagDto?> AddTagForItem(int id, string tagName)
     {
         var item = await _db.Items
             .Include(i => i.ItemTags)
@@ -99,13 +104,13 @@ public class ItemService : IItemService
 
         if (item == null)
         {
-            return false;
+            return null;
         }
 
         tagName = tagName.Trim();
         if (string.IsNullOrWhiteSpace(tagName))
         {
-            return false;
+            return null;
         }
 
         var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
@@ -119,7 +124,7 @@ public class ItemService : IItemService
         bool alreadyTagged = item.ItemTags.Any(it => it.TagId == tag.Id);
         if (alreadyTagged)
         {
-            return false;
+            return null;
         }
 
         item.ItemTags.Add(new ItemTag
@@ -130,14 +135,16 @@ public class ItemService : IItemService
 
 
         await _db.SaveChangesAsync();
-        return true;
+
+        var tagDto = _mapper.Map<TagDto>(tag);
+        return tagDto;
     }
 
     public async Task<bool> RemoveTagFromItem(int id, string tagName)
     {
         var item = await _db.Items
             .Include(i => i.ItemTags)
-            .ThenInclude(it => it.Tag)
+                .ThenInclude(it => it.Tag)
             .FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
