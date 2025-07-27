@@ -3,6 +3,10 @@ export type Tag = {
   name: string;
 };
 
+export type TagRequest = {
+  name: string;
+};
+
 export type TagCreateRequest = {
   name: string;
 };

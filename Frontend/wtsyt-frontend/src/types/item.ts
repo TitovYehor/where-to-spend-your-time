@@ -1,3 +1,5 @@
+import type { Tag } from "./tag";
+
 export type Item = {
   id: number;
   title: string;
@@ -5,6 +7,7 @@ export type Item = {
   categoryId: number;
   categoryName: string;
   averageRating: number;
+  tags: Tag[];
 };
 
 export type ItemsResult = {
