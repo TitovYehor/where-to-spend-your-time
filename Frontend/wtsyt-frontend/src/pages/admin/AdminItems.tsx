@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getItems, addItem, updateItem, deleteItem } from "../../services/itemService";
+import { getItems, addItem, updateItem, deleteItem, addTagForItem, removeTagFromItem } from "../../services/itemService";
 import { getCategories } from "../../services/categoryService";
 import type { Item, ItemCreateRequest } from "../../types/item";
 import type { Category } from "../../types/category";
@@ -14,6 +14,7 @@ export default function AdminItems() {
     description: "",
     categoryId: 0,
   });
+  const [tagInput, setTagInput] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
@@ -53,10 +54,19 @@ export default function AdminItems() {
     try {
       if (editingId !== null) {
         await updateItem(editingId, form);
-        setEditingId(null);
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === editingId
+              ? { ...item, ...form }
+              : item
+          )
+        );
       } else {
-        await addItem(form);
+        const newItem = await addItem(form);
+        setItems((prev) => [...prev, newItem]);
+        setEditingId(newItem.id);
       }
+
       setForm({ title: "", description: "", categoryId: 0 });
       fetchItemsAndCategories();
     } catch (err) {
@@ -89,6 +99,48 @@ export default function AdminItems() {
       fetchItemsAndCategories();
     } catch {
       setError("Failed to delete item");
+    }
+  };
+
+  const handleAddTag = async () => {
+    if (!editingId || !tagInput.trim()) return;
+
+    try {
+      const addedTag = await addTagForItem(editingId, { name: tagInput.trim() });
+      
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === editingId
+            ? { ...item, tags: [...item.tags, addedTag] }
+            : item
+        )
+      );
+
+      setTagInput("");
+      fetchItemsAndCategories();
+      setError("");
+    } catch {
+      setError("Failed to add tag");
+    }
+  };
+
+  const handleRemoveTag = async (tagName: string) => {
+    if (!editingId || !tagName) return;
+
+    try {
+      await removeTagFromItem(editingId, tagName);
+    
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === editingId
+            ? { ...item, tags: item.tags.filter((t) => t.name !== tagName) }
+            : item
+        )
+      );
+
+      setError("");
+    } catch {
+      setError("Failed to remove tag");
     }
   };
 
@@ -125,23 +177,64 @@ export default function AdminItems() {
             </option>
           ))}
         </select>
+
         <button
           type="submit"
           className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
           {editingId ? "Update Item" : "Add Item"}
         </button>
+
         {editingId && (
-          <button
-            type="button"
-            onClick={() => {
-              setEditingId(null);
-              setForm({ title: "", description: "", categoryId: 0 });
-            }}
-            className="ml-4 text-gray-500 text-sm underline"
-          >
-            Cancel
-          </button>
+          <div className="mt-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+              <input
+                type="text"
+                placeholder="Enter tag"
+                className="flex-1 px-4 py-2 border rounded shadow-sm"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+              />
+              <button
+                type="button"
+                className="mt-2 sm:mt-0 px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                onClick={handleAddTag}
+              >
+                Add Tag
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {items.find((i) => i.id === editingId)?.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="flex items-center bg-gray-200 text-sm px-3 py-1 rounded-full"
+                >
+                  {tag.name}
+                  <button
+                    onClick={() => handleRemoveTag(tag.name)}
+                    className="ml-2 text-red-500 hover:text-red-700 font-semibold"
+                    title="Remove tag"
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setForm({ title: "", description: "", categoryId: 0 });
+                }}
+                className="text-gray-500 text-sm underline hover:text-gray-700"
+              >
+                Cancel editing
+              </button>
+            </div>
+          </div>
         )}
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
@@ -163,6 +256,18 @@ export default function AdminItems() {
                 <p className="text-sm text-gray-500">
                   Category: {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
                 </p>
+                {item.tags && item.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="bg-gray-200 px-3 py-1 rounded text-sm text-gray-300"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="space-x-2">
                 <button
