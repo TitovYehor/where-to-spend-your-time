@@ -29,6 +29,7 @@ export default function Home() {
         const result = await getItems({
             search: search,
             categoryId: categoryId,
+            tagsids: [],
             sortBy: sortBy,
             descending: descending,
             page: page,

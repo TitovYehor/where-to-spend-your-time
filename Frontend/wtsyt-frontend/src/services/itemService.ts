@@ -1,9 +1,11 @@
 import api from '../api/axios.ts';
 import type { Item, ItemsResult, ItemCreateRequest, ItemUpdateRequest } from '../types/item.ts';
+import type { Tag, TagRequest } from '../types/tag.ts';
 
 export const buildItemQuery = (params: {
   search?: string;
   categoryId?: number;
+  tagsIds?: number[];
   sortBy?: string;
   descending?: boolean;
   page?: number;
@@ -13,6 +15,9 @@ export const buildItemQuery = (params: {
 
   if (params.search) query.append("search", params.search);
   if (params.categoryId !== undefined) query.append("categoryId", params.categoryId.toString());
+  
+  params.tagsIds?.forEach(id => query.append("tagsIds", id.toString()));
+  
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.descending !== undefined) query.append("descending", params.descending.toString());
   if (params.page !== undefined) query.append("page", params.page.toString());
@@ -24,6 +29,7 @@ export const buildItemQuery = (params: {
 export const getItems = async (params: {
   search?: string;
   categoryId?: number;
+  tagsids?: number[];
   sortBy?: string;
   descending?: boolean;
   page?: number;
@@ -50,4 +56,13 @@ export const updateItem = async (itemId: number, data: ItemUpdateRequest): Promi
 
 export const deleteItem = async (itemId: number): Promise<void> => {
   await api.delete(`/items/${itemId}`);
+};
+
+export const addTagForItem = async (itemId: number, tag: TagRequest): Promise<Tag> => {
+  const res = await api.post(`/items/${itemId}/tags`, tag);
+  return res.data;
+};
+
+export const removeTagFromItem = async (itemId: number, tagName: string): Promise<void> => {
+  await api.delete(`/items/${itemId}/tags/remove/${tagName}`);
 };
