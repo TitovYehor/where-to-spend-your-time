@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Item;
 
 namespace WhereToSpendYourTime.Api.Controllers;
@@ -58,15 +59,15 @@ public class ItemsController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("{id}/tags")]
-    public async Task<IActionResult> AddTagForItem(int id, [FromBody] string tagName) 
+    public async Task<IActionResult> AddTagForItem(int id, [FromBody] TagRequest tag) 
     {
-        var result = await _itemService.AddTagForItem(id, tagName);
-        return result ? NoContent() : BadRequest("Could not add tag to the item");
+        var result = await _itemService.AddTagForItem(id, tag.Name);
+        return result != null ? Ok(result) : BadRequest("Could not add tag to the item");
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpDelete("{id}/tags/{tagName}")]
-    public async Task<IActionResult> RemoveTagFromItem(int id, [FromBody] string tagName)
+    [HttpDelete("{id}/tags/remove/{tagName}")]
+    public async Task<IActionResult> RemoveTagFromItem(int id, string tagName)
     {
         var result = await _itemService.RemoveTagFromItem(id, tagName);
         return result ? NoContent() : NotFound("Tag or item not found, or tag is not associated with item");
