@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getItems, addItem, updateItem, deleteItem, addTagForItem, removeTagFromItem } from "../../services/itemService";
+import { getItems, addItem, updateItem, deleteItem, addTagForItem, removeTagFromItem, getItemById } from "../../services/itemService";
 import { getCategories } from "../../services/categoryService";
 import type { Item, ItemCreateRequest } from "../../types/item";
 import type { Category } from "../../types/category";
@@ -54,12 +54,9 @@ export default function AdminItems() {
     try {
       if (editingId !== null) {
         await updateItem(editingId, form);
+        const updatedItem = await getItemById(editingId);
         setItems((prev) =>
-          prev.map((item) =>
-            item.id === editingId
-              ? { ...item, ...form }
-              : item
-          )
+          prev.map((i) => (i.id === editingId ? updatedItem : i))
         );
       } else {
         const newItem = await addItem(form);
@@ -67,8 +64,7 @@ export default function AdminItems() {
         setEditingId(newItem.id);
       }
 
-      setForm({ title: "", description: "", categoryId: 0 });
-      fetchItemsAndCategories();
+      setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to save item");
@@ -96,6 +92,9 @@ export default function AdminItems() {
 
     try {
       await deleteItem(id);
+      setEditingId(null);
+      setForm({ title: "", description: "", categoryId: 0 });
+      setError("");
       fetchItemsAndCategories();
     } catch {
       setError("Failed to delete item");
@@ -117,7 +116,6 @@ export default function AdminItems() {
       );
 
       setTagInput("");
-      fetchItemsAndCategories();
       setError("");
     } catch {
       setError("Failed to add tag");
@@ -184,9 +182,15 @@ export default function AdminItems() {
         >
           {editingId ? "Update Item" : "Add Item"}
         </button>
-
+        
         {editingId && (
           <div className="mt-6 space-y-4">
+            <button
+              onClick={() => handleDelete(editingId)}
+              className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
+            >
+              Delete item
+            </button>
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
               <input
                 type="text"
@@ -242,7 +246,7 @@ export default function AdminItems() {
       {loading ? (
         <p>Loading items...</p>
       ) : items.length === 0 ? (
-        <p className="text-gray-600">No items found.</p>
+        <p className="text-gray-600">No items found</p>
       ) : (
         <ul className="space-y-4">
           {items.map((item) => (
