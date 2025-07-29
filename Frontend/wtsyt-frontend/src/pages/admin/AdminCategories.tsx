@@ -79,34 +79,44 @@ export default function AdminCategories() {
 
       <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
         <div>
+          <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 mb-1">
+            Category Name
+          </label>
           <input
+            id="categoryName"
             type="text"
-            placeholder="Category Name"
+            placeholder="e.g., Books"
             className="w-full px-4 py-2 border rounded"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-        >
-          {editingId ? "Update Category" : "Add Category"}
-        </button>
-        {editingId && (
+        <div className="flex items-center gap-4">
           <button
-            type="button"
-            className="ml-4 text-sm text-gray-500 underline"
-            onClick={() => {
-              setEditingId(null);
-              setName("");
-              setError("");
-            }}
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
           >
-            Cancel
+            {editingId ? "Update Category" : "Add Category"}
           </button>
+          {editingId && (
+            <button
+              type="button"
+              className="text-sm text-gray-500 underline"
+              onClick={() => {
+                setEditingId(null);
+                setName("");
+                setError("");
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+        {error && ( 
+          <p className="text-red-500 text-sm">
+            {error}
+            </p>
         )}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
       {loading ? (
@@ -118,7 +128,7 @@ export default function AdminCategories() {
           {categories.map((cat) => (
             <li
               key={cat.id}
-              className="flex justify-between items-center border p-4 rounded"
+              className="flex justify-between items-center bg-gray-50 border rounded-xl px-4 py-3 shadow-sm"
             >
               <span>{cat.name}</span>
               <div className="space-x-2">

@@ -1,35 +1,45 @@
 import { Link } from "react-router-dom";
+import { Tag, Boxes, FolderCog } from 'lucide-react';
 
 export default function AdminDashboard() {
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
+    return (
+    <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto p-6">
+      <h1 id="admin-heading" className="text-3xl font-bold mb-6">Admin Panel</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
           to="/admin/categories"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition text-center"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <h2 className="text-xl font-semibold mb-2">Manage Categories</h2>
-          <p className="text-sm text-gray-600">Create, update, or delete categories</p>
+          <div className="flex flex-col items-center justify-center">
+            <FolderCog className="w-8 h-8 text-blue-600 mb-2" />
+            <h2 className="text-xl font-semibold mb-1">Manage Categories</h2>
+            <p className="text-sm text-gray-600">Create, update, or delete categories</p>
+          </div>
         </Link>
 
         <Link
           to="/admin/items"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition text-center"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <h2 className="text-xl font-semibold mb-2">Manage Items</h2>
-          <p className="text-sm text-gray-600">Create, update, or delete items</p>
+          <div className="flex flex-col items-center justify-center">
+            <Boxes className="w-8 h-8 text-blue-600 mb-2" />
+            <h2 className="text-xl font-semibold mb-1">Manage Items</h2>
+            <p className="text-sm text-gray-600">Create, update, or delete items</p>
+          </div>
         </Link>
 
         <Link
           to="/admin/tags"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition text-center"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <h2 className="text-xl font-semibold mb-2">Manage Tags</h2>
-          <p className="text-sm text-gray-600">Create, update, or delete tags</p>
+          <div className="flex flex-col items-center justify-center">
+            <Tag className="w-8 h-8 text-blue-600 mb-2" />
+            <h2 className="text-xl font-semibold mb-1">Manage Tags</h2>
+            <p className="text-sm text-gray-600">Create, update, or delete tags</p>
+          </div>
         </Link>
       </div>
-    </div>
+    </section>
   );
 }
