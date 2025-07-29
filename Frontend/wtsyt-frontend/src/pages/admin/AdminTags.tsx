@@ -74,12 +74,21 @@ export default function AdminTags() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl">
-      <h1 className="text-2xl font-bold mb-6">Manage Tags</h1>
+    <section
+      aria-labelledby="manage-tags-heading"
+      className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl"
+    >
+      <h1 id="manage-tags-heading" className="text-2xl font-bold mb-6">
+        Manage Tags
+      </h1>
 
       <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
         <div>
+          <label htmlFor="tagName" className="block text-sm font-medium text-gray-700 mb-1">
+            Tag name
+          </label>
           <input
+            id="tagName"
             type="text"
             placeholder="Tag Name"
             className="w-full px-4 py-2 border rounded"
@@ -87,25 +96,28 @@ export default function AdminTags() {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-        >
-          {editingId ? "Update Tag" : "Add Tag"}
-        </button>
-        {editingId && (
+        <div className="flex items-center gap-4">
           <button
-            type="button"
-            className="ml-4 text-sm text-gray-500 underline"
-            onClick={() => {
-              setEditingId(null);
-              setName("");
-              setError("");
-            }}
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
           >
-            Cancel
+            {editingId ? "Update Tag" : "Add Tag"}
           </button>
-        )}
+
+          {editingId && (
+            <button
+              type="button"
+              className="text-gray-500 text-sm underline hover:text-gray-700 transition"
+              onClick={() => {
+                setEditingId(null);
+                setName("");
+                setError("");
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
@@ -114,23 +126,26 @@ export default function AdminTags() {
       ) : tags.length === 0 ? (
         <p className="text-gray-600">No tags found</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-6">
           {tags.map((tag) => (
             <li
               key={tag.id}
-              className="flex justify-between items-center border p-4 rounded"
+              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
             >
-              <span>{tag.name}</span>
-              <div className="space-x-2">
+              <span className="text-lg font-medium text-gray-900">{tag.name}</span>
+
+              <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col gap-2 items-center">
                 <button
                   onClick={() => handleEdit(tag)}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
+                  aria-label={`Edit ${tag.name}`}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(tag.id)}
-                  className="text-red-600 hover:underline"
+                  className="text-red-600 hover:underline font-medium"
+                  aria-label={`Delete ${tag.name}`}
                 >
                   Delete
                 </button>
@@ -139,6 +154,6 @@ export default function AdminTags() {
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

@@ -147,34 +147,57 @@ export default function AdminItems() {
       <h1 className="text-2xl font-bold mb-6">Manage Items</h1>
 
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 mb-8">
-        <input
-          name="title"
-          type="text"
-          placeholder="Title"
-          className="w-full px-4 py-2 border rounded"
-          value={form.title}
-          onChange={handleChange}
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          className="w-full px-4 py-2 border rounded"
-          value={form.description}
-          onChange={handleChange}
-        />
-        <select
-          name="categoryId"
-          className="w-full px-4 py-2 border rounded"
-          value={form.categoryId}
-          onChange={handleChange}
-        >
-          <option value={0}>Select a category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+        {error && (
+          <p className="text-red-500 text-sm">
+            {error}
+            </p>
+        )}
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+            Title
+          </label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            placeholder="Title"
+            className="w-full px-4 py-2 border rounded"
+            value={form.title}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Description"
+            className="w-full px-4 py-2 border rounded"
+            value={form.description}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+            Category
+          </label>
+          <select
+            id="categoryId"
+            name="categoryId"
+            className="w-full px-4 py-2 border rounded"
+            value={form.categoryId}
+            onChange={handleChange}
+          >
+            <option value={0}>Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <button
           type="submit"
@@ -186,22 +209,29 @@ export default function AdminItems() {
         {editingId && (
           <div className="mt-6 space-y-4">
             <button
+              type="button"
               onClick={() => handleDelete(editingId)}
               className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
             >
               Delete item
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-              <input
-                type="text"
-                placeholder="Enter tag"
-                className="flex-1 px-4 py-2 border rounded shadow-sm"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-              />
+              <div>
+                <label htmlFor="tag" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tag
+                </label>
+                <input
+                  id="tag"
+                  type="text"
+                  placeholder="Enter tag"
+                  className="flex-1 px-4 py-2 border rounded shadow-sm"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                />
+              </div>
               <button
                 type="button"
-                className="mt-2 sm:mt-0 px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                className="mt-6 px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
                 onClick={handleAddTag}
               >
                 Add Tag
@@ -240,7 +270,6 @@ export default function AdminItems() {
             </div>
           </div>
         )}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
       {loading ? (
@@ -252,20 +281,22 @@ export default function AdminItems() {
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex justify-between items-center border p-4 rounded"
+              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
             >
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-600 break-words whitespace-pre-wrap max-w-2xl">{item.description}</p>
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold text-lg">{item.title}</h3>
+                <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-3xl line-clamp-3">{item.description}</p>
                 <p className="text-sm text-gray-500">
-                  Category: {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
+                  <span className="font-medium">Category:</span>{" "}
+                  {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
                 </p>
+
                 {item.tags && item.tags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {item.tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="bg-gray-200 px-3 py-1 rounded text-sm text-gray-300"
+                        className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
                       >
                         {tag.name}
                       </span>
@@ -273,16 +304,19 @@ export default function AdminItems() {
                   </div>
                 )}
               </div>
-              <div className="space-x-2">
+
+              <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col gap-3 items-center">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
+                  aria-label={`Edit ${item.title}`}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="text-red-600 hover:underline"
+                  className="text-red-600 hover:underline font-medium"
+                  aria-label={`Delete ${item.title}`}
                 >
                   Delete
                 </button>
