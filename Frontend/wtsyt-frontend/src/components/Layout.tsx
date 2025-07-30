@@ -6,11 +6,19 @@ export default function Layout() {
 
   const hideBackButton = ["/", "/login", "/register"].includes(location.pathname);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="relative px-4 py-6">
       {!hideBackButton && (
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="absolute top-0 left-0 mt-1 ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition z-10"
         >
           ← Back

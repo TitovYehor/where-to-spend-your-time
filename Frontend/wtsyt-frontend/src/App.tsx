@@ -9,7 +9,6 @@ import Items from './pages/Items.tsx';
 import ItemDetails from './pages/ItemDetails.tsx';
 import ReviewDetails from './pages/ReviewDetails.tsx';
 import Categories from './pages/Categories.tsx';
-import CategoryDetails from './pages/CategoryDetails.tsx';
 import Stats from './pages/Stats.tsx';
 import Header from './components/Header.tsx';
 import RequireAdmin from './components/RequireAdmin.tsx';
@@ -39,7 +38,6 @@ export default function App() {
           <Route path="/items/:id" element={ <ItemDetails/> } />
           <Route path="/reviews/:reviewId" element={ <ReviewDetails/> } />
           <Route path="/categories" element={ <Categories/>} />
-          <Route path="/categories/:categoryId" element={ <CategoryDetails/> } />
           <Route path="/stats" element={ <Stats/> } />
         </Route>
       </Routes>
