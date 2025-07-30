@@ -35,8 +35,13 @@ export default function Categories() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
-      <h1 className="text-2xl font-bold mb-4">Categories</h1>
+    <section
+      aria-labelledby="categories-heading"
+      className="max-w-4xl mx-auto px-4 py-6"
+    >
+      <h1 id="categories-heading" className="text-2xl font-bold mb-4">
+        Categories
+      </h1>
 
       {loading ? (
         <p className="text-center mt-10">Loading...</p>
@@ -44,31 +49,37 @@ export default function Categories() {
         <p className="text-center text-red-500 mt-10">{error}</p>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="Search categories..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border px-3 py-2 rounded mb-6"
-          />
+          <div>
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+              Search
+            </label>
+            <input
+              id="search"
+              type="text"
+              placeholder="Search categories..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
           {filteredCategories.length === 0 ? (
             <p className="text-center mt-10 text-gray-500">No categories match your search</p>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {filteredCategories.map(cat => (
                 <Link
                   key={cat.id}
                   to={`/?categoryId=${cat.id}`}
-                  className="bg-white rounded-xl shadow p-4 hover:shadow-md transition"
+                  className="bg-white rounded-xl shadow p-4 hover:shadow-md transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <h3 className="text-lg font-semibold">{cat.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">{cat.name}</h3>
                 </Link>
               ))}
             </div>
           )}
         </>
       )}
-    </div>
+    </section>
   );
 }

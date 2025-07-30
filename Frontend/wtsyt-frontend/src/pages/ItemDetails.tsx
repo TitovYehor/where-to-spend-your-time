@@ -103,84 +103,115 @@ export default function ItemDetails() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-2">Title: {item.title}</h1>
-      <p className="text-gray-700 mb-6">Description: {item.description}</p>
-      <p className="text-gray-700 mb-6">Category: {item.categoryName}</p>
-      <p className="text-gray-700 mb-6">Average rating: {item.averageRating}</p>
+      <article className="mb-10">
+        <h1 className="text-3xl font-bold mb-2">Title: {item.title}</h1>
+        <p className="text-gray-700 mb-2">Description: {item.description}</p>
+        <p className="text-gray-700 mb-2">Category: {item.categoryName}</p>
+        <p className="text-yellow-600 font-medium">Average rating: {item.averageRating}</p>
+      </article>
 
-      <h2 className="text-xl font-semibold mb-4">Reviews</h2>
-      {reviews.length === 0 ? (
-        <p className="text-gray-500 mb-6">No reviews yet</p>
-      ) : (
-        <ul className="space-y-4 mb-6">
-          {reviews.map((review) => (
-            <li key={review.id}>
-              <Link 
-                to={`/reviews/${review.id}`}
-                className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold">{review.title}</h3>
-                <p className="text-sm text-gray-600">Content: {review.content}</p>
-                <p className="text-yellow-500">Rating: {review.rating}/5</p>
-                <p className="text-sm text-gray-500">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+        {reviews.length === 0 ? (
+          <p className="text-gray-500">No reviews yet</p>
+        ) : (
+          <ul className="space-y-4">
+            {reviews.map((review) => (
+              <li key={review.id}>
+                <Link 
+                  to={`/reviews/${review.id}`}
+                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+                >
+                  <h3 className="text-lg font-semibold mb-1">{review.title}</h3>
+                  <p className="text-sm text-gray-700 mb-1">Content: {review.content}</p>
+                  <p className="text-yellow-500 font-medium mb-1">Rating: {review.rating}/5</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {user && (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <section className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-bold mb-4">
             {myReview ? "Edit your review" : "Write a review"}
           </h3>
+
           {error && <p className="text-red-500 mb-2">{error}</p>}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input type="hidden" value={item.id} readOnly />
-            <input
-              type="text"
-              placeholder="Title"
-              className="w-full border rounded px-3 py-2"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-            <textarea
-              placeholder="Content"
-              className="w-full border rounded px-3 py-2"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-            />
-            <input
-              type="number"
-              min="1"
-              max="5"
-              className="w-full border rounded px-3 py-2"
-              placeholder="Rating (1-5)"
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              required
-            />
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700"
-            >
-              {myReview ? "Update Review" : "Submit Review"}
-            </button>
-            {myReview && (
+
+            <div>
+              <label htmlFor="review-title" className="block text-sm font-medium text-gray-700 mb-1">
+                Title
+              </label>
+              <input
+                id="review-title"
+                type="text"
+                placeholder="Title"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="review-content" className="block text-sm font-medium text-gray-700 mb-1">
+                Content
+              </label>
+              <textarea
+                id="review-content"
+                placeholder="Write your review..."
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="review-rating" className="block text-sm font-medium text-gray-700 mb-1">
+                Rating
+              </label>
+              <input
+                id="review-rating"
+                type="number"
+                min="1"
+                max="5"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Rating (1-5)"
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+                required
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-4 mt-2">
               <button
-                type="button"
-                className="ml-4 text-red-600 hover:underline"
-                onClick={handleDelete}
+                type="submit"
+                className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition"
               >
-                Delete Review
+                {myReview ? "Update Review" : "Submit Review"}
               </button>
-            )}
+              
+              {myReview && (
+                <button
+                  type="button"
+                  className="text-red-600 text-sm hover:underline"
+                  onClick={handleDelete}
+                >
+                  Delete Review
+                </button>
+              )}
+            </div>
           </form>
-        </div>
+        </section>
       )}
     </div>
   );
