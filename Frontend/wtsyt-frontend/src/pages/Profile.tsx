@@ -101,7 +101,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
       <div className="mb-8 bg-white shadow rounded-2xl p-6 space-y-3">
@@ -109,109 +109,131 @@ const Profile = () => {
         <p><strong>Email:</strong> {user?.email ?? "Not available"}</p>
       </div>
 
-      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-3">
+      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
         <h2 className="text-xl font-semibold">Edit Profile</h2>
 
-        {successMessage && <p className="text-green-600">{successMessage}</p>}
+        {successMessage && (
+          <p className="text-green-600">
+            {successMessage}
+          </p>
+        )}
         {errorMessages.length > 0 && (
           <ul className="mb-4 text-red-500 text-sm list-disc list-inside">
-              {errorMessages.map((msg, i) => (
-              <li key={i}>{msg}</li>
-              ))}
+            {errorMessages.map((msg, i) => (
+            <li key={i}>{msg}</li>
+            ))}
           </ul>
         )}
 
-        <div className="space-y-3">
-            <label className="block">Display Name</label>
+        <div className="space-y-6">
+          <div className="space-y-2 border-b pb-4">
+            <label htmlFor="displayName" className="block font-medium">
+              Display Name
+            </label>
             <input
-                value={newDisplayName}
-                onChange={(e) => {
-                  setNewDisplayName(e.target.value)
-                  setSuccessMessage("");
-                }}
-                className="w-full border rounded-lg px-4 py-2"
+              id="displayName"
+              value={newDisplayName}
+              onChange={(e) => {
+                setNewDisplayName(e.target.value)
+                setSuccessMessage("");
+              }}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+
             <button
-                onClick={handleProfileUpdate}
-                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              onClick={handleProfileUpdate}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
-                Save Display Name
+              Save Display Name
             </button>
-        </div>
+          </div>
         
-        <div className="space-y-3">
-            <label className="block mb-1">Current Password</label>
+          <div className="space-y-2">
+            <label htmlFor="currentPassword" className="block font-medium">
+              Current Password
+            </label>
             <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => {
-                  setCurrentPassword(e.target.value)
-                  setSuccessMessage("");
-                }}
-                className="w-full border rounded-lg px-4 py-2"
+              id="currentPassword"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => {
+                setCurrentPassword(e.target.value)
+                setSuccessMessage("");
+              }}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
-            <label className="block mt-4 mb-1">New Password</label>
+
+            <label htmlFor="newPassword" className="block font-medium mt-3">
+              New Password
+            </label>
             <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value)
-                  setSuccessMessage("");
-                }}
-                className="w-full border rounded-lg px-4 py-2"
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => {
+                setNewPassword(e.target.value)
+                setSuccessMessage("");
+              }}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+
             <button
-                onClick={handlePasswordChange}
-                className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              onClick={handlePasswordChange}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
-                Change Password
+              Change Password
             </button>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-10 bg-white p-6 rounded-2xl shadow space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Reviews</h2>
+
         {reviews.length === 0 ? (
           <p className="text-gray-600">You haven't written any reviews yet</p>
         ) : (
-          <ul className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {reviews.map((review) => (
-              <li key={review.id}>
-                <Link
-                  to={`/reviews/${review.id}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                >
-                  <h3 className="text-lg font-semibold">{review.title}</h3>
-                  <p className="text-sm text-gray-600">Content: {review.content}</p>
-                  <p className="text-yellow-500">Rating: {review.rating}/5</p>
-                  <p className="text-sm text-gray-500">
+              <Link
+                to={`/reviews/${review.id}`}
+                key={review.id}
+                className="block border border-gray-200 rounded-xl p-4 hover:shadow-lg transition bg-white"
+              >
+                <h3 className="text-lg font-semibold mb-1 truncate">{review.title}</h3>
+                <p className="text-gray-600 text-sm line-clamp-3">Content: {review.content}</p>
+                <p className="mt-2 flex items-center justify-between text-sm text-gray-500">
+                  <span className="text-yellow-500 font-medium">
+                    Rating: {review.rating}/5
+                  </span>
+                  <span>
                     {new Date(review.createdAt).toLocaleDateString()}
-                  </p>
-                </Link>
-              </li>
+                  </span>
+                </p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </div>
 
-      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-10 bg-white p-6 rounded-2xl shadow space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Comments</h2>
+
         {comments.length === 0 ? (
           <p className="text-gray-600">You haven't written any comments yet</p>
         ) : (
-          <ul className="space-y-4">
+          <div className="space-y-4">
             {comments.map((comment) => (
-              <li key={comment.id}>
-                <Link
-                  to={`/reviews/${comment.reviewId}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                >
-                  <p className="text-gray-800">{comment.content}</p>
-                  <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</p>
-                </Link>
-              </li>
+              <Link
+                to={`/reviews/${comment.reviewId}`}
+                key={comment.id}
+                className="block border border-gray-200 rounded-xl p-4 hover:shadow-md transition bg-white"
+              >
+                <p className="text-gray-800 text-sm line-clamp-3 mb-2">{comment.content}</p>
+                <p className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>
