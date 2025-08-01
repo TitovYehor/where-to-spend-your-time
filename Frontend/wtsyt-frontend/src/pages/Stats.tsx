@@ -23,99 +23,99 @@ export default function Stats() {
     fetchData();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (!stats) return <p className="text-center mt-10">No statistic formed</p>;
+  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
+  if (!stats) return <p className="text-center mt-10 text-gray-500">No statistics available</p>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-4">Platform Statistics</h1>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-center">Platform Statistics</h1>
 
-      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Top Rated Items</h2>
+      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-2xl font-semibold mb-4">Top Rated Items</h2>
+
         {stats.topRatedItems.length === 0 ? (
-          <p className="text-gray-500">No top rated items yet.</p>
+          <p className="text-gray-500 italic">No top rated items yet</p>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.topRatedItems.map((item) => (
-              <li key={item.id}>
-                <Link
-                  to={`/items/${item.id}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                >
-                  <h3 className="text-lg font-semibold">{item.title}</h3>
-                  <p className="text-sm text-gray-600">Category: {item.category}</p>
-                  <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
-                </Link>
-              </li>
+              <Link
+                to={`/items/${item.id}`}
+                key={item.id}
+                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-500">Category: {item.category}</p>
+                <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
-      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Most Reviewed Items</h2>
+      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-2xl font-semibold mb-4">Most Reviewed Items</h2>
         {stats.mostReviewedItems.length === 0 ? (
-          <p className="text-gray-500">No most reviewed items yet.</p>
+          <p className="text-gray-500 italic">No most reviewed items yet</p>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.mostReviewedItems.map((item) => (
-              <li key={item.id}>
-                <Link 
-                  to={`/items/${item.id}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                >
-                  <h3 className="text-lg font-semibold">{item.title}</h3>
-                  <p className="text-sm text-gray-600">Category: {item.category}</p>
-                  <p className="text-yellow-500">Rating: {item.averageRating}/5</p>
-                </Link>
-              </li>
+              <Link 
+                to={`/items/${item.id}`}
+                key={item.id}
+                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-500">Category: {item.category}</p>
+                <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
-      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Top Reviewers</h2>
+      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-2xl font-semibold mb-4">Top Reviewers</h2>
         {stats.topReviewers.length === 0 ? (
-          <p className="text-gray-500">No top reviewers yet.</p>
+          <p className="text-gray-500 italic">No top reviewers yet</p>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.topReviewers.map((user) => (
-              <li key={user.userId}>
                 <Link 
                   to={`/users/${user.userId}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+                  key={user.userId}
+                  className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
                 >
-                  <h2 className="text-lg font-semibold">{user.displayName} - {user.reviewCount} reviews</h2>
+                  <h3 className="text-lg font-semibold">
+                    {user.displayName}
+                  </h3>
+                  <p className="text-sm text-gray-500">{user.reviewCount} reviews</p>
                 </Link>
-              </li>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
-      <section className="mb-8 bg-white p-6 rounded-2xl shadow space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Recent Reviews</h2>
+      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-2xl font-semibold mb-4">Recent Reviews</h2>
         {stats.recentReviews.length === 0 ? (
-          <p className="text-gray-500">No recent reviews yet.</p>
+          <p className="text-gray-500 italic">No recent reviews yet</p>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.recentReviews.map((review) => (
-              <li key={review.id}>
-                <Link 
-                  to={`/reviews/${review.id}`}
-                  className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                >
-                  <h3 className="text-lg font-semibold">{review.title}</h3>
-                  <p className="text-sm text-gray-600">By {review.author}</p>
-                  <p className="text-yellow-500">Rating: {review.rating}/5</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </p>
-                </Link>
-              </li>
+              <Link 
+                to={`/reviews/${review.id}`}
+                key={review.id}
+                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{review.title}</h3>
+                <p className="text-sm text-gray-500">By {review.author}</p>
+                <p className="text-yellow-500 font-medium">Rating: {review.rating}/5</p>
+                <p className="text-xs text-gray-400">
+                  {new Date(review.createdAt).toLocaleDateString()}
+                </p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </div>

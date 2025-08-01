@@ -111,49 +111,75 @@ export default function ReviewDetails() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 bg-white rounded-xl shadow">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-md">
       {review ? (
         <>
-          <h2 className="text-2xl font-bold">{review.title}</h2>
-          <p className="text-gray-600 mb-1">By {review.author}</p>
-          <p className="text-yellow-500 mb-2">Rating: {review.rating}/5</p>
-          <p className="mb-4">{review.content}</p>
+          <header className="mb-4">
+            <h2 className="text-3xl font-bold mb-1">{review.title}</h2>
+            <p className=" text-sm text-gray-500">By {review.author}</p>
+            <p className="text-yellow-500 font-medium">Rating: {review.rating}/5</p>
+          </header>
           
+          <section className="mb-6">
+            <p className="text-gray-800">{review.content}</p>
+          </section>
+
           {isEditing ? (
-            <form onSubmit={handleEditSubmit} className="space-y-3 mt-4">
-              <input
-                type="text"
-                className="w-full border px-3 py-2 rounded"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                required
-              />
-              <textarea
-                className="w-full border px-3 py-2 rounded"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                required
-              />
-              <input
-                type="number"
-                min={1}
-                max={5}
-                className="w-full border px-3 py-2 rounded"
-                value={editRating}
-                onChange={(e) => setEditRating(Number(e.target.value))}
-                required
-              />
+            <form onSubmit={handleEditSubmit} className="space-y-3 mb-6">
+              <div>
+                <label htmlFor="editTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                  Edit title
+                </label>
+                <input
+                  id="editTitle"
+                  type="text"
+                  className="w-full border px-4 py-2 rounded-md"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="editContent" className="block text-sm font-medium text-gray-700 mb-1">
+                  Edit content
+                </label>
+                <textarea
+                  id="editContent"
+                  className="w-full border px-3 py-2 rounded"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="editRating" className="block text-sm font-medium text-gray-700 mb-1">
+                  Edit rating
+                </label>
+                <input
+                  id="editRating"
+                  type="number"
+                  min={1}
+                  max={5}
+                  className="w-full border px-3 py-2 rounded"
+                  value={editRating}
+                  onChange={(e) => setEditRating(Number(e.target.value))}
+                  required
+                />
+              </div>
+
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-4 py-1 rounded"
+                  className="bg-green-600 text-white px-4 py-2 rounded-md"
                 >
                   Save
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="bg-gray-300 text-black px-4 py-1 rounded"
+                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
                 >
                   Cancel
                 </button>
@@ -161,7 +187,7 @@ export default function ReviewDetails() {
             </form>
           ) : ( 
             (isAuthor || isAdmin) && (
-              <div className="space-x-2 mb-6">
+              <div className="flex gap-2 mb-6">
                 {isAuthor && (
                   <button
                     onClick={() => {
@@ -170,14 +196,14 @@ export default function ReviewDetails() {
                       setEditRating(review.rating);
                       setIsEditing(true);
                     }}
-                    className="bg-blue-600 text-white px-4 py-1 rounded"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
                   >
                     Edit
                   </button>
                 )}
                 <button
                   onClick={handleDeleteReview}
-                  className="bg-red-600 text-white px-4 py-1 rounded"
+                  className="bg-red-600 text-white px-4 py-2 rounded-md"
                 >
                   Delete
                 </button>
@@ -185,47 +211,67 @@ export default function ReviewDetails() {
             )
           )}
           
-          <h3 className="text-lg font-semibold mt-6">Comments</h3>
-          <ul className="space-y-2 mt-2">
-            {comments.map((c) => (
-              <li key={c.id} className="border p-2 rounded">
-                <p className="text-sm text-gray-600">
-                  {c.author} • {new Date(c.createdAt).toLocaleString()}
-                </p>
-                <p>{c.content}</p>
-                {(isAdmin || (c.author == user?.displayName)) && (
-                  <button
-                    onClick={() => handleDeleteComment(c.id, c.author)}
-                    className="bg-red-600 text-white px-4 py-1 rounded"
+          <section>
+            <h3 className="text-xl font-semibold mb-3">Comments</h3>
+            {comments.length === 0 ? (
+              <p className="text-sm text-gray-500 mb-4">No comments yet.</p>
+            ) : (
+              <ul className="space-y-4 mb-4">
+                {comments.map((c) => (
+                  <li 
+                    key={c.id} 
+                    className="border rounded-lg p-3 bg-gray-50 shadow-sm"
                   >
-                    Delete
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-sm text-gray-600">
+                        {c.author} • {new Date(c.createdAt).toLocaleString()}
+                      </p>
+                      {(isAdmin || c.author === user?.displayName) && (
+                        <button
+                          onClick={() => handleDeleteComment(c.id, c.author)}
+                          className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-gray-800">{c.content}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-          {user && (
-            <form onSubmit={handleAddComment} className="mt-4 space-y-2">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="w-full border rounded px-3 py-2"
-                placeholder="Write a comment..."
-                required
-              />
-              <button
-                type="submit"
-                className="bg-indigo-600 text-white px-4 py-1 rounded"
-              >
-                Add Comment
-              </button>
-              {error && <p className="text-red-500">{error}</p>}
-            </form>
-          )}
+            {user && (
+              <form onSubmit={handleAddComment} className="space-y-2">
+                <div>
+                  <label htmlFor="newComment" className="block text-sm font-medium text-gray-700 mb-1">
+                    New comment
+                  </label>
+                  <textarea
+                    id="newComment"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="w-full border px-4 py-2 rounded-md"
+                    placeholder="Write a comment..."
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md"
+                  >
+                    Add Comment
+                  </button>
+                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                </div>
+              </form>
+            )}
+          </section>
         </>
       ) : (
-        <p>Loading review...</p>
+        <p className="text-center text-gray-500">Loading review...</p>
       )}
     </div>
   );
