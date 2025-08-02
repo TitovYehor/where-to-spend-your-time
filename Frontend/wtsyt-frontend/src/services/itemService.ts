@@ -5,7 +5,7 @@ import type { Tag, TagRequest } from '../types/tag.ts';
 export const buildItemQuery = (params: {
   search?: string;
   categoryId?: number;
-  tagsIds?: number[];
+  tagsids?: number[];
   sortBy?: string;
   descending?: boolean;
   page?: number;
@@ -16,13 +16,13 @@ export const buildItemQuery = (params: {
   if (params.search) query.append("search", params.search);
   if (params.categoryId !== undefined) query.append("categoryId", params.categoryId.toString());
   
-  params.tagsIds?.forEach(id => query.append("tagsIds", id.toString()));
+  params.tagsids?.forEach(id => query.append("tagsids", id.toString()));
   
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.descending !== undefined) query.append("descending", params.descending.toString());
   if (params.page !== undefined) query.append("page", params.page.toString());
   if (params.pageSize !== undefined) query.append("pageSize", params.pageSize.toString());
-
+  
   return query.toString();
 };
 
