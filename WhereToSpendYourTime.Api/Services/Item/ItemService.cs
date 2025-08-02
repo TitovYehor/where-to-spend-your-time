@@ -39,9 +39,9 @@ public class ItemService : IItemService
 
         if (filter.TagsIds.Count > 0)
         {
-            query = query.Where(i => i.ItemTags.Any(it => filter.TagsIds.Contains(it.Tag.Id)));
+            query = query.Where(i => filter.TagsIds.All(tagId => i.ItemTags.Any(it => it.TagId == tagId)));
         }
-
+        
         var totalCount = await query.CountAsync();
 
         query = filter.SortBy?.ToLower() switch
