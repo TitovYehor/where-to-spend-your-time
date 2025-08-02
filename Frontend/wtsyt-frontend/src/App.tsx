@@ -5,7 +5,6 @@ import Register from './pages/Register.tsx';
 import Home from './pages/Home.tsx';
 import Profile from './pages/Profile.tsx';
 import PublicProfile from './pages/PublicProfilePage.tsx';
-import Items from './pages/Items.tsx';
 import ItemDetails from './pages/ItemDetails.tsx';
 import ReviewDetails from './pages/ReviewDetails.tsx';
 import Categories from './pages/Categories.tsx';
@@ -16,6 +15,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 import AdminCategories from './pages/admin/AdminCategories.tsx';
 import AdminItems from './pages/admin/AdminItems.tsx';
 import AdminTags from './pages/admin/AdminTags.tsx';
+import Tags from './pages/Tags.tsx';
 
 export default function App() {
   return (
@@ -34,10 +34,10 @@ export default function App() {
 
           <Route path="/profile" element={ <Profile/> } />
           <Route path="/users/:userId" element={ <PublicProfile/> } />
-          <Route path="/items" element={ <Items/> } />
           <Route path="/items/:id" element={ <ItemDetails/> } />
           <Route path="/reviews/:reviewId" element={ <ReviewDetails/> } />
           <Route path="/categories" element={ <Categories/>} />
+          <Route path="/tags" element={ <Tags/> } />
           <Route path="/stats" element={ <Stats/> } />
         </Route>
       </Routes>

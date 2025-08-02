@@ -6,8 +6,8 @@ export default function Header() {
   
   const navItems = [
     { label: 'Home', path: '/' },
-    { label: 'Items', path: '/items' },
     { label: 'Categories', path: '/categories' },
+    { label: 'Tags', path: '/tags' },
     { label: 'Stats', path: '/stats' },
     ...(user ? [{ label : 'Profile', path: '/profile' }] : []),
   ];
