@@ -104,10 +104,23 @@ export default function ItemDetails() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
       <article className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">Title: {item.title}</h1>
+        <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
         <p className="text-gray-700 mb-2">Description: {item.description}</p>
         <p className="text-gray-700 mb-2">Category: {item.categoryName}</p>
         <p className="text-yellow-600 font-medium">Average rating: {item.averageRating}</p>
+
+        {item.tags && item.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {item.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
       </article>
 
       <section className="mb-10">

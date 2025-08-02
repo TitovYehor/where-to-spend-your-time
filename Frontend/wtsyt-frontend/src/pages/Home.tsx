@@ -5,16 +5,27 @@ import type { Item } from "../types/item";
 import { getItems } from "../services/itemService";
 import { getCategories } from "../services/categoryService";
 import { handleApiError } from "../utils/handleApi";
+import type { Tag } from "../types/tag";
+import { getTags } from "../services/tagService";
+import Select from "react-select";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   
   const [searchParams] = useSearchParams();
+  
   const categoryIdParam = searchParams.get("categoryId");
+  const tagsidsParam = searchParams.getAll("tagsids");
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | undefined>(
-    categoryIdParam ? parseInt(categoryIdParam) : undefined);
+    categoryIdParam ? parseInt(categoryIdParam) : undefined
+  );
+  const [selectedTags, setSelectedTags] = useState<number[]>(
+    tagsidsParam.map((id) => parseInt(id))
+  );
+  
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const [descending, setDescending] = useState(true);
   const [page, setPage] = useState(1);
@@ -23,13 +34,20 @@ export default function Home() {
   const [totalCount, setTotalCount] = useState(0);
   const isLastPage = totalCount <= page * pageSize;
 
+  const tagOptions = tags.map(tag => ({
+    value: tag.id,
+    label: tag.name
+  }));
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("tags");
+        console.log(selectedTags[0]);
         const result = await getItems({
             search: search,
             categoryId: categoryId,
-            tagsids: [],
+            tagsids: selectedTags,
             sortBy: sortBy,
             descending: descending,
             page: page,
@@ -43,19 +61,22 @@ export default function Home() {
     };
 
     fetchData();
-  }, [search, categoryId, sortBy, descending, page]);
+  }, [search, categoryId, selectedTags, sortBy, descending, page]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchMeta = async () => {
       try {
-        const result = await getCategories();
-        setCategories(result);
+        const cats = await getCategories();
+        setCategories(cats);
+
+        const tags = await getTags();
+        setTags(tags);
       } catch (e) {
         handleApiError(e);
       }
     };
     
-    fetchCategories();
+    fetchMeta();
   }, []);
 
   return (
@@ -135,6 +156,19 @@ export default function Home() {
             {descending ? "Descending ↓" : "Ascending ↑"}
           </button>
         </div>
+
+        <Select
+          isMulti
+          options={tagOptions}
+          value={tagOptions.filter(opt => selectedTags.includes(opt.value))}
+          onChange={(selected) => {
+            setPage(1);
+            setSelectedTags(selected.map(opt => opt.value));
+          }}
+          placeholder="Select tags..."
+          className="w-full sm:w-64"
+          classNamePrefix="react-select"
+        />
       </div>
 
       {items.length === 0 ? (
@@ -151,6 +185,19 @@ export default function Home() {
                 <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
                 <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
                 <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
+
+                {item.tags && item.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Link>
             </li>
           ))}
