@@ -4,30 +4,38 @@ import { getCategories } from "../../services/categoryService";
 import type { Item, ItemCreateRequest } from "../../types/item";
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
+import type { Tag } from "../../types/tag";
+import { getTags } from "../../services/tagService";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<ItemCreateRequest>({
     title: "",
     description: "",
     categoryId: 0,
   });
+  
   const [tagInput, setTagInput] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+  
   const [error, setError] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
   const fetchItemsAndCategories = async () => {
     try {
-      const [itemList, categoryList] = await Promise.all([
+      const [itemList, categoryList, tagList] = await Promise.all([
         getItems({}),
         getCategories(),
+        getTags(),
       ]);
       setItems(itemList.items);
       setCategories(categoryList);
+      setTags(tagList);
     } catch (err) {
       handleApiError(err);
       setError("Failed to fetch data");
@@ -152,6 +160,7 @@ export default function AdminItems() {
             {error}
             </p>
         )}
+
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Title
@@ -166,6 +175,7 @@ export default function AdminItems() {
             onChange={handleChange}
           />
         </div>
+        
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
             Description
@@ -179,6 +189,7 @@ export default function AdminItems() {
             onChange={handleChange}
           />
         </div>
+        
         <div>
           <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
             Category
@@ -216,19 +227,27 @@ export default function AdminItems() {
               Delete item
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+              
               <div>
-                <label htmlFor="tag" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="tagsList" className="block text-sm font-medium text-gray-700 mb-1">
                   Tag
                 </label>
-                <input
-                  id="tag"
-                  type="text"
-                  placeholder="Enter tag"
-                  className="flex-1 px-4 py-2 border rounded shadow-sm"
+                <select
+                  id="tagsList"
+                  name="tagsSelector"
+                  className="w-full px-4 py-2 border rounded"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                />
+                >
+                  <option value={0}>Select a tag</option>
+                  {tags.map((t) => (
+                    <option key={t.id} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+
               <button
                 type="button"
                 className="mt-6 px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
