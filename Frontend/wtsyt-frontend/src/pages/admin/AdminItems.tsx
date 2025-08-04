@@ -19,6 +19,7 @@ export default function AdminItems() {
     categoryId: 0,
   });
   
+  const [search, setSearch] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   
@@ -149,6 +150,10 @@ export default function AdminItems() {
       setError("Failed to remove tag");
     }
   };
+
+  const filteredItems = items.filter(i =>
+    i.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow">
@@ -291,13 +296,27 @@ export default function AdminItems() {
         )}
       </form>
 
+      <div className="mb-3">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          Search
+        </label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search items..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       {loading ? (
         <p>Loading items...</p>
       ) : items.length === 0 ? (
         <p className="text-gray-600">No items found</p>
       ) : (
         <ul className="space-y-4">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <li
               key={item.id}
               className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"

@@ -5,9 +5,13 @@ import { handleApiError } from "../../utils/handleApi";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
+
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+  
   const [error, setError] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -44,6 +48,7 @@ export default function AdminCategories() {
       }
       setName("");
       fetchCategories();
+      setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to save category.");
@@ -67,11 +72,16 @@ export default function AdminCategories() {
     try {
       await deleteCategory(id);
       fetchCategories();
+      setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete category.");
     }
   };
+
+  const filteredCategories = categories.filter(cat =>
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl">
@@ -119,28 +129,42 @@ export default function AdminCategories() {
         )}
       </form>
 
+      <div className="mb-3">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          Search
+        </label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search categories..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       {loading ? (
         <p>Loading...</p>
       ) : categories.length === 0 ? (
         <p className="text-gray-600">No categories found.</p>
       ) : (
-        <ul className="space-y-4">
-          {categories.map((cat) => (
+        <ul className="space-y-6">
+          {filteredCategories.map((cat) => (
             <li
               key={cat.id}
-              className="flex justify-between items-center bg-gray-50 border rounded-xl px-4 py-3 shadow-sm"
+              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
             >
-              <span>{cat.name}</span>
-              <div className="space-x-2">
+              <span className="text-lg font-medium text-gray-900">{cat.name}</span>
+              <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col gap-2 items-center">
                 <button
                   onClick={() => handleEdit(cat)}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(cat.id)}
-                  className="text-red-600 hover:underline"
+                  className="text-red-600 hover:underline font-medium"
                 >
                   Delete
                 </button>

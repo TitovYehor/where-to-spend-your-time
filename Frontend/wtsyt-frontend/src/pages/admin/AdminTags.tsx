@@ -5,9 +5,13 @@ import { handleApiError } from "../../utils/handleApi";
 
 export default function AdminTags() {
   const [tags, setTags] = useState<Tag[]>([]);
+
   const [loading, setLoading] = useState(true);
+
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+
   const [error, setError] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -44,6 +48,7 @@ export default function AdminTags() {
       }
       setName("");
       fetchTags();
+      setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to save tag");
@@ -67,11 +72,16 @@ export default function AdminTags() {
     try {
       await deleteTag(id);
       fetchTags();
+      setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete tag");
     }
   };
+
+  const filteredtags = tags.filter(t =>
+    t.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <section
@@ -121,13 +131,27 @@ export default function AdminTags() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
+      <div className="mb-3">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          Search
+        </label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search tags..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       {loading ? (
         <p>Loading...</p>
       ) : tags.length === 0 ? (
         <p className="text-gray-600">No tags found</p>
       ) : (
         <ul className="space-y-6">
-          {tags.map((tag) => (
+          {filteredtags.map((tag) => (
             <li
               key={tag.id}
               className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
