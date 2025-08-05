@@ -19,7 +19,7 @@ export default function Layout() {
       {!hideBackButton && (
         <button
           onClick={handleBack}
-          className="absolute top-0 left-0 mt-1 ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition z-10"
+          className="absolute top-2 left-0 mt-1 ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition z-10"
         >
           ← Back
         </button>
