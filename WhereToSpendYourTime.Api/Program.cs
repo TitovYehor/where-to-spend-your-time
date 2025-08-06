@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Handlers;
 using WhereToSpendYourTime.Api.Services.Auth;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Api.Services.Comment;
@@ -56,8 +57,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseRouting();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
