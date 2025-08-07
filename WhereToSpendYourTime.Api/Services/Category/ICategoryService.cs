@@ -11,7 +11,7 @@ public interface ICategoryService
 
     Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId);
     
-    Task<CategoryDto> CreateCategoryAsync(CategoryCreateRequest request);
+    Task<CategoryDto?> CreateCategoryAsync(CategoryCreateRequest request);
     
     Task<bool> UpdateCategoryAsync(int id, CategoryUpdateRequest request);
     
