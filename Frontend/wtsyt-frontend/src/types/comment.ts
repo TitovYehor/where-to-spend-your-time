@@ -3,13 +3,14 @@ export type Comment = {
   content: string;
   createdAt: string;
   author: string;
+  userId: string;
   reviewId: number;
 };
 
 export type CommentCreateRequest = {
-    content: string;
+  content: string;
 };
 
 export type CommentUpdateRequest = {
-    content: string;
+  content: string;
 };

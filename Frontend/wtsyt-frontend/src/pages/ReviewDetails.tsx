@@ -231,8 +231,14 @@ export default function ReviewDetails() {
                     className="border rounded-lg p-3 bg-gray-50 shadow-sm"
                   >
                     <div className="flex justify-between items-center mb-1">
-                      <p className="text-sm text-gray-600">
-                        {c.author} • {new Date(c.createdAt).toLocaleString()}
+                      <p className="text-sm text-gray-600 flex items-center gap-1"> 
+                        <Link 
+                          to={`/users/${c.userId}`} 
+                          className="text-blue-600 hover:underline"
+                        >
+                          {c.author}
+                        </Link>
+                        <span>• {new Date(c.createdAt).toLocaleString()}</span>
                       </p>
                       {(isAdmin || c.author === user?.displayName) && (
                         <button
