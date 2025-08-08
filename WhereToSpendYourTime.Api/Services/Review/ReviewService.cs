@@ -42,6 +42,7 @@ public class ReviewService : IReviewService
         var review = await _db.Reviews
             .Include(r => r.User)
             .Include(r => r.Comments)
+                .ThenInclude(c => c.User)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (review == null)
