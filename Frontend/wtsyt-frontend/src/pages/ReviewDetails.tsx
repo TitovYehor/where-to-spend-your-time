@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
@@ -116,7 +116,15 @@ export default function ReviewDetails() {
         <>
           <header className="mb-4">
             <h2 className="text-3xl font-bold mb-1">{review.title}</h2>
-            <p className=" text-sm text-gray-500">By {review.author}</p>
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <span>By</span> 
+              <Link 
+                to={`/users/${review.userId}`} 
+                className="text-blue-600 hover:underline"
+              >
+                {review.author}
+              </Link>
+            </p>
             <p className="text-yellow-500 font-medium">Rating: {review.rating}/5</p>
           </header>
           
