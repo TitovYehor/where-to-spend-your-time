@@ -5,6 +5,7 @@ export type Review = {
   rating: number;
   createdAt: string;
   author: string;
+  userId: string;
 };
 
 export type ReviewCreateRequest = {
