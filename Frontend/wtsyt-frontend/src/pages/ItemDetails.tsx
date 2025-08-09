@@ -112,12 +112,13 @@ export default function ItemDetails() {
         {item.tags && item.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {item.tags.map((tag) => (
-              <span
+              <Link
                 key={tag.id}
+                to={`/?tagsids=${tag.id}`}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
               >
                 {tag.name}
-              </span>
+              </Link>
             ))}
           </div>
         )}
