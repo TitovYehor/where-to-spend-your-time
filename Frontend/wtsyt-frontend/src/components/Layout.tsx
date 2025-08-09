@@ -1,14 +1,22 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const hideBackButton = ["/", "/login", "/register"].includes(location.pathname);
+  const [canGoBack, setCanGoBack] = useState(false);
+
+  useEffect(() => {
+    const historyIndex = window.history.state?.idx ?? 0;
+    setCanGoBack(historyIndex > 0);
+  }, [location]);
+
+  const hideBackButton = !canGoBack || ["/login", "/register"].includes(location.pathname);
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
+    if (canGoBack) {
+      window.history.back();
     } else {
       navigate("/");
     }

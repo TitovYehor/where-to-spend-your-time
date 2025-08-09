@@ -24,9 +24,10 @@ export default function App() {
       <Routes>
         <Route path="/login" element={ <Login/> } />
         <Route path="/register" element={ <Register/> } />
-        <Route path="/" element={ <Home/> } />
         
         <Route element={ <Layout/> }>
+          <Route path="/" element={ <Home/> } />
+          
           <Route path="/admin" element={ <RequireAdmin><AdminDashboard/></RequireAdmin> } />
           <Route path="/admin/categories" element={ <RequireAdmin><AdminCategories/></RequireAdmin> } />
           <Route path="/admin/items" element={ <RequireAdmin><AdminItems/></RequireAdmin> } />
