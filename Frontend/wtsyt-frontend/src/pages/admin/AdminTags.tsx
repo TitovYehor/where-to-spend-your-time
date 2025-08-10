@@ -13,6 +13,7 @@ export default function AdminTags() {
   const [search, setSearch] = useState("");
 
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -43,8 +44,10 @@ export default function AdminTags() {
       if (editingId !== null) {
         await updateTag(editingId, { name });
         setEditingId(null);
+        setMessage("Tag updated");
       } else {
         await addTag({ name });
+        setMessage("Tag added");
       }
       setName("");
       fetchTags();
@@ -52,6 +55,7 @@ export default function AdminTags() {
     } catch (err) {
       handleApiError(err);
       setError("Failed to save tag");
+      setMessage("");
     }
   };
 
@@ -64,6 +68,7 @@ export default function AdminTags() {
     }, 0);
     
     setError("");
+    setMessage("");
   };
 
   const handleDelete = async (id: number) => {
@@ -73,9 +78,11 @@ export default function AdminTags() {
       await deleteTag(id);
       fetchTags();
       setError("");
+      setMessage("Tag deleted");
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete tag");
+      setMessage("");
     }
   };
 
@@ -91,6 +98,28 @@ export default function AdminTags() {
       <h1 id="manage-tags-heading" className="text-2xl font-bold mb-6">
         Manage Tags
       </h1>
+
+      {message && (
+        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{message}</span>
+          </div>
+          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
+            ✕
+          </button>
+        </div>
+      )}
 
       <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
         <div>
@@ -128,7 +157,6 @@ export default function AdminTags() {
             </button>
           )}
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
       </form>
 
       <div className="mb-3">

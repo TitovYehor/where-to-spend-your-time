@@ -13,6 +13,7 @@ export default function AdminCategories() {
   const [editingId, setEditingId] = useState<number | null>(null);
   
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -35,7 +36,7 @@ export default function AdminCategories() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim().length < 2) {
-      setError("Category name must be at least 2 characters.");
+      setError("Category name must be at least 2 characters");
       return;
     }
 
@@ -43,15 +44,18 @@ export default function AdminCategories() {
       if (editingId !== null) {
         await updateCategory(editingId, { name });
         setEditingId(null);
+        setMessage("Category updated");
       } else {
         await addCategory({ name });
+        setMessage("Category added");
       }
       setName("");
       fetchCategories();
       setError("");
     } catch (err) {
       handleApiError(err);
-      setError("Failed to save category.");
+      setError("Failed to save category");
+      setMessage("");
     }
   };
 
@@ -64,6 +68,7 @@ export default function AdminCategories() {
     }, 0);
     
     setError("");
+    setMessage("");
   };
 
   const handleDelete = async (id: number) => {
@@ -72,10 +77,12 @@ export default function AdminCategories() {
     try {
       await deleteCategory(id);
       fetchCategories();
+      setMessage("Category deleted");
       setError("");
     } catch (err) {
       handleApiError(err);
-      setError("Failed to delete category.");
+      setError("Failed to delete category");
+      setMessage("");
     }
   };
 
@@ -86,6 +93,28 @@ export default function AdminCategories() {
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl">
       <h1 className="text-2xl font-bold mb-6">Manage Categories</h1>
+
+      {message && (
+        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{message}</span>
+          </div>
+          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
+            ✕
+          </button>
+        </div>
+      )}
 
       <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
         <div>

@@ -24,6 +24,7 @@ export default function AdminItems() {
   const [editingId, setEditingId] = useState<number | null>(null);
   
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -67,16 +68,19 @@ export default function AdminItems() {
         setItems((prev) =>
           prev.map((i) => (i.id === editingId ? updatedItem : i))
         );
+        setMessage("Item updated");
       } else {
         const newItem = await addItem(form);
         setItems((prev) => [...prev, newItem]);
         setEditingId(newItem.id);
+        setMessage("Item added");
       }
 
       setError("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to save item");
+      setMessage("");
     }
   };
 
@@ -94,6 +98,7 @@ export default function AdminItems() {
     }, 0);
 
     setError("");
+    setMessage("");
   };
 
   const handleDelete = async (id: number) => {
@@ -104,9 +109,11 @@ export default function AdminItems() {
       setEditingId(null);
       setForm({ title: "", description: "", categoryId: 0 });
       setError("");
+      setMessage("Item deleted");
       fetchItemsAndCategories();
     } catch {
       setError("Failed to delete item");
+      setMessage("");
     }
   };
 
@@ -126,8 +133,10 @@ export default function AdminItems() {
 
       setTagInput("");
       setError("");
+      setMessage("Tag added");
     } catch {
       setError("Failed to add tag");
+      setMessage("");
     }
   };
 
@@ -146,8 +155,10 @@ export default function AdminItems() {
       );
 
       setError("");
+      setMessage("Tag removed");
     } catch {
       setError("Failed to remove tag");
+      setMessage("");
     }
   };
 
@@ -159,13 +170,29 @@ export default function AdminItems() {
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow">
       <h1 className="text-2xl font-bold mb-6">Manage Items</h1>
 
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 mb-8">
-        {error && (
-          <p className="text-red-500 text-sm">
-            {error}
-            </p>
-        )}
+      {message && (
+        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{message}</span>
+          </div>
+          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
+            ✕
+          </button>
+        </div>
+      )}
 
+      {error && (
+        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
+            ✕
+          </button>
+        </div>
+      )}
+
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Title
