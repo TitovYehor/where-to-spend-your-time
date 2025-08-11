@@ -137,6 +137,7 @@ export default function ItemDetails() {
                   className="block p-4 bg-white rounded shadow hover:shadow-md transition"
                 >
                   <h3 className="text-lg font-semibold mb-1">{review.title}</h3>
+                  <p className="text-sm text-gray-500 mb-1">By {review.author}</p>
                   <p className="text-sm text-gray-700 mb-1">Content: {review.content}</p>
                   <p className="text-yellow-500 font-medium mb-1">Rating: {review.rating}/5</p>
                   <p className="text-xs text-gray-500">
