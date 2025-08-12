@@ -14,21 +14,26 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   
+  const searchParam = searchParams.get("search") || "";
   const categoryIdParam = searchParams.get("categoryId");
   const tagsidsParam = searchParams.getAll("tagsids");
-  const [search, setSearch] = useState("");
+  const sortByParam = searchParams.get("sortBy");
+  const descendingParam = searchParams.get("descending");
+  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+
+  const [search, setSearch] = useState(searchParam);
   const [categoryId, setCategoryId] = useState<number | undefined>(
     categoryIdParam ? parseInt(categoryIdParam) : undefined
   );
   const [selectedTags, setSelectedTags] = useState<number[]>(
     tagsidsParam.map((id) => parseInt(id))
   );
+  const [sortBy, setSortBy] = useState<string | undefined>(sortByParam || undefined);
+  const [descending, setDescending] = useState(descendingParam !== "false");
   
-  const [sortBy, setSortBy] = useState<string | undefined>(undefined);
-  const [descending, setDescending] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(pageParam > 0 ? pageParam : 1);
   const [pageSize] = useState(5);
 
   const [totalCount, setTotalCount] = useState(0);
@@ -39,11 +44,19 @@ export default function Home() {
     label: tag.name
   }));
 
+  const updateParam = (key: string, value?: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value && value.trim() !== "") {
+      newParams.set(key, value);
+    } else {
+      newParams.delete(key);
+    }
+    setSearchParams(newParams);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("tags");
-        console.log(selectedTags[0]);
         const result = await getItems({
             search: search,
             categoryId: categoryId,
@@ -98,8 +111,10 @@ export default function Home() {
             placeholder="Search..."
             value={search}
             onChange={(e) => {
+              const val = e.target.value;
               setPage(1);
-              setSearch(e.target.value);
+              setSearch(val);
+              updateParam("search", val);
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -116,6 +131,7 @@ export default function Home() {
               const val = e.target.value;
               setPage(1);
               setCategoryId(val === "" ? undefined : parseInt(val));
+              updateParam("categoryId", val);
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -136,8 +152,10 @@ export default function Home() {
             id="sort"
             value={sortBy ?? ""}
             onChange={(e) => {
+              const val = e.target.value || undefined;
               setPage(1);
-              setSortBy(e.target.value || undefined);
+              setSortBy(val);
+              updateParam("sortBy", val ?? "");
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -150,7 +168,11 @@ export default function Home() {
         <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium text-transparent mb-1">Toggle</label>
           <button
-            onClick={() => setDescending((prev) => !prev)}
+            onClick={() => {
+              const newDescending = !descending;
+              setDescending(newDescending);
+              updateParam("descending", newDescending.toString());
+            }}
             className="px-4 py-2 border rounded-md bg-gray-100 hover:bg-gray-200 transition text-sm w-full sm:w-auto"
           >
             {descending ? "Descending ↓" : "Ascending ↑"}
@@ -162,8 +184,14 @@ export default function Home() {
           options={tagOptions}
           value={tagOptions.filter(opt => selectedTags.includes(opt.value))}
           onChange={(selected) => {
+            const ids = selected.map(opt => opt.value);
             setPage(1);
-            setSelectedTags(selected.map(opt => opt.value));
+            setSelectedTags(ids);
+
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete("tagsids");
+            ids.forEach(id => newParams.append("tagsids", id.toString()));
+            setSearchParams(newParams);
           }}
           placeholder="Select tags..."
           className="w-full sm:w-64"
@@ -207,7 +235,11 @@ export default function Home() {
       <div className="flex justify-center items-center gap-4 mt-6">
         <button
           disabled={page === 1}
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => {
+            const newPage = Math.max(page - 1, 1);
+            setPage(newPage);
+            updateParam("page", newPage.toString());
+          }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
           Previous
@@ -219,7 +251,11 @@ export default function Home() {
 
         <button
           disabled={isLastPage}
-          onClick={() => setPage((prev) => prev + 1)}
+          onClick={() => {
+            const newPage = page + 1;
+            setPage(newPage);
+            updateParam("page", newPage.toString());
+          }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
           Next
