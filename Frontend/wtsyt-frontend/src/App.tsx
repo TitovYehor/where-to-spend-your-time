@@ -16,15 +16,18 @@ import AdminCategories from './pages/admin/AdminCategories.tsx';
 import AdminItems from './pages/admin/AdminItems.tsx';
 import AdminTags from './pages/admin/AdminTags.tsx';
 import Tags from './pages/Tags.tsx';
+import GuestOnlyRoute from './components/GuestOnlyRoute.tsx';
 
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       <Header />
       <Routes>
-        <Route path="/login" element={ <Login/> } />
-        <Route path="/register" element={ <Register/> } />
-        
+        <Route element={ <GuestOnlyRoute/> }>
+          <Route path="/login" element={ <Login/> } />
+          <Route path="/register" element={ <Register/> } />
+        </Route>
+
         <Route element={ <Layout/> }>
           <Route path="/" element={ <Home/> } />
           
