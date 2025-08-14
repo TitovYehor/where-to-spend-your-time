@@ -124,6 +124,92 @@ public class UserServiceTests
         Assert.Null(result.Email);
     }
 
+    [Fact]
+    public async Task UpdateProfileAsync_ReturnsTrue_WhenUserExistsAndUpdateSucceeds()
+    {
+        var user = new ApplicationUser { Id = "user1", DisplayName = "Old Name" };
+        _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
+            .ReturnsAsync(user);
+        _userManagerMock.Setup(m => m.UpdateAsync(user))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var result = await _service.UpdateProfileAsync(user.Id, "New Name");
+
+        Assert.True(result);
+        Assert.Equal("New Name", user.DisplayName);
+        _userManagerMock.Verify(m => m.UpdateAsync(It.Is<ApplicationUser>(u => u.DisplayName == "New Name")), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateProfileAsync_ReturnsFalse_WhenUserNotFound()
+    {
+        _userManagerMock.Setup(m => m.FindByIdAsync("missing"))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        var result = await _service.UpdateProfileAsync("missing", "New Name");
+
+        Assert.False(result);
+        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<ApplicationUser>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateProfileAsync_ReturnsFalse_WhenUpdateFails()
+    {
+        var user = new ApplicationUser { Id = "user1", DisplayName = "Old Name" };
+        _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
+            .ReturnsAsync(user);
+        _userManagerMock.Setup(m => m.UpdateAsync(user))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Failed" }));
+
+        var result = await _service.UpdateProfileAsync(user.Id, "New Name");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_ReturnsTrue_WhenSuccess()
+    {
+        var user = new ApplicationUser { Id = "user1" };
+        _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
+            .ReturnsAsync(user);
+        _userManagerMock.Setup(m => m.ChangePasswordAsync(user, "old", "new"))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var (succeeded, errors) = await _service.ChangePasswordAsync(user.Id, "old", "new");
+
+        Assert.True(succeeded);
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_ReturnsFalse_WhenUserNotFound()
+    {
+        _userManagerMock.Setup(m => m.FindByIdAsync("missing"))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        var (succeeded, errors) = await _service.ChangePasswordAsync("missing", "old", "new");
+
+        Assert.False(succeeded);
+        Assert.Single(errors);
+        Assert.Equal("User not found", errors.First().Description);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_ReturnsFalse_WhenChangePasswordFails()
+    {
+        var user = new ApplicationUser { Id = "user1" };
+        _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
+            .ReturnsAsync(user);
+        _userManagerMock.Setup(m => m.ChangePasswordAsync(user, "old", "new"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Bad password" }));
+
+        var (succeeded, errors) = await _service.ChangePasswordAsync(user.Id, "old", "new");
+
+        Assert.False(succeeded);
+        Assert.Single(errors);
+        Assert.Equal("Bad password", errors.First().Description);
+    }
+
     private static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class
     {
         var store = new Mock<IUserStore<TUser>>();
