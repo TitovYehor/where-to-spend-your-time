@@ -95,7 +95,7 @@ public class ItemService : IItemService
         return dto;
     }
 
-    public async Task<TagDto?> AddTagForItem(int id, string tagName)
+    public async Task<TagDto?> AddTagForItemAsync(int id, string tagName)
     {
         var item = await _db.Items
             .Include(i => i.ItemTags)
@@ -140,7 +140,7 @@ public class ItemService : IItemService
         return tagDto;
     }
 
-    public async Task<bool> RemoveTagFromItem(int id, string tagName)
+    public async Task<bool> RemoveTagFromItemAsync(int id, string tagName)
     {
         var item = await _db.Items
             .Include(i => i.ItemTags)

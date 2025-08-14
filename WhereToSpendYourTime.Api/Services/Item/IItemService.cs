@@ -9,9 +9,9 @@ public interface IItemService
 
     Task<ItemDto?> GetByIdAsync(int id);
 
-    Task<TagDto?> AddTagForItem(int id, string tagName);
+    Task<TagDto?> AddTagForItemAsync(int id, string tagName);
 
-    Task<bool> RemoveTagFromItem(int id, string tagName);
+    Task<bool> RemoveTagFromItemAsync(int id, string tagName);
 
     Task<ItemDto?> CreateAsync(ItemCreateRequest request);
     
