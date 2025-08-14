@@ -53,6 +53,80 @@ public class ReviewServiceTests
     }
 
     [Fact]
+    public async Task GetMyReviewForItemAsync_ReturnsReview_WhenExists()
+    {
+        var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
+        var item = new Item { Title = "Item1" };
+        var review = new Review
+        {
+            Title = "My Review",
+            Content = "Content",
+            Rating = 5,
+            User = user,
+            Item = item
+        };
+
+        _db.Users.Add(user);
+        _db.Items.Add(item);
+        _db.Reviews.Add(review);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.GetMyReviewForItemAsync(user.Id, item.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal("My Review", result.Title);
+        Assert.Equal(5, result.Rating);
+    }
+
+    [Fact]
+    public async Task GetMyReviewForItemAsync_ReturnsNull_WhenNotFound()
+    {
+        var user = new ApplicationUser { Id = "user1" };
+        var item = new Item { Title = "Item1" };
+        _db.Users.Add(user);
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.GetMyReviewForItemAsync(user.Id, item.Id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsReview_WhenExists()
+    {
+        var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
+        var review = new Review
+        {
+            Title = "Review Title",
+            Content = "Some content",
+            Rating = 4,
+            User = user,
+            Comments = new List<Comment>
+            {
+                new Comment { Content = "Nice", User = user }
+            }
+        };
+
+        _db.Users.Add(user);
+        _db.Reviews.Add(review);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.GetByIdAsync(review.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal("Review Title", result.Title);
+        Assert.Equal(4, result.Rating);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    {
+        var result = await _service.GetByIdAsync(999);
+        Assert.Null(result);
+    }
+
+    [Fact]
     public async Task CreateReviewAsync_Success_WhenNoExistingReview()
     {
         var userId = "user1";

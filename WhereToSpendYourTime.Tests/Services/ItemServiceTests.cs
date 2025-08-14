@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Item;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -23,6 +24,7 @@ public class ItemServiceTests
         var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<Item, ItemDto>();
+            cfg.CreateMap<Tag, TagDto>();
         });
         _mapper = config.CreateMapper();
 
@@ -86,6 +88,117 @@ public class ItemServiceTests
     {
         var result = await _service.GetByIdAsync(999);
         Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task AddTagForItemAsync_AddsNewTag_WhenValid()
+    {
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.AddTagForItemAsync(item.Id, "NewTag");
+
+        Assert.NotNull(result);
+        Assert.Equal("NewTag", result!.Name);
+        Assert.Single(_db.Tags);
+        Assert.Single(_db.ItemTags);
+    }
+
+    [Fact]
+    public async Task AddTagForItemAsync_ReturnsNull_WhenItemNotFound()
+    {
+        var result = await _service.AddTagForItemAsync(999, "SomeTag");
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task AddTagForItemAsync_ReturnsNull_WhenTagNameEmpty()
+    {
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.AddTagForItemAsync(item.Id, "  ");
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task AddTagForItemAsync_ReturnsNull_WhenTagAlreadyExistsForItem()
+    {
+        var tag = new Tag { Name = "Existing" };
+        var item = new Item
+        {
+            Title = "TestItem",
+            ItemTags = new List<ItemTag> { new ItemTag { Tag = tag } }
+        };
+        _db.Items.Add(item);
+        _db.Tags.Add(tag);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.AddTagForItemAsync(item.Id, "Existing");
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_RemovesTag_WhenExists()
+    {
+        var tag = new Tag { Name = "Removable" };
+        var item = new Item
+        {
+            Title = "TestItem",
+            ItemTags = new List<ItemTag> { new ItemTag { Tag = tag } }
+        };
+        _db.Items.Add(item);
+        _db.Tags.Add(tag);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.RemoveTagFromItemAsync(item.Id, "Removable");
+
+        Assert.True(result);
+        Assert.Empty(item.ItemTags);
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenItemNotFound()
+    {
+        var result = await _service.RemoveTagFromItemAsync(999, "SomeTag");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagNameEmpty()
+    {
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.RemoveTagFromItemAsync(item.Id, "  ");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagDoesNotExist()
+    {
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.RemoveTagFromItemAsync(item.Id, "NoSuchTag");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagNotAssignedToItem()
+    {
+        var tag = new Tag { Name = "Unlinked" };
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        _db.Tags.Add(tag);
+        await _db.SaveChangesAsync();
+
+        var result = await _service.RemoveTagFromItemAsync(item.Id, "Unlinked");
+        Assert.False(result);
     }
 
     [Fact]
