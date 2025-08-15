@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
@@ -15,42 +15,34 @@ export default function Home() {
   const [tags, setTags] = useState<Tag[]>([]);
   
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  const searchParam = searchParams.get("search") || "";
-  const categoryIdParam = searchParams.get("categoryId");
-  const tagsidsParam = searchParams.getAll("tagsids");
-  const sortByParam = searchParams.get("sortBy");
-  const descendingParam = searchParams.get("descending");
-  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = 5;
 
-  const [search, setSearch] = useState(searchParam);
-  const [categoryId, setCategoryId] = useState<number | undefined>(
-    categoryIdParam ? parseInt(categoryIdParam) : undefined
-  );
-  const [selectedTags, setSelectedTags] = useState<number[]>(
-    tagsidsParam.map((id) => parseInt(id))
-  );
-  const [sortBy, setSortBy] = useState<string | undefined>(sortByParam || undefined);
-  const [descending, setDescending] = useState(descendingParam !== "false");
-  
-  const [page, setPage] = useState(pageParam > 0 ? pageParam : 1);
-  const [pageSize] = useState(5);
+  const filters = useMemo(() => {
+    const search = searchParams.get("search") || "";
+    const categoryId = searchParams.get("categoryId") ? parseInt(searchParams.get("categoryId")!) : undefined;
+    const selectedTags = searchParams.getAll("tagsids").map(id => parseInt(id));
+    const sortBy = searchParams.get("sortBy") || undefined;
+    const descending = searchParams.get("descending") !== "false";
+    const page = parseInt(searchParams.get("page") || "1", 10);
 
-  const [totalCount, setTotalCount] = useState(0);
-  const isLastPage = totalCount <= page * pageSize;
+    return { search, categoryId, selectedTags, sortBy, descending, page };
+  }, [searchParams]);
 
-  const tagOptions = tags.map(tag => ({
-    value: tag.id,
-    label: tag.name
-  }));
+  const totalCountRef = useRef(0);
+  const isLastPage = totalCountRef.current <= filters.page * pageSize;
 
-  const updateParam = (key: string, value?: string) => {
+  const tagOptions = tags.map(tag => ({ value: tag.id, label: tag.name }));
+
+  const updateSearchParams = (changes: Partial<Record<string, string | string[]>>) => {
     const newParams = new URLSearchParams(searchParams);
-    if (value && value.trim() !== "") {
-      newParams.set(key, value);
-    } else {
+    Object.entries(changes).forEach(([key, value]) => {
       newParams.delete(key);
-    }
+      if (Array.isArray(value)) {
+        value.forEach(v => newParams.append(key, v));
+      } else if (value) {
+        newParams.set(key, value);
+      }
+    });
     setSearchParams(newParams);
   };
 
@@ -58,23 +50,23 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const result = await getItems({
-            search: search,
-            categoryId: categoryId,
-            tagsids: selectedTags,
-            sortBy: sortBy,
-            descending: descending,
-            page: page,
+            search: filters.search,
+            categoryId: filters.categoryId,
+            tagsids: filters.selectedTags,
+            sortBy: filters.sortBy,
+            descending: filters.descending,
+            page: filters.page,
             pageSize: pageSize,
           });
         setItems(result.items);
-        setTotalCount(result.totalCount);
+        totalCountRef.current = result.totalCount;
       } catch (e) {
         handleApiError(e);
       }
     };
 
     fetchData();
-  }, [search, categoryId, selectedTags, sortBy, descending, page]);
+  }, [filters]);
 
   useEffect(() => {
     const fetchMeta = async () => {
@@ -92,12 +84,16 @@ export default function Home() {
     fetchMeta();
   }, []);
 
+  const searchValue = filters.search;
+  const categoryValue = filters.categoryId ?? "";
+  const sortValue = filters.sortBy ?? "";
+
   return (
     <section aria-labelledby="explore-heading" className="max-w-5xl mx-auto px-4 py-6">
       <h1 id="explore-heading" className="text-2xl font-bold mb-4">Explore Items</h1>
       
       <div className="mb-4 text-gray-700">
-        {totalCount} item{totalCount !== 1 ? "s" : ""} found
+        {totalCountRef.current} item{totalCountRef.current !== 1 ? "s" : ""} found
       </div>
       
       <div className="flex flex-wrap gap-4 mb-6 items-end">
@@ -109,12 +105,9 @@ export default function Home() {
             id="search"
             type="text"
             placeholder="Search..."
-            value={search}
+            value={searchValue}
             onChange={(e) => {
-              const val = e.target.value;
-              setPage(1);
-              setSearch(val);
-              updateParam("search", val);
+              updateSearchParams({ search: e.target.value, page: "1" })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -126,12 +119,9 @@ export default function Home() {
           </label>
           <select
             id="categoryId"
-            value={categoryId ?? ""}
+            value={categoryValue}
             onChange={(e) => {
-              const val = e.target.value;
-              setPage(1);
-              setCategoryId(val === "" ? undefined : parseInt(val));
-              updateParam("categoryId", val);
+              updateSearchParams({ categoryId: e.target.value, page: "1" })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -150,12 +140,9 @@ export default function Home() {
           </label>
           <select
             id="sort"
-            value={sortBy ?? ""}
+            value={sortValue}
             onChange={(e) => {
-              const val = e.target.value || undefined;
-              setPage(1);
-              setSortBy(val);
-              updateParam("sortBy", val ?? "");
+              updateSearchParams({ sortBy: e.target.value ?? "", page: "1" })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -169,30 +156,19 @@ export default function Home() {
           <label className="block text-sm font-medium text-transparent mb-1">Toggle</label>
           <button
             onClick={() => {
-              const newDescending = !descending;
-              setDescending(newDescending);
-              updateParam("descending", newDescending.toString());
+              updateSearchParams({ descending: (!filters.descending).toString(), page: "1" });
             }}
             className="px-4 py-2 border rounded-md bg-gray-100 hover:bg-gray-200 transition text-sm w-full sm:w-auto"
           >
-            {descending ? "Descending ↓" : "Ascending ↑"}
+            {filters.descending ? "Descending ↓" : "Ascending ↑"}
           </button>
         </div>
 
         <Select
           isMulti
           options={tagOptions}
-          value={tagOptions.filter(opt => selectedTags.includes(opt.value))}
-          onChange={(selected) => {
-            const ids = selected.map(opt => opt.value);
-            setPage(1);
-            setSelectedTags(ids);
-
-            const newParams = new URLSearchParams(searchParams);
-            newParams.delete("tagsids");
-            ids.forEach(id => newParams.append("tagsids", id.toString()));
-            setSearchParams(newParams);
-          }}
+          value={tagOptions.filter(opt => filters.selectedTags.includes(opt.value))}
+          onChange={selected => updateSearchParams({ tagsids: selected.map(s => s.value.toString()), page: "1" })}
           placeholder="Select tags..."
           className="w-full sm:w-64"
           classNamePrefix="react-select"
@@ -234,11 +210,9 @@ export default function Home() {
 
       <div className="flex justify-center items-center gap-4 mt-6">
         <button
-          disabled={page === 1}
+          disabled={filters.page === 1}
           onClick={() => {
-            const newPage = Math.max(page - 1, 1);
-            setPage(newPage);
-            updateParam("page", newPage.toString());
+            updateSearchParams({ page: (filters.page - 1).toString() })
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
@@ -246,15 +220,13 @@ export default function Home() {
         </button>
 
         <span className="text-sm text-gray-700">
-          Page {page} of {Math.ceil(totalCount / pageSize)}
+          Page {filters.page} of {Math.ceil(totalCountRef.current / pageSize)}
         </span>
 
         <button
           disabled={isLastPage}
           onClick={() => {
-            const newPage = page + 1;
-            setPage(newPage);
-            updateParam("page", newPage.toString());
+            updateSearchParams({ page: (filters.page + 1).toString() })
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
@@ -263,7 +235,7 @@ export default function Home() {
       </div>
 
       <p className="mt-4 text-sm text-gray-500 text-center">
-        Showing {Math.min((page - 1) * pageSize + 1, totalCount)}-{Math.min(page * pageSize, totalCount)} of {totalCount}
+        Showing {Math.min((filters.page - 1) * pageSize + 1, totalCountRef.current)}-{Math.min(filters.page * pageSize, totalCountRef.current)} of {totalCountRef.current}
       </p>
     </section>
   );
