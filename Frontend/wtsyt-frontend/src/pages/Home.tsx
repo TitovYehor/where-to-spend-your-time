@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
-import { getItems } from "../services/itemService";
+import { buildItemQuery, getItems } from "../services/itemService";
 import { getCategories } from "../services/categoryService";
 import { handleApiError } from "../utils/handleApi";
 import type { Tag } from "../types/tag";
@@ -16,48 +16,48 @@ export default function Home() {
   
   const [searchParams, setSearchParams] = useSearchParams();
   const pageSize = 5;
-
-  const filters = useMemo(() => {
-    const search = searchParams.get("search") || "";
-    const categoryId = searchParams.get("categoryId") ? parseInt(searchParams.get("categoryId")!) : undefined;
-    const selectedTags = searchParams.getAll("tagsids").map(id => parseInt(id));
-    const sortBy = searchParams.get("sortBy") || undefined;
-    const descending = searchParams.get("descending") !== "false";
-    const page = parseInt(searchParams.get("page") || "1", 10);
-
-    return { search, categoryId, selectedTags, sortBy, descending, page };
-  }, [searchParams]);
-
   const totalCountRef = useRef(0);
-  const isLastPage = totalCountRef.current <= filters.page * pageSize;
 
+  const [filters, setFilters] = useState({
+    search: searchParams.get("search") || "",
+    categoryId: searchParams.get("categoryId")
+      ? parseInt(searchParams.get("categoryId")!)
+      : undefined,
+    tagsids: searchParams.getAll("tagsids").map((id) => parseInt(id)),
+    sortBy: searchParams.get("sortBy") || "",
+    descending: searchParams.get("descending") !== "false",
+    page: parseInt(searchParams.get("page") || "1", 10),
+  });
+
+  const isLastPage = totalCountRef.current <= filters.page * pageSize;
+  
   const tagOptions = tags.map(tag => ({ value: tag.id, label: tag.name }));
 
-  const updateSearchParams = (changes: Partial<Record<string, string | string[]>>) => {
-    const newParams = new URLSearchParams(searchParams);
-    Object.entries(changes).forEach(([key, value]) => {
-      newParams.delete(key);
-      if (Array.isArray(value)) {
-        value.forEach(v => newParams.append(key, v));
-      } else if (value) {
-        newParams.set(key, value);
-      }
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get("search") || "",
+      categoryId: searchParams.get("categoryId")
+        ? parseInt(searchParams.get("categoryId")!)
+        : undefined,
+      tagsids: searchParams.getAll("tagsids").map((id) => parseInt(id)),
+      sortBy: searchParams.get("sortBy") || "",
+      descending: searchParams.get("descending") !== "false",
+      page: parseInt(searchParams.get("page") || "1", 10),
     });
-    setSearchParams(newParams);
+  }, [searchParams]);
+
+  const updateFilters = (changes: Partial<typeof filters>) => {
+    const newFilters = { ...filters, ...changes };
+    setFilters(newFilters);
+    setSearchParams(buildItemQuery({ ...newFilters, pageSize }), {
+      replace: false,
+    });
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await getItems({
-            search: filters.search,
-            categoryId: filters.categoryId,
-            tagsids: filters.selectedTags,
-            sortBy: filters.sortBy,
-            descending: filters.descending,
-            page: filters.page,
-            pageSize: pageSize,
-          });
+        const result = await getItems({ ...filters, pageSize });
         setItems(result.items);
         totalCountRef.current = result.totalCount;
       } catch (e) {
@@ -107,7 +107,7 @@ export default function Home() {
             placeholder="Search..."
             value={searchValue}
             onChange={(e) => {
-              updateSearchParams({ search: e.target.value, page: "1" })
+              updateFilters({ search: e.target.value, page: 1 })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -121,7 +121,11 @@ export default function Home() {
             id="categoryId"
             value={categoryValue}
             onChange={(e) => {
-              updateSearchParams({ categoryId: e.target.value, page: "1" })
+              updateFilters({ 
+                categoryId: e.target.value
+                  ? parseInt(e.target.value)
+                  : undefined,
+                page: 1 })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -142,7 +146,7 @@ export default function Home() {
             id="sort"
             value={sortValue}
             onChange={(e) => {
-              updateSearchParams({ sortBy: e.target.value ?? "", page: "1" })
+              updateFilters({ sortBy: e.target.value, page: 1 })
             }}
             className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -156,7 +160,7 @@ export default function Home() {
           <label className="block text-sm font-medium text-transparent mb-1">Toggle</label>
           <button
             onClick={() => {
-              updateSearchParams({ descending: (!filters.descending).toString(), page: "1" });
+              updateFilters({ descending: !filters.descending, page: 1 })
             }}
             className="px-4 py-2 border rounded-md bg-gray-100 hover:bg-gray-200 transition text-sm w-full sm:w-auto"
           >
@@ -167,8 +171,11 @@ export default function Home() {
         <Select
           isMulti
           options={tagOptions}
-          value={tagOptions.filter(opt => filters.selectedTags.includes(opt.value))}
-          onChange={selected => updateSearchParams({ tagsids: selected.map(s => s.value.toString()), page: "1" })}
+          value={tagOptions.filter(opt => filters.tagsids.includes(opt.value))}
+          onChange={selected => updateFilters({ 
+            tagsids: selected.map(s => s.value), 
+            page: 1 })
+          }
           placeholder="Select tags..."
           className="w-full sm:w-64"
           classNamePrefix="react-select"
@@ -212,7 +219,7 @@ export default function Home() {
         <button
           disabled={filters.page === 1}
           onClick={() => {
-            updateSearchParams({ page: (filters.page - 1).toString() })
+            updateFilters({ page: filters.page - 1 })
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
@@ -226,7 +233,7 @@ export default function Home() {
         <button
           disabled={isLastPage}
           onClick={() => {
-            updateSearchParams({ page: (filters.page + 1).toString() })
+            updateFilters({ page: filters.page + 1 })
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
