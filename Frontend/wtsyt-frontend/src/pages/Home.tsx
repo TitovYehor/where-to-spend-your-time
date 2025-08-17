@@ -31,6 +31,16 @@ export default function Home() {
 
   const isLastPage = totalCountRef.current <= filters.page * pageSize;
   
+  const categoryOptions = [
+    { value: 0, label: "All Categories" },
+    ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+  ];
+  const sortOptions = [
+    { value: "", label: "Default" },
+    { value: "title", label: "Title" },
+    { value: "rating", label: "Rating" },
+  ];
+
   const tagOptions = tags.map(tag => ({ value: tag.id, label: tag.name }));
 
   useEffect(() => {
@@ -85,8 +95,6 @@ export default function Home() {
   }, []);
 
   const searchValue = filters.search;
-  const categoryValue = filters.categoryId ?? "";
-  const sortValue = filters.sortBy ?? "";
 
   return (
     <section aria-labelledby="explore-heading" className="max-w-5xl mx-auto px-4 py-6">
@@ -97,89 +105,113 @@ export default function Home() {
       </div>
       
       <div className="flex flex-wrap gap-4 mb-6 items-end">
-        <div className="w-full sm:w-auto">
+        <div className="flex-1 min-w-[200px]">
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
             Search
           </label>
           <input
             id="search"
             type="text"
-            placeholder="Search..."
+            placeholder="Search items..."
             value={searchValue}
             onChange={(e) => {
-              updateFilters({ search: e.target.value, page: 1 })
+              updateFilters({ search: e.target.value, page: 1 });
             }}
-            className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 pr-10 shadow-sm 
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 
+                      transition"
           />
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="min-w-[180px] flex-1 sm:flex-none">
           <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
             Category
           </label>
-          <select
+          <Select
             id="categoryId"
-            value={categoryValue}
-            onChange={(e) => {
-              updateFilters({ 
-                categoryId: e.target.value
-                  ? parseInt(e.target.value)
-                  : undefined,
-                page: 1 })
-            }}
-            className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            options={categoryOptions}
+            value={
+              categoryOptions.find(
+                (opt) => opt.value === (filters.categoryId ?? 0)
+              ) || categoryOptions[0]
+            }
+            onChange={(option) =>
+              updateFilters({
+                categoryId:
+                  option && option.value !== 0 ? Number(option.value) : undefined,
+                page: 1,
+              })
+            }
+            classNamePrefix="react-select"
+          />
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="min-w-[160px] flex-1 sm:flex-none">
           <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">
             Sort by
           </label>
-          <select
+          <Select 
             id="sort"
-            value={sortValue}
-            onChange={(e) => {
-              updateFilters({ sortBy: e.target.value, page: 1 })
-            }}
-            className="border border-gray-300 px-4 py-2 rounded-md shadow-sm w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Sort by Default</option>
-            <option value="title">Title</option>
-            <option value="rating">Rating</option>
-          </select>
+            options={sortOptions}
+            value={
+              sortOptions.find((opt) => opt.value === filters.sortBy)
+            }
+            onChange={(option) => 
+              updateFilters({
+                sortBy: option?.value || "",
+                page: 1
+              }) 
+            }
+            classNamePrefix="react-select"
+          />
         </div>
 
-        <div className="w-full sm:w-auto">
-          <label className="block text-sm font-medium text-transparent mb-1">Toggle</label>
-          <button
-            onClick={() => {
-              updateFilters({ descending: !filters.descending, page: 1 })
-            }}
-            className="px-4 py-2 border rounded-md bg-gray-100 hover:bg-gray-200 transition text-sm w-full sm:w-auto"
-          >
-            {filters.descending ? "Descending ↓" : "Ascending ↑"}
-          </button>
+        <div className="min-w-[140px] flex-1 sm:flex-none">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Order
+          </label>
+          <div className="inline-flex w-full rounded-md shadow-sm border border-gray-300">
+            <button
+              onClick={() => updateFilters({ descending: false, page: 1 })}
+              className={`flex-1 px-3 py-2 text-sm rounded-l-md transition ${
+                !filters.descending
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              ↑ Asc
+            </button>
+            <button
+              onClick={() => updateFilters({ descending: true, page: 1 })}
+              className={`flex-1 px-3 py-2 text-sm rounded-r-md transition ${
+                filters.descending
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              ↓ Desc
+            </button>
+          </div>
         </div>
 
-        <Select
-          isMulti
-          options={tagOptions}
-          value={tagOptions.filter(opt => filters.tagsids.includes(opt.value))}
-          onChange={selected => updateFilters({ 
-            tagsids: selected.map(s => s.value), 
-            page: 1 })
-          }
-          placeholder="Select tags..."
-          className="w-full sm:w-64"
-          classNamePrefix="react-select"
-        />
+        <div className="min-w-[200px] flex-1 sm:flex-none">
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+            Tags
+          </label>
+          <Select
+            inputId="tags"
+            isMulti
+            options={tagOptions}
+            value={tagOptions.filter(opt => filters.tagsids.includes(opt.value))}
+            onChange={selected => updateFilters({ 
+              tagsids: selected.map(s => s.value), 
+              page: 1 })
+            }
+            placeholder="Select tags..."
+            className="w-full sm:w-64"
+            classNamePrefix="react-select"
+          />
+        </div>
       </div>
 
       {items.length === 0 ? (
