@@ -6,6 +6,7 @@ import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
 import type { Tag } from "../../types/tag";
 import { getTags } from "../../services/tagService";
+import Select from "react-select";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -23,6 +24,12 @@ export default function AdminItems() {
   const [tagInput, setTagInput] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   
+  const categoryOptions = categories.map((cat) => ({ value: cat.id, label: cat.name }));
+  const tagOptions = [
+    { value: "", label: "Choose tag" },
+    ...tags.map(tag => ({ value: tag.name, label: tag.name }))
+  ];
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -54,6 +61,13 @@ export default function AdminItems() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSelectChange = (field: keyof typeof form) => 
+  (selectedOption: { value: any; label: string } | null) => {
+    if (selectedOption) {
+      setForm({ ...form, [field]: selectedOption.value });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.categoryId) {
@@ -68,7 +82,7 @@ export default function AdminItems() {
         setItems((prev) =>
           prev.map((i) => (i.id === editingId ? updatedItem : i))
         );
-        setMessage("Item updated");
+        setMessage("Item updated11");
       } else {
         const newItem = await addItem(form);
         setItems((prev) => [...prev, newItem]);
@@ -226,20 +240,17 @@ export default function AdminItems() {
           <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
             Category
           </label>
-          <select
+          <Select
             id="categoryId"
-            name="categoryId"
-            className="w-full px-4 py-2 border rounded"
-            value={form.categoryId}
-            onChange={handleChange}
-          >
-            <option value={0}>Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            options={categoryOptions}
+            value={
+              categoryOptions.find(
+                (opt) => opt.value === (form.categoryId ?? 0)
+              ) || categoryOptions[0]
+            }
+            onChange={handleSelectChange("categoryId")}
+            classNamePrefix="react-select"
+          />
         </div>
 
         <button
@@ -264,20 +275,18 @@ export default function AdminItems() {
                 <label htmlFor="tagsList" className="block text-sm font-medium text-gray-700 mb-1">
                   Tag
                 </label>
-                <select
-                  id="tagsList"
-                  name="tagsSelector"
-                  className="w-full px-4 py-2 border rounded"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                >
-                  <option value={0}>Select a tag</option>
-                  {tags.map((t) => (
-                    <option key={t.id} value={t.name}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  inputId="tagsList"
+                  options={tagOptions}
+                  value={
+                    tagOptions.find(
+                      (opt) => opt.value === (tagInput ?? "")
+                    ) || tagOptions[0]}
+                  onChange={option => setTagInput(option?.value ?? "")}
+                  placeholder="Select tags..."
+                  className="w-full sm:w-64"
+                  classNamePrefix="react-select"
+                />
               </div>
 
               <button
@@ -297,6 +306,7 @@ export default function AdminItems() {
                 >
                   {tag.name}
                   <button
+                    type="button"
                     onClick={() => handleRemoveTag(tag.name)}
                     className="ml-2 text-red-500 hover:text-red-700 font-semibold"
                     title="Remove tag"
