@@ -12,12 +12,25 @@ export default function Header() {
     ...(user ? [{ label : 'Profile', path: '/profile' }] : []),
   ];
 
+  const handleReplaceNavigate = (path: string) => {
+    window.location.replace(path);
+  };
+
+  const handleLogout = async () => {
+    await userLogout();
+    window.location.replace("/");
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-indigo-600">
+        <button
+          onClick={() => handleReplaceNavigate("/")}
+          className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+          aria-label="Go to home"
+        >
           WTSYT
-        </Link>
+        </button>
 
         <nav className="flex items-center gap-x-4">
           {navItems.map(({ label, path }) => (
@@ -46,7 +59,10 @@ export default function Header() {
           {user ? (
             <div className="flex items-center gap-x-4">
               <span className="text-sm text-gray-600">Hello, {user.displayName}</span>
-              <button onClick={userLogout} className="text-red-500 text-sm hover:underline">
+              <button
+                onClick={handleLogout}
+                className="text-red-500 text-sm hover:underline"
+              >
                 Logout
               </button>
             </div>
