@@ -3,7 +3,6 @@ import type { AuthUser } from "../types/authUser";
 import { getMyProfile } from "../services/userService";
 import { logout } from "../services/authService";
 import { handleApiError } from "../utils/handleApi";
-import { useNavigate } from "react-router-dom";
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -18,8 +17,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -54,7 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => {
         setUser(null);
         setLoading(false);
-        navigate("/");
       })
   };
 
