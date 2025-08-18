@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { login, register } from "../services/authService";
 import { getMyProfile } from "../services/userService";
@@ -9,7 +9,6 @@ const isValidEmail = (email: string) =>
 
 const Register = () => {
   const { setUser } = useAuth();
-  const navigate = useNavigate();
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -56,7 +55,7 @@ const Register = () => {
       const profile = await getMyProfile();
       setUser(profile);
 
-      navigate("/");
+      window.location.replace("/");
     } catch (err: any) {
       const messages = err?.response?.data;
       const errorList = Array.isArray(messages)

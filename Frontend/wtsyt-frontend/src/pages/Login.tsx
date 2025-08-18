@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { login } from "../services/authService";
 import { getMyProfile } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
 
 const Login = () => {
-  const navigate = useNavigate();
   const { setUser } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -23,7 +22,7 @@ const Login = () => {
       const profile = await getMyProfile();
       setUser(profile);
 
-      navigate("/");
+      window.location.replace("/");
     } catch (err: any) {
       handleApiError(err);
       setError(
