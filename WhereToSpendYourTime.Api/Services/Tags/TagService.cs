@@ -21,6 +21,7 @@ public class TagService : ITagService
     {
         var tags = await _db.Tags
             .AsNoTracking()
+            .OrderBy(t => t.Name)
             .Select(tag => _mapper.Map<TagDto>(tag))
             .ToListAsync();
 

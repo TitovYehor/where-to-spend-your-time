@@ -21,6 +21,7 @@ public class CategoryService : ICategoryService
     {
         var categories = await _db.Categories
             .AsNoTracking()
+            .OrderBy(c => c.Name)
             .Select(cat => _mapper.Map<CategoryDto>(cat))
             .ToListAsync();
         
