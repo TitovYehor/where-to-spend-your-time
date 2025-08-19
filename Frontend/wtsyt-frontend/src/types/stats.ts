@@ -1,6 +1,6 @@
 import type { Review } from "./review";
 
-type ItemStat = {
+export type ItemStat = {
   id: number;
   title: string;
   category: string;
@@ -9,9 +9,9 @@ type ItemStat = {
 };
 
 type UserStat = {
-    userId: string;
-    displayName: string;
-    reviewCount: number;
+  userId: string;
+  displayName: string;
+  reviewCount: number;
 };
 
 export type Stats = {
