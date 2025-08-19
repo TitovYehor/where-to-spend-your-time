@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
 import { getProfileById } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
+import ReviewCard from "../components/reviews/ReviewCard";
+import CommentCard from "../components/comments/CommentCard";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -46,22 +48,7 @@ export default function PublicProfile() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {user.reviews.map((review) => (
-              <Link 
-                to={`/reviews/${review.id}`}
-                key={review.id}
-                className="block border border-gray-200 rounded-xl p-4 hover:shadow-lg transition bg-white"
-              >
-                <h3 className="text-lg font-semibold mb-1 truncate">{review.title}</h3>
-                <p className="text-gray-600 text-sm line-clamp-3">Content: {review.content}</p>
-                <p className="mt-2 flex items-center justify-between text-sm text-gray-500">
-                  <span className="text-yellow-500 font-medium">
-                    Rating: {review.rating}/5
-                  </span>
-                  <span>
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </span>
-                </p>
-              </Link>
+              <ReviewCard key={review.id} review={review} />
             ))}
           </div>
         )}
@@ -74,14 +61,7 @@ export default function PublicProfile() {
         ) : (
           <div className="space-y-4">
             {user.comments.map((comment) => (
-              <Link
-                to={`/reviews/${comment.reviewId}`}
-                key={comment.id}
-                className="block border border-gray-200 rounded-xl p-4 hover:shadow-md transition bg-white"
-              >
-                <p className="text-gray-800 text-sm line-clamp-3 mb-2">{comment.content}</p>
-                <p className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</p>
-              </Link>
+              <CommentCard key={comment.id} comment={comment} />
             ))}
           </div>
         )}
