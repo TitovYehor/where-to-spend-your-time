@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import type { Stats } from '../types/stats';
 import { getStats } from '../services/statsService';
 import { handleApiError } from '../utils/handleApi';
+import ReviewCard from '../components/reviews/ReviewCard';
+import ItemStatCard from '../components/items/ItemStatCard';
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -38,15 +40,7 @@ export default function Stats() {
         ) : (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.topRatedItems.map((item) => (
-              <Link
-                to={`/items/${item.id}`}
-                key={item.id}
-                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-500">Category: {item.category}</p>
-                <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
-              </Link>
+              <ItemStatCard key={item.id} item={item} />
             ))}
           </div>
         )}
@@ -59,15 +53,7 @@ export default function Stats() {
         ) : (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.mostReviewedItems.map((item) => (
-              <Link 
-                to={`/items/${item.id}`}
-                key={item.id}
-                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-500">Category: {item.category}</p>
-                <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
-              </Link>
+              <ItemStatCard key={item.id} item={item} />
             ))}
           </div>
         )}
@@ -102,18 +88,7 @@ export default function Stats() {
         ) : (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             {stats.recentReviews.map((review) => (
-              <Link 
-                to={`/reviews/${review.id}`}
-                key={review.id}
-                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold">{review.title}</h3>
-                <p className="text-sm text-gray-500">By {review.author}</p>
-                <p className="text-yellow-500 font-medium">Rating: {review.rating}/5</p>
-                <p className="text-xs text-gray-400">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </p>
-              </Link>
+              <ReviewCard key={review.id} review={review} />
             ))}
           </div>
         )}
