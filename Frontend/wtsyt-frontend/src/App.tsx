@@ -17,34 +17,39 @@ import AdminItems from './pages/admin/AdminItems.tsx';
 import AdminTags from './pages/admin/AdminTags.tsx';
 import Tags from './pages/Tags.tsx';
 import GuestOnlyRoute from './components/GuestOnlyRoute.tsx';
+import Background from './components/Background.tsx';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <Header />
-      <Routes>
-        <Route element={ <GuestOnlyRoute/> }>
-          <Route path="/login" element={ <Login/> } />
-          <Route path="/register" element={ <Register/> } />
-        </Route>
+    <div className="min-h-screen text-gray-800 relative overflow-hidden">
+      <Background />
+      
+      <div className="relative z-10">
+        <Header />
+        <Routes>
+          <Route element={ <GuestOnlyRoute/> }>
+            <Route path="/login" element={ <Login/> } />
+            <Route path="/register" element={ <Register/> } />
+          </Route>
 
-        <Route element={ <Layout/> }>
-          <Route path="/" element={ <Home/> } />
-          
-          <Route path="/admin" element={ <RequireAdmin><AdminDashboard/></RequireAdmin> } />
-          <Route path="/admin/categories" element={ <RequireAdmin><AdminCategories/></RequireAdmin> } />
-          <Route path="/admin/items" element={ <RequireAdmin><AdminItems/></RequireAdmin> } />
-          <Route path="/admin/tags" element={ <RequireAdmin><AdminTags/></RequireAdmin> } />
+          <Route element={ <Layout/> }>
+            <Route path="/" element={ <Home/> } />
+            
+            <Route path="/admin" element={ <RequireAdmin><AdminDashboard/></RequireAdmin> } />
+            <Route path="/admin/categories" element={ <RequireAdmin><AdminCategories/></RequireAdmin> } />
+            <Route path="/admin/items" element={ <RequireAdmin><AdminItems/></RequireAdmin> } />
+            <Route path="/admin/tags" element={ <RequireAdmin><AdminTags/></RequireAdmin> } />
 
-          <Route path="/profile" element={ <Profile/> } />
-          <Route path="/users/:userId" element={ <PublicProfile/> } />
-          <Route path="/items/:id" element={ <ItemDetails/> } />
-          <Route path="/reviews/:reviewId" element={ <ReviewDetails/> } />
-          <Route path="/categories" element={ <Categories/>} />
-          <Route path="/tags" element={ <Tags/> } />
-          <Route path="/stats" element={ <Stats/> } />
-        </Route>
-      </Routes>
+            <Route path="/profile" element={ <Profile/> } />
+            <Route path="/users/:userId" element={ <PublicProfile/> } />
+            <Route path="/items/:id" element={ <ItemDetails/> } />
+            <Route path="/reviews/:reviewId" element={ <ReviewDetails/> } />
+            <Route path="/categories" element={ <Categories/>} />
+            <Route path="/tags" element={ <Tags/> } />
+            <Route path="/stats" element={ <Stats/> } />
+          </Route>
+        </Routes>
+      </div>
     </div>
   );
 }
