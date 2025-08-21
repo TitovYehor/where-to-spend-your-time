@@ -3,7 +3,7 @@ import { Tag, Boxes, FolderCog } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
-    <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto p-6">
+    <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
       <h1 id="admin-heading" className="text-3xl font-bold mb-6">Admin Panel</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

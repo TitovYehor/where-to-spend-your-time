@@ -181,7 +181,10 @@ export default function AdminItems() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow">
+    <section 
+      aria-labelledby="manage-items-heading" 
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg"
+    >
       <h1 className="text-2xl font-bold mb-6">Manage Items</h1>
 
       {message && (
@@ -208,7 +211,7 @@ export default function AdminItems() {
 
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-black mb-1">
             Title
           </label>
           <input
@@ -223,7 +226,7 @@ export default function AdminItems() {
         </div>
         
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-black mb-1">
             Description
           </label>
           <textarea
@@ -237,7 +240,7 @@ export default function AdminItems() {
         </div>
         
         <div>
-          <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-1">
             Category
           </label>
           <Select
@@ -334,7 +337,7 @@ export default function AdminItems() {
       </form>
 
       <div className="mb-3">
-        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
           Search
         </label>
         <input
@@ -400,6 +403,6 @@ export default function AdminItems() {
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }
