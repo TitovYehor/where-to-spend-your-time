@@ -37,7 +37,7 @@ export default function Categories() {
   return (
     <section
       aria-labelledby="categories-heading"
-      className="max-w-4xl mx-auto px-4 py-6"
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg"
     >
       <h1 id="categories-heading" className="text-2xl font-bold mb-4">
         Categories
@@ -50,7 +50,7 @@ export default function Categories() {
       ) : (
         <>
           <div>
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
               Search
             </label>
             <input

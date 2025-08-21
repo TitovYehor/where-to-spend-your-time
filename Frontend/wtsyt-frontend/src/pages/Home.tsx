@@ -97,16 +97,19 @@ export default function Home() {
   const searchValue = filters.search;
 
   return (
-    <section aria-labelledby="explore-heading" className="max-w-5xl mx-auto px-4 py-6">
-      <h1 id="explore-heading" className="text-2xl font-bold mb-4">Explore Items</h1>
+    <section 
+      aria-labelledby="explore-heading" 
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg"
+    >
+      <h1 id="explore-heading" className="text-3xl font-bold mb-6 text-black">Explore Items</h1>
       
-      <div className="mb-4 text-gray-700">
+      <div className="mb-4 text-black">
         {totalCountRef.current} item{totalCountRef.current !== 1 ? "s" : ""} found
       </div>
       
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
             Search
           </label>
           <input
@@ -124,7 +127,7 @@ export default function Home() {
         </div>
 
         <div className="min-w-[180px] flex-1 sm:flex-none">
-          <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-1">
             Category
           </label>
           <Select
@@ -147,7 +150,7 @@ export default function Home() {
         </div>
 
         <div className="min-w-[160px] flex-1 sm:flex-none">
-          <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="sort" className="block text-sm font-medium text-black mb-1">
             Sort by
           </label>
           <Select 
@@ -167,7 +170,7 @@ export default function Home() {
         </div>
 
         <div className="min-w-[140px] flex-1 sm:flex-none">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Order
           </label>
           <div className="inline-flex w-full rounded-md shadow-sm border border-gray-300">
@@ -195,7 +198,7 @@ export default function Home() {
         </div>
 
         <div className="min-w-[200px] flex-1 sm:flex-none">
-          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="tags" className="block text-sm font-medium text-black mb-1">
             Tags
           </label>
           <Select
@@ -215,14 +218,15 @@ export default function Home() {
       </div>
 
       {items.length === 0 ? (
-        <p className="text-center text-gray-500">No items found</p>
+        <p className="text-center text-black">No items found</p>
       ) : (
         <ul className="space-y-4">
           {items.map((item) => (
             <li key={item.id}>
               <Link
                 to={`/items/${item.id}`}
-                className="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-transform 
+                  hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
                 <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
@@ -258,7 +262,7 @@ export default function Home() {
           Previous
         </button>
 
-        <span className="text-sm text-gray-700">
+        <span className="text-sm text-black">
           Page {filters.page} of {Math.ceil(totalCountRef.current / pageSize)}
         </span>
 
@@ -273,7 +277,7 @@ export default function Home() {
         </button>
       </div>
 
-      <p className="mt-4 text-sm text-gray-500 text-center">
+      <p className="mt-4 text-sm text-gray-700 text-center">
         Showing {Math.min((filters.page - 1) * pageSize + 1, totalCountRef.current)}-{Math.min(filters.page * pageSize, totalCountRef.current)} of {totalCountRef.current}
       </p>
     </section>

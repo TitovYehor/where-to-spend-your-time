@@ -29,10 +29,10 @@ export default function Stats() {
   if (!stats) return <p className="text-center mt-10 text-gray-500">No statistics available</p>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
       <h1 className="text-3xl font-bold mb-8 text-center">Platform Statistics</h1>
 
-      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+      <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">Top Rated Items</h2>
 
         {stats.topRatedItems.length === 0 ? (
@@ -46,7 +46,7 @@ export default function Stats() {
         )}
       </section>
 
-      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+      <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">Most Reviewed Items</h2>
         {stats.mostReviewedItems.length === 0 ? (
           <p className="text-gray-500 italic">No most reviewed items yet</p>
@@ -59,7 +59,7 @@ export default function Stats() {
         )}
       </section>
 
-      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+      <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">Top Reviewers</h2>
         {stats.topReviewers.length === 0 ? (
           <p className="text-gray-500 italic">No top reviewers yet</p>
@@ -81,7 +81,7 @@ export default function Stats() {
         )}
       </section>
 
-      <section className="mb-10 bg-white p-6 rounded-2xl shadow">
+      <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">Recent Reviews</h2>
         {stats.recentReviews.length === 0 ? (
           <p className="text-gray-500 italic">No recent reviews yet</p>
