@@ -102,15 +102,15 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
       <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
-      <div className="mb-8 bg-white shadow rounded-2xl p-6 space-y-3">
+      <div className="mb-8 space-y-3">
         <p><strong>Name:</strong> {user?.displayName}</p>
         <p><strong>Email:</strong> {user?.email ?? "Not available"}</p>
       </div>
 
-      <div className="mb-8 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-8 space-y-6">
         <h2 className="text-xl font-semibold">Edit Profile</h2>
 
         {successMessage && (
@@ -127,7 +127,7 @@ const Profile = () => {
         )}
 
         <div className="space-y-6">
-          <div className="space-y-2 border-b pb-4">
+          <div className="space-y-2">
             <label htmlFor="displayName" className="block font-medium">
               Display Name
             </label>
@@ -188,7 +188,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="mb-10 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-10 space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Reviews</h2>
 
         {reviews.length === 0 ? (
@@ -202,7 +202,7 @@ const Profile = () => {
         )}
       </div>
 
-      <div className="mb-10 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-10 space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Comments</h2>
 
         {comments.length === 0 ? (

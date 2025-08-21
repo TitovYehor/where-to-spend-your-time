@@ -38,10 +38,14 @@ export default function PublicProfile() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{user?.displayName}'s Profile</h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
+      <article className="mb-10">
+        <h1 className="text-3xl font-bold mb-2">{user?.displayName}'s Profile</h1>
+        <p className="text-black mb-2">Reviews count: {user?.reviews.length}</p>
+        <p className="text-black mb-2">Comments count: {user?.comments.length}</p>
+      </article>
 
-      <div className="mb-12 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-12 space-y-6">
         <h2 className="text-2xl font-semibold">User Reviews</h2>
         {user?.reviews.length === 0 ? (
           <p className="text-gray-600">User haven't written any reviews yet</p>
@@ -54,7 +58,7 @@ export default function PublicProfile() {
         )}
       </div>
 
-      <div className="mb-10 bg-white p-6 rounded-2xl shadow space-y-6">
+      <div className="mb-10  space-y-6">
         <h2 className="text-2xl font-semibold mb-4">User Comments</h2>
         {user?.comments.length === 0 ? (
           <p className="text-gray-600">User haven't written any comments yet</p>
