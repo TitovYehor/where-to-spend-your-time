@@ -111,21 +111,21 @@ export default function ReviewDetails() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-md">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
       {review ? (
         <>
           <header className="mb-4">
             <h2 className="text-3xl font-bold mb-1">{review.title}</h2>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
+            <p className="text-sm text-black flex items-center gap-1">
               <span>By</span> 
               <Link 
                 to={`/users/${review.userId}`} 
-                className="text-blue-600 hover:underline"
+                className="text-blue-700 hover:underline"
               >
                 {review.author}
               </Link>
             </p>
-            <p className="text-yellow-500 font-medium">Rating: {review.rating}/5</p>
+            <p className="text-yellow-600 font-medium">Rating: {review.rating}/5</p>
           </header>
           
           <section className="mb-6">

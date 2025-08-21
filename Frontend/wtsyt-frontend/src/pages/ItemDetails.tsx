@@ -102,11 +102,11 @@ export default function ItemDetails() {
   if (!item) return <div className="p-6">Loading item...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
       <article className="mb-10">
         <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
-        <p className="text-gray-700 mb-2">Description: {item.description}</p>
-        <p className="text-gray-700 mb-2">Category: {item.categoryName}</p>
+        <p className="text-black mb-2">Description: {item.description}</p>
+        <p className="text-black mb-2">Category: {item.categoryName}</p>
         <p className="text-yellow-600 font-medium">Average rating: {item.averageRating}</p>
 
         {item.tags && item.tags.length > 0 && (
@@ -151,7 +151,7 @@ export default function ItemDetails() {
       </section>
 
       {user && (
-        <section className="bg-white p-6 rounded-lg shadow">
+        <section>
           <h3 className="text-lg font-bold mb-4">
             {myReview ? "Edit your review" : "Write a review"}
           </h3>
@@ -162,7 +162,7 @@ export default function ItemDetails() {
             <input type="hidden" value={item.id} readOnly />
 
             <div>
-              <label htmlFor="review-title" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="review-title" className="block text-sm font-medium text-black mb-1">
                 Title
               </label>
               <input
@@ -177,7 +177,7 @@ export default function ItemDetails() {
             </div>
 
             <div>
-              <label htmlFor="review-content" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="review-content" className="block text-sm font-medium text-black mb-1">
                 Content
               </label>
               <textarea
@@ -191,7 +191,7 @@ export default function ItemDetails() {
             </div>
 
             <div>
-              <label htmlFor="review-rating" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="review-rating" className="block text-sm font-medium text-black mb-1">
                 Rating
               </label>
               <input
