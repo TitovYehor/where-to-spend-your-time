@@ -1,7 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function Header() {
+interface HeaderProps {
+  toggleBackground: () => void;
+  solid: boolean;
+}
+
+export default function Header({ toggleBackground, solid }: HeaderProps) {
   const { user, userLogout } = useAuth();
   
   const navItems = [
@@ -81,6 +86,14 @@ export default function Header() {
               </NavLink>
             </div>
         )}
+
+        <button
+            onClick={toggleBackground}
+            className="px-3 py-1.5 rounded-md text-sm font-medium
+                       bg-gray-700/70 hover:bg-gray-600 text-white shadow-sm transition"
+          >
+            {solid ? "Aurora Mode" : "Solid Mode"}
+          </button>
         </nav>
       </div>
     </header>
