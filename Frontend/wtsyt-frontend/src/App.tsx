@@ -18,14 +18,18 @@ import AdminTags from './pages/admin/AdminTags.tsx';
 import Tags from './pages/Tags.tsx';
 import GuestOnlyRoute from './components/GuestOnlyRoute.tsx';
 import Background from './components/Background.tsx';
+import { useState } from 'react';
 
 export default function App() {
+  const [solidBackground, setSolidBackground] = useState(false);
+  
   return (
     <div className="min-h-screen text-gray-800 relative overflow-hidden">
-      <Background />
+      <Background solid={solidBackground} />
       
       <div className="relative z-10">
-        <Header />
+        <Header toggleBackground={() => setSolidBackground(v => !v)} solid={solidBackground} />
+          
         <Routes>
           <Route element={ <GuestOnlyRoute/> }>
             <Route path="/login" element={ <Login/> } />
