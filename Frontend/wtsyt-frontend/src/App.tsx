@@ -24,7 +24,7 @@ export default function App() {
   const [solidBackground, setSolidBackground] = useState(false);
   
   return (
-    <div className="min-h-screen text-gray-800 relative overflow-hidden">
+    <div className="min-h-screen text-gray-800 relative">
       <Background solid={solidBackground} />
       
       <div className="relative z-10">
