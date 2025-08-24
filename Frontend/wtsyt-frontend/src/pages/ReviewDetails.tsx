@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
@@ -6,6 +6,7 @@ import type { Comment } from "../types/comment";
 import { deleteReview, getReviewById, updateReview } from "../services/reviewService";
 import { getCommentsForReview, addComment, deleteComment } from "../services/commentService";
 import { handleApiError } from "../utils/handleApi";
+import UserProfileLink from "../components/users/UserProfileLinks";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -118,12 +119,7 @@ export default function ReviewDetails() {
             <h2 className="text-3xl font-bold mb-1">{review.title}</h2>
             <p className="text-sm text-black flex items-center gap-1">
               <span>By</span> 
-              <Link 
-                to={`/users/${review.userId}`} 
-                className="text-blue-700 hover:underline"
-              >
-                {review.author}
-              </Link>
+              <UserProfileLink userId={review.userId} name={review.author} />
             </p>
             <p className="text-yellow-600 font-medium">Rating: {review.rating}/5</p>
           </header>
@@ -232,12 +228,7 @@ export default function ReviewDetails() {
                   >
                     <div className="flex justify-between items-center mb-1">
                       <p className="text-sm text-gray-600 flex items-center gap-1"> 
-                        <Link 
-                          to={`/users/${c.userId}`} 
-                          className="text-blue-600 hover:underline"
-                        >
-                          {c.author}
-                        </Link>
+                        <UserProfileLink userId={c.userId} name={c.author} />
                         <span>• {new Date(c.createdAt).toLocaleString()}</span>
                       </p>
                       {(isAdmin || c.author === user?.displayName) && (
