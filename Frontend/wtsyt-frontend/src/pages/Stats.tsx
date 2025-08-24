@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { Stats } from '../types/stats';
 import { getStats } from '../services/statsService';
 import { handleApiError } from '../utils/handleApi';
 import ReviewCard from '../components/reviews/ReviewCard';
 import ItemStatCard from '../components/items/ItemStatCard';
+import UserProfileLink from '../components/users/UserProfileLinks';
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -65,17 +65,16 @@ export default function Stats() {
           <p className="text-gray-500 italic">No top reviewers yet</p>
         ) : (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
-            {stats.topReviewers.map((user) => (
-                <Link 
-                  to={`/users/${user.userId}`}
-                  key={user.userId}
-                  className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
-                >
-                  <h3 className="text-lg font-semibold">
-                    {user.displayName}
-                  </h3>
-                  <p className="text-sm text-gray-500">{user.reviewCount} reviews</p>
-                </Link>
+            {stats.topReviewers.map((reviewer) => (
+              <div
+                key={reviewer.userId}
+                className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">
+                  <UserProfileLink userId={reviewer.userId} name={reviewer.displayName} />
+                </h3>
+                <p className="text-sm text-gray-500">{reviewer.reviewCount} reviews</p>
+              </div>
             ))}
           </div>
         )}
