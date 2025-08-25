@@ -22,6 +22,24 @@ public class UserService : IUserService
         this._userManager = userManager;
     }
 
+    public async Task<IEnumerable<ApplicationUserDto>> GetAllUsersAsync()
+    { 
+        var usersDto = await _db.Users
+            .AsNoTracking()
+            .OrderBy(u => u.DisplayName)
+            .Select(u => _mapper.Map<ApplicationUserDto>(u))
+            .ToListAsync();
+
+        foreach (var userDto in usersDto)
+        {
+            var user = await _userManager.FindByIdAsync(userDto.Id);
+            var userRole = await _userManager.GetRolesAsync(user!);
+            userDto.Role = userRole?.FirstOrDefault();
+        }
+
+        return usersDto;
+    }
+
     public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)
     {
         var user = await _db.Users
@@ -70,6 +88,16 @@ public class UserService : IUserService
         return dto;
     }
 
+    public async Task<IEnumerable<string?>> GetRolesAsync()
+    {
+        var roles = await _db.Roles
+            .AsNoTracking()
+            .OrderBy(r => r.Name)
+            .Select(r => r.Name)
+            .ToListAsync();
+        return roles;
+    }
+
     public async Task<bool> UpdateProfileAsync(string userId, string displayName)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -93,5 +121,46 @@ public class UserService : IUserService
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         return (result.Succeeded, result.Errors);
+    }
+
+    public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
+    {
+        if (string.IsNullOrEmpty(newRole))
+        {
+            return false;
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+        if (isAdmin)
+        { 
+            return false;
+        }
+
+        var result = await _userManager.AddToRoleAsync(user, newRole);
+        return result.Succeeded;
+    }
+
+    public async Task<bool> DeleteUserAsync(string userId)
+    { 
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+        if (isAdmin)
+        {
+            return false;
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
     }
 }
