@@ -15,6 +15,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.tsx';
 import AdminCategories from './pages/admin/AdminCategories.tsx';
 import AdminItems from './pages/admin/AdminItems.tsx';
 import AdminTags from './pages/admin/AdminTags.tsx';
+import AdminUsers from './pages/admin/AdminUsers.tsx';
 import Tags from './pages/Tags.tsx';
 import GuestOnlyRoute from './components/GuestOnlyRoute.tsx';
 import Background from './components/Background.tsx';
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/admin/categories" element={ <RequireAdmin><AdminCategories/></RequireAdmin> } />
             <Route path="/admin/items" element={ <RequireAdmin><AdminItems/></RequireAdmin> } />
             <Route path="/admin/tags" element={ <RequireAdmin><AdminTags/></RequireAdmin> } />
+            <Route path="/admin/users" element={ <RequireAdmin><AdminUsers/></RequireAdmin> } />
 
             <Route path="/profile" element={ <Profile/> } />
             <Route path="/users/:userId" element={ <PublicProfile/> } />

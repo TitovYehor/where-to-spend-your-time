@@ -1,0 +1,236 @@
+import { useEffect, useRef, useState } from "react";
+import { deleteUser, getAllUsers, getRoles, updateUserRole } from "../../services/userService.ts";
+import type { AuthUser } from "../../types/authUser.ts";
+import { handleApiError } from "../../utils/handleApi";
+import Select from "react-select";
+
+export default function AdminUsers() {
+  const [users, setUsers] = useState<AuthUser[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [role, setRole] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const rolesOptions = [
+    { value: "", label: "All Roles" },
+    ...roles.map((role) => ({ value: role, label: role })),
+  ];
+
+  const fetchData = async () => {
+    try {
+      const[usersList, rolesList] = await Promise.all([
+        getAllUsers(),
+        getRoles(),
+      ]);
+      setUsers(usersList);
+      setRoles(rolesList);
+    } catch (err) {
+      handleApiError(err);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (role == null) {
+      setError("Role can't be empty");
+      return;
+    }
+
+    try {
+      if (editingId !== null) {
+        await updateUserRole(editingId, { Role: role });
+        setEditingId(null);
+        setMessage("User role updated");
+      }
+      setRole("");
+      fetchData();
+      setError("");
+    } catch (err) {
+      handleApiError(err);
+      setError("Failed to update user role");
+      setMessage("");
+    }
+  };
+
+  const handleEdit = (user: AuthUser) => {
+    setEditingId(user.id);
+    setRole(user.role);
+    
+    setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
+    
+    setError("");
+    setMessage("");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+      await deleteUser(id);
+      fetchData();
+      setError("");
+      setMessage("User deleted");
+    } catch (err) {
+      handleApiError(err);
+      setError("Failed to delete user");
+      setMessage("");
+    }
+  };
+
+  const filteredUsers = users.filter(u =>
+    u.displayName.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <section
+      aria-labelledby="manage-users-heading"
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg"
+    >
+      <h1 id="manage-users-heading" className="text-2xl font-bold mb-6">
+        Manage Users
+      </h1>
+
+      {message && (
+        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{message}</span>
+          </div>
+          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
+          <div>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
+            ✕
+          </button>
+        </div>
+      )}
+      
+      {editingId && (
+        <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
+          <div>
+            <label htmlFor="userName" className="block text-sm font-medium text-black mb-1">
+                User name
+            </label>
+            <input
+                id="userName"
+                className="w-full px-4 py-2 border rounded"
+                value={users.find(u => u.id == editingId)?.displayName}
+                readOnly
+            />
+          </div>
+          <div>
+            <label htmlFor="userRole" className="block text-sm font-medium text-black mb-1">
+              User role
+            </label>
+            <Select
+              id="userRole"
+              options={rolesOptions}
+              value={
+                rolesOptions.find(
+                    (opt) => opt.value === (role ?? "")
+                ) || rolesOptions[0]
+              }
+              onChange={(option) =>
+                setRole(option?.value ?? "")
+              }
+              classNamePrefix="react-select"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
+          >
+            Update user
+          </button>
+
+          <button
+            type="button"
+            className="text-gray-500 text-sm underline hover:text-gray-700 transition"
+            onClick={() => {
+                setEditingId(null);
+                setRole("");
+                setError("");
+            }}
+            >
+            Cancel
+          </button>
+          </div>
+        </form>
+      )}
+
+      <div className="mb-3">
+        <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
+          Search
+        </label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : users.length === 0 ? (
+        <p className="text-gray-600">No users found</p>
+      ) : (
+        <ul className="space-y-6">
+          {filteredUsers.map((user) => (
+            <li
+              key={user.id}
+              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+            >
+              <span className="text-lg font-medium text-gray-900">{user.displayName}</span>
+              <span className="text-lg font-medium text-gray-900">{user.role}</span>
+
+              <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col gap-2 items-center">
+                <button
+                  onClick={() => handleEdit(user)}
+                  className="text-blue-600 hover:underline font-medium"
+                  aria-label={`Edit ${user.displayName}`}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(user.id)}
+                  className="text-red-600 hover:underline font-medium"
+                  aria-label={`Delete ${user.displayName}`}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
