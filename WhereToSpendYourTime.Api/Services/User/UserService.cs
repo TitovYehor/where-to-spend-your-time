@@ -37,7 +37,7 @@ public class UserService : IUserService
             userDto.Role = userRole?.FirstOrDefault();
         }
 
-        return usersDto;
+        return usersDto.OrderBy(u => u.Role);
     }
 
     public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)
@@ -140,6 +140,16 @@ public class UserService : IUserService
         if (isAdmin)
         { 
             return false;
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+        {
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                return false;
+            }
         }
 
         var result = await _userManager.AddToRoleAsync(user, newRole);
