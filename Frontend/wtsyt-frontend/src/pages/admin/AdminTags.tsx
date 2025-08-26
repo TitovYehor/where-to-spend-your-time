@@ -184,9 +184,11 @@ export default function AdminTags() {
               key={tag.id}
               className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
             >
-              <span className="text-lg font-medium text-gray-900">{tag.name}</span>
+              <div className="flex-1">
+                <span className="text-lg font-medium text-gray-900">{tag.name}</span>
+              </div>
 
-              <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col gap-2 items-center">
+              <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
                 <button
                   onClick={() => handleEdit(tag)}
                   className="text-blue-600 hover:underline font-medium"
