@@ -3,8 +3,12 @@ import { deleteUser, getAllUsers, getRoles, updateUserRole } from "../../service
 import type { AuthUser } from "../../types/authUser.ts";
 import { handleApiError } from "../../utils/handleApi";
 import Select from "react-select";
+import { useAuth } from "../../contexts/AuthContext.tsx";
+import UserProfileLink from "../../components/users/UserProfileLinks.tsx";
 
 export default function AdminUsers() {
+  const { user } = useAuth();
+
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
 
@@ -13,6 +17,7 @@ export default function AdminUsers() {
   const [role, setRole] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>(""); 
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -95,7 +100,9 @@ export default function AdminUsers() {
   };
 
   const filteredUsers = users.filter(u =>
-    u.displayName.toLowerCase().includes(search.toLowerCase())
+    u.displayName.toLowerCase().includes(search.toLowerCase()) &&
+    (roleFilter === "" || u.role === roleFilter) &&
+    (u.id != user?.id)
   );
 
   return (
@@ -133,13 +140,13 @@ export default function AdminUsers() {
         <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
           <div>
             <label htmlFor="userName" className="block text-sm font-medium text-black mb-1">
-                User name
+              User name
             </label>
             <input
-                id="userName"
-                className="w-full px-4 py-2 border rounded"
-                value={users.find(u => u.id == editingId)?.displayName}
-                readOnly
+              id="userName"
+              className="w-full px-4 py-2 border rounded"
+              value={users.find(u => u.id == editingId)?.displayName}
+              readOnly
             />
           </div>
           <div>
@@ -183,35 +190,71 @@ export default function AdminUsers() {
         </form>
       )}
 
-      <div className="mb-3">
-        <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
-          Search
-        </label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+        <div className="flex-1">
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
+            Search
+          </label>
+          <input
+            id="search"
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex-1">
+          <label htmlFor="roleFilter" className="block text-sm font-medium text-black mb-1">
+            Filter by role
+          </label>
+          <Select
+            id="roleFilter"
+            options={rolesOptions}
+            value={rolesOptions.find(opt => opt.value === roleFilter) || rolesOptions[0]}
+            onChange={(option) => setRoleFilter(option?.value ?? "")}
+            classNamePrefix="react-select"
+          />
+        </div>
       </div>
 
       {loading ? (
-        <p>Loading...</p>
-      ) : users.length === 0 ? (
-        <p className="text-gray-600">No users found</p>
+        <p className="text-gray-500 text-center">Loading...</p>
+      ) : filteredUsers.length === 0 ? (
+        <p className="text-gray-600 text-center">No users found</p>
       ) : (
-        <ul className="space-y-6">
+        <ul className="space-y-4">
           {filteredUsers.map((user) => (
             <li
               key={user.id}
               className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
             >
-              <span className="text-lg font-medium text-gray-900">{user.displayName}</span>
-              <span className="text-lg font-medium text-gray-900">{user.role}</span>
+              <div className="flex-1">
+                <p className="text-lg font-semibold text-gray-900">
+                  <UserProfileLink
+                    userId={user.id}
+                    name={user.displayName}
+                    className="text-lg font-semibold"
+                  />
+                </p>
+              </div>
 
-              <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col gap-2 items-center">
+              <div className="mt-2 sm:mt-0">
+                <span
+                  className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
+                    user.role === "Admin"
+                      ? "bg-red-100 text-red-700"
+                      : user.role === "Moderator"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-blue-100 text-blue-700"
+                  }`}
+                >
+                  {user.role}
+                </span>
+              </div>
+
+              <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
                 <button
                   onClick={() => handleEdit(user)}
                   className="text-blue-600 hover:underline font-medium"
