@@ -118,8 +118,8 @@ public class UsersController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpDelete]
-    public async Task<IActionResult> DeleteUser([FromQuery] string userId)
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteUser(string userId)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
