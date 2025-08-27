@@ -197,7 +197,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="min-w-[200px] flex-1 sm:flex-none">
+        <div className="min-w-[200px] max-w-[600px] flex-1 sm:flex-none">
           <label htmlFor="tags" className="block text-sm font-medium text-black mb-1">
             Tags
           </label>
@@ -211,7 +211,7 @@ export default function Home() {
               page: 1 })
             }
             placeholder="Select tags..."
-            className="w-full sm:w-64"
+            className="w-full sm:w-auto"
             classNamePrefix="react-select"
           />
         </div>
