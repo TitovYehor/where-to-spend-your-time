@@ -15,6 +15,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ItemTag> ItemTags { get; set; }
 
+    public DbSet<Media> Media { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -40,6 +42,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(it => it.Tag)
             .WithMany(t => t.ItemTags)
             .HasForeignKey(it => it.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
+    
+        builder.Entity<Media>()
+            .HasOne(m => m.Item)
+            .WithMany(i => i.Media)
+            .HasForeignKey(m => m.ItemId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
