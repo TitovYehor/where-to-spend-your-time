@@ -22,6 +22,8 @@ public class Item
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public ICollection<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
+
+    public ICollection<Media> Media { get; set; } = new List<Media>();
 }
 
 public enum ItemStatus
