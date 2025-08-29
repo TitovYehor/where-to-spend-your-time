@@ -1,4 +1,5 @@
-﻿using WhereToSpendYourTime.Api.Models.Tags;
+﻿using WhereToSpendYourTime.Api.Models.Media;
+using WhereToSpendYourTime.Api.Models.Tags;
 
 namespace WhereToSpendYourTime.Api.Models.Item;
 
@@ -17,4 +18,6 @@ public class ItemDto
     public double AverageRating { get; set; }
 
     public List<TagDto> Tags { get; set; } = [];
+
+    public List<MediaDto> Media { get; set; } = [];
 }
