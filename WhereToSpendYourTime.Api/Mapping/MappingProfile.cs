@@ -2,6 +2,7 @@
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Models.User;
@@ -23,5 +24,6 @@ public class MappingProfile : Profile
         CreateMap<Comment, CommentDto>()
             .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
         CreateMap<ApplicationUser, ApplicationUserDto>();
+        CreateMap<Media, MediaDto>();
     }
 }
