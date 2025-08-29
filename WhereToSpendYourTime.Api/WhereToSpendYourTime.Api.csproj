@@ -19,6 +19,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WhereToSpendYourTime.Data\WhereToSpendYourTime.Data.csproj" />
+    <ProjectReference Include="..\WhereToSpendYourTime.ShareLib\WhereToSpendYourTime.ShareLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>
