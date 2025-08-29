@@ -1,14 +1,12 @@
 ﻿using WhereToSpendYourTime.ShareLib.Enums;
 
-namespace WhereToSpendYourTime.Data.Entities;
+namespace WhereToSpendYourTime.Api.Models.Media;
 
-public class Media
+public class MediaDto
 {
     public int Id { get; set; }
-    public int ItemId { get; set; }
 
     public MediaType Type { get; set; }
+    
     public string Url { get; set; } = string.Empty;
-
-    public Item Item { get; set; } = null!;
 }
