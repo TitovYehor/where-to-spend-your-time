@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using System.Text.Json.Serialization;
 using WhereToSpendYourTime.Api.Handlers;
 using WhereToSpendYourTime.Api.Services.Auth;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Api.Services.Comment;
 using WhereToSpendYourTime.Api.Services.Item;
+using WhereToSpendYourTime.Api.Services.Media;
 using WhereToSpendYourTime.Api.Services.Review;
 using WhereToSpendYourTime.Api.Services.Stats;
 using WhereToSpendYourTime.Api.Services.Tags;
@@ -30,6 +33,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -55,6 +59,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddProblemDetails();
@@ -76,5 +86,7 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 await app.RunAsync();

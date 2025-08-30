@@ -25,6 +25,7 @@ public class ItemService : IItemService
             .Include(i => i.Reviews)
             .Include(i => i.ItemTags)
                 .ThenInclude(it => it.Tag)
+            .Include(i => i.Media)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
@@ -82,6 +83,7 @@ public class ItemService : IItemService
             .Include(i => i.Reviews)
             .Include(i => i.ItemTags)
                 .ThenInclude(it => it.Tag)
+            .Include(i => i.Media)
             .FirstOrDefaultAsync(i => i.Id == id);
 
         if (item == null)
