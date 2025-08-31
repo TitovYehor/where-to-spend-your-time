@@ -21,4 +21,17 @@ public class MediaController : ControllerBase
         var media = await _mediaService.UploadAsync(dto);
         return Ok(media);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteMedia(int id)
+    {
+        var deleted = await _mediaService.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return Ok(deleted);
+    }
 }
