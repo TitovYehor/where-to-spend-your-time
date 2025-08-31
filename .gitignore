@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # Ignore user uploads
-wwwroot/uploads/
+wwwroot/
 
 # User-specific files
 *.rsuser

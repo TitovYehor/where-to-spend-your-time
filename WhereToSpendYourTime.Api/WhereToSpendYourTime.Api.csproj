@@ -22,8 +22,4 @@
     <ProjectReference Include="..\WhereToSpendYourTime.ShareLib\WhereToSpendYourTime.ShareLib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\uploads\" />
-  </ItemGroup>
-
 </Project>
