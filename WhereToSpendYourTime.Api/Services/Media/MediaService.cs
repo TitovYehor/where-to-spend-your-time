@@ -49,4 +49,28 @@ public class MediaService : IMediaService
 
         return _mapper.Map<MediaDto>(media);
     }
+
+    public async Task<bool> DeleteAsync(int mediaId)
+    {
+        var media = await _db.Media.FindAsync(mediaId);
+        if (media == null)
+        {
+            return false;
+        }
+
+        var filePath = Path.Combine(
+            _env.WebRootPath,
+            media.Url.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString())
+        );
+
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+
+        _db.Media.Remove(media);
+        await _db.SaveChangesAsync();
+
+        return true;
+    }
 }

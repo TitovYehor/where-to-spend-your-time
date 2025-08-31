@@ -5,4 +5,6 @@ namespace WhereToSpendYourTime.Api.Services.Media;
 public interface IMediaService
 {
     Task<MediaDto> UploadAsync(CreateMediaDto dto);
+
+    Task<bool> DeleteAsync(int mediaId);
 }
