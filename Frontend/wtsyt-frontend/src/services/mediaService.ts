@@ -17,3 +17,8 @@ export const uploadMedia = async (request: MediaUploadRequest): Promise<Media> =
 export const getMediaUrl = (relativeUrl: string) => {
   return `https://localhost:7005${relativeUrl}`;
 };
+
+export const deleteMedia = async (mediaId: number): Promise<boolean> => {
+  const res = await api.delete<boolean>(`/media/${mediaId}`);
+  return res.data;
+};
