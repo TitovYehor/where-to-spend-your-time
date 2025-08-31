@@ -66,6 +66,7 @@ public class ItemService : IItemService
             var dto = _mapper.Map<ItemDto>(i);
             dto.CategoryName = i.Category?.Name ?? "Unknown";
             dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
+            dto.Media = dto.Media.OrderByDescending(m => m.Type).ThenBy(m => m.Id).ToList();
             return dto;
         }).ToList();
 
@@ -94,6 +95,7 @@ public class ItemService : IItemService
         var dto = _mapper.Map<ItemDto>(item);
         dto.CategoryName = item.Category?.Name ?? "Unknown";
         dto.AverageRating = item.Reviews.Count != 0 ? item.Reviews.Average(r => r.Rating) : 0;
+        dto.Media = dto.Media.OrderByDescending(m => m.Type).ThenBy(m => m.Id).ToList();
         return dto;
     }
 
@@ -134,7 +136,6 @@ public class ItemService : IItemService
             ItemId = item.Id,
             TagId = tag.Id
         });
-
 
         await _db.SaveChangesAsync();
 
