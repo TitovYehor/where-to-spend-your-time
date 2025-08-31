@@ -8,7 +8,7 @@ import type { Tag } from "../../types/tag";
 import { getTags } from "../../services/tagService";
 import Select from "react-select";
 import type { MediaType } from "../../types/media";
-import { getMediaUrl, uploadMedia } from "../../services/mediaService";
+import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaService";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -91,7 +91,7 @@ export default function AdminItems() {
         setItems((prev) =>
           prev.map((i) => (i.id === editingId ? updatedItem : i))
         );
-        setMessage("Item updated11");
+        setMessage("Item updated");
       } else {
         const newItem = await addItem(form);
         setItems((prev) => [...prev, newItem]);
@@ -207,6 +207,30 @@ export default function AdminItems() {
     } catch (err) {
       handleApiError(err);
       setError("Failed to upload media");
+      setMessage("");
+    }
+  };
+
+  const handleDeleteMedia = async (mediaId: number) => {
+    if (!editingId) return;
+    if (!confirm("Are you sure you want to delete this media?")) return;
+
+    try {
+      const success = await deleteMedia(mediaId);
+      if (success) {
+        const updatedItem = await getItemById(editingId);
+        setItems((prev) =>
+          prev.map((i) => (i.id === editingId ? updatedItem : i))
+        );
+        setMessage("Media deleted successfully");
+        setError("");
+      } else {
+        setError("Failed to delete media");
+        setMessage("");
+      }
+    } catch (err) {
+      handleApiError(err);
+      setError("Error deleting media");
       setMessage("");
     }
   };
@@ -357,27 +381,40 @@ export default function AdminItems() {
 
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-2">Uploaded Media</h3>
-              <div className="flex flex-wrap gap-4">
-                {items.find((i) => i.id === editingId)?.media.map((m) => (
-                  <div key={m.id} className="flex flex-col items-center">
-                    {m.type === "Image" ? (
-                      <img
-                        src={getMediaUrl(m.url)}
-                        alt="Media"
-                        className="w-32 h-32 object-cover rounded-lg shadow cursor-pointer"
-                        onClick={() => window.open(m.url, "_blank")}
-                      />
-                    ) : (
-                      <video
-                        src={m.url}
-                        controls
-                        className="w-48 rounded-lg shadow cursor-pointer"
-                        onClick={() => window.open(m.url, "_blank")}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+              {items.find((i) => i.id === editingId)?.media.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">No media uploaded yet</p>
+              ) : (
+                <div className="flex flex-wrap gap-4">
+                  {items.find((i) => i.id === editingId)?.media.map((m) => (
+                    <div key={m.id} className="relative group flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMedia(m.id)}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded p-1 text-xs opacity-80 hover:opacity-100 transition hidden group-hover:block"
+                        title="Delete media"
+                      >
+                        ✕
+                      </button>
+                      
+                      {m.type === "Image" ? (
+                        <img
+                          src={getMediaUrl(m.url)}
+                          alt="Media"
+                          className="w-32 h-32 object-cover rounded-lg shadow cursor-pointer"
+                          onClick={() => window.open(getMediaUrl(m.url), "_blank")}
+                        />
+                      ) : (
+                        <video
+                          src={getMediaUrl(m.url)}
+                          controls
+                          className="w-64 h-40 object-cover rounded-lg shadow cursor-pointer"
+                          onClick={() => window.open(getMediaUrl(m.url), "_blank")}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-6 space-y-4">
