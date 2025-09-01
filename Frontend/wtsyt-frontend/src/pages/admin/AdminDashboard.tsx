@@ -3,13 +3,14 @@ import { Tag, Boxes, FolderCog, User } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
-    <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
+    <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       <h1 id="admin-heading" className="text-3xl font-bold mb-6">Admin Panel</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
           to="/admin/categories"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] 
+                     text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
             <FolderCog className="w-8 h-8 text-blue-600 mb-2" />
@@ -20,7 +21,8 @@ export default function AdminDashboard() {
 
         <Link
           to="/admin/items"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] 
+                     text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
             <Boxes className="w-8 h-8 text-blue-600 mb-2" />
@@ -31,7 +33,8 @@ export default function AdminDashboard() {
 
         <Link
           to="/admin/tags"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] 
+                     text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
             <Tag className="w-8 h-8 text-blue-600 mb-2" />
@@ -42,7 +45,8 @@ export default function AdminDashboard() {
 
         <Link
           to="/admin/users"
-          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="block p-6 bg-white rounded-xl shadow hover:shadow-md transition-transform hover:scale-[1.02] 
+                     text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
             <User className="w-8 h-8 text-blue-600 mb-2" />
