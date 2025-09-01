@@ -29,7 +29,7 @@ export default function Stats() {
   if (!stats) return <p className="text-center mt-10 text-gray-500">No statistics available</p>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/60 backdrop-blur-md rounded-xl shadow-lg">
+    <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       <h1 className="text-3xl font-bold mb-8 text-center">Platform Statistics</h1>
 
       <section className="mb-10">
