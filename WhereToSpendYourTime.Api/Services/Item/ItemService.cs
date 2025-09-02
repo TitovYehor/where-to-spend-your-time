@@ -45,12 +45,26 @@ public class ItemService : IItemService
         
         var totalCount = await query.CountAsync();
 
+        const double ratingWeight = 2.0;
+        const double reviewWeight = 0.5;
+
         query = filter.SortBy?.ToLower() switch
         {
             "title" => filter.Descending ? query.OrderByDescending(i => i.Title) : query.OrderBy(i => i.Title),
             "rating" => filter.Descending
-                ? query.OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
-                : query.OrderBy(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0),
+                ? query
+                    .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                    .ThenByDescending(i => i.Reviews.Count)
+                : query
+                    .OrderBy(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                    .ThenBy(i => i.Reviews.Count),
+            "popularity" => filter.Descending
+                ? query.OrderByDescending(i =>
+                    (i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) * ratingWeight : 0) +
+                    (i.Reviews.Count * reviewWeight))
+                : query.OrderBy(i =>
+                    (i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) * ratingWeight : 0) +
+                    (i.Reviews.Count * reviewWeight)),
             _ => query.OrderByDescending(i => i.Id)
         };
 
