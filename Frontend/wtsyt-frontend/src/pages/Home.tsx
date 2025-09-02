@@ -39,6 +39,7 @@ export default function Home() {
     { value: "", label: "Default" },
     { value: "title", label: "Title" },
     { value: "rating", label: "Rating" },
+    { value: "popularity", label: "Popularity" },
   ];
 
   const tagOptions = tags.map(tag => ({ value: tag.id, label: tag.name }));
