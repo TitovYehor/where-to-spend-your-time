@@ -24,6 +24,14 @@ public class CategoriesController : ControllerBase
         return Ok(categories);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPagedCategories([FromQuery] CategoryFilterRequest filter)
+    { 
+        var categories = await _categoryService.GetPagedCategoriesAsync(filter);
+
+        return Ok(categories);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCategoryById(int id)
     {
