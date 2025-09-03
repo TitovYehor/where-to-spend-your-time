@@ -10,3 +10,8 @@ export type CategoryCreateRequest = {
 export type CategoryUpdateRequest = {
   name: string;
 };
+
+export type CategoryPagedResult = {
+  categories: Category[];
+  totalCount: number;
+};
