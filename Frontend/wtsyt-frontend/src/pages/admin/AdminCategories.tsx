@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { getCategories, addCategory, updateCategory, deleteCategory } from "../../services/categoryService";
-import type { Category } from "../../types/category";
+import { addCategory, updateCategory, deleteCategory, getPagedCategories } from "../../services/categoryService";
+import type { Category, CategoryPagedResult } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   
@@ -19,8 +23,14 @@ export default function AdminCategories() {
 
   const fetchCategories = async () => {
     try {
-      const data = await getCategories();
-      setCategories(data);
+      setLoading(true);
+      const data: CategoryPagedResult = await getPagedCategories({
+        search,
+        page,
+        pageSize
+      });
+      setCategories(data.categories);
+      setTotalCount(data.totalCount);
     } catch (err) {
       handleApiError(err);
       setError("Failed to load categories");
@@ -31,7 +41,9 @@ export default function AdminCategories() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [search, page, pageSize]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,10 +55,12 @@ export default function AdminCategories() {
     try {
       if (editingId !== null) {
         await updateCategory(editingId, { name });
+        fetchCategories()
         setEditingId(null);
         setMessage("Category updated");
       } else {
         await addCategory({ name });
+        fetchCategories()
         setMessage("Category added");
       }
       setName("");
@@ -154,11 +168,6 @@ export default function AdminCategories() {
             </button>
           )}
         </div>
-        {error && ( 
-          <p className="text-red-500 text-sm">
-            {error}
-            </p>
-        )}
       </form>
 
       <div className="mb-3">
@@ -170,7 +179,10 @@ export default function AdminCategories() {
           type="text"
           placeholder="Search categories..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -180,33 +192,55 @@ export default function AdminCategories() {
       ) : categories.length === 0 ? (
         <p className="text-gray-600">No categories found.</p>
       ) : (
-        <ul className="space-y-6">
-          {filteredCategories.map((cat) => (
-            <li
-              key={cat.id}
-              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+        <>
+          <ul className="space-y-6">
+            {filteredCategories.map((cat) => (
+              <li
+                key={cat.id}
+                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex-1">
+                  <span className="text-lg font-medium text-gray-900">{cat.name}</span>
+                </div>
+                
+                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
+                  <button
+                    onClick={() => handleEdit(cat)}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(cat.id)}
+                    className="text-red-600 hover:underline font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex justify-center items-center gap-3 mt-6">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
             >
-              <div className="flex-1">
-                <span className="text-lg font-medium text-gray-900">{cat.name}</span>
-              </div>
-              
-              <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                <button
-                  onClick={() => handleEdit(cat)}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(cat.id)}
-                  className="text-red-600 hover:underline font-medium"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+              Prev
+            </button>
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
