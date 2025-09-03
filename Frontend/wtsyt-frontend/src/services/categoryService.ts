@@ -1,6 +1,7 @@
 import api from '../api/axios.ts';
-import type { Category, CategoryCreateRequest, CategoryPagedResult, CategoryUpdateRequest } from '../types/category.ts';
+import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from '../types/category.ts';
 import type { Item } from '../types/item.ts';
+import type { CategoryPagedResult } from '../types/pagination/pagedResult.ts';
 
 export const buildCategoryQuery = (params: {
   search?: string;

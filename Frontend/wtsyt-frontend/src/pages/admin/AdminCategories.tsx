@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { addCategory, updateCategory, deleteCategory, getPagedCategories } from "../../services/categoryService";
-import type { Category, CategoryPagedResult } from "../../types/category";
+import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
+import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -29,7 +30,7 @@ export default function AdminCategories() {
         page,
         pageSize
       });
-      setCategories(data.categories);
+      setCategories(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
       handleApiError(err);
