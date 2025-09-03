@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Extensions;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -26,6 +28,24 @@ public class TagService : ITagService
             .ToListAsync();
 
         return tags;
+    }
+
+    public async Task<PagedResult<TagDto>> GetPagedTagsAsync(TagFilterRequest filter)
+    {
+        var query = _db.Tags.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(c => c.Name.ToLower().Contains(filter.Search.ToLower()));
+        }
+
+        query = query.OrderBy(c => c.Name);
+
+        var pagedResult = await query
+            .Select(c => _mapper.Map<TagDto>(c))
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return pagedResult;
     }
 
     public async Task<TagDto?> GetTagByIdAsync(int id)
