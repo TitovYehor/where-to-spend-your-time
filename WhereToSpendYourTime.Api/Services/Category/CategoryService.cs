@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Data;
@@ -26,6 +27,30 @@ public class CategoryService : ICategoryService
             .ToListAsync();
         
         return categories;
+    }
+
+    public async Task<PagedCategoryResult> GetPagedCategoriesAsync(CategoryFilterRequest filter)
+    { 
+        var query = _db.Categories.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(c => c.Name.ToLower().Contains(filter.Search.ToLower()));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        query = query.OrderBy(c => c.Name);
+
+        var paged = await query
+            .Select(c => _mapper.Map<CategoryDto>(c))
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return new PagedCategoryResult 
+        { 
+            Categories = paged.Items,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id)

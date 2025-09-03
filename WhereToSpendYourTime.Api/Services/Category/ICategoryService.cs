@@ -7,6 +7,8 @@ public interface ICategoryService
 {
     Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
 
+    Task<PagedCategoryResult> GetPagedCategoriesAsync(CategoryFilterRequest filter);
+
     Task<CategoryDto?> GetByIdAsync(int id);
 
     Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId);
