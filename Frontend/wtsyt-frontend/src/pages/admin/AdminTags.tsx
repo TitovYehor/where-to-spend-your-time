@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { getTags, addTag, updateTag, deleteTag } from "../../services/tagService.ts";
+import { addTag, updateTag, deleteTag, getPagedTags } from "../../services/tagService.ts";
 import type { Tag } from "../../types/tag";
 import { handleApiError } from "../../utils/handleApi";
+import type { TagPagedResult } from "../../types/pagination/pagedResult.ts";
 
 export default function AdminTags() {
   const [tags, setTags] = useState<Tag[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
 
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -19,8 +24,14 @@ export default function AdminTags() {
 
   const fetchTags = async () => {
     try {
-      const data = await getTags();
-      setTags(data);
+      setLoading(true);
+      const data: TagPagedResult = await getPagedTags({
+        search,
+        page,
+        pageSize
+      });
+      setTags(data.items);
+      setTotalCount(data.totalCount);
     } catch (err) {
       handleApiError(err);
       setError("Failed to load tags");
@@ -31,7 +42,9 @@ export default function AdminTags() {
 
   useEffect(() => {
     fetchTags();
-  }, []);
+  }, [search, page, pageSize]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,10 +56,12 @@ export default function AdminTags() {
     try {
       if (editingId !== null) {
         await updateTag(editingId, { name });
+        fetchTags();
         setEditingId(null);
         setMessage("Tag updated");
       } else {
         await addTag({ name });
+        fetchTags();
         setMessage("Tag added");
       }
       setName("");
@@ -168,7 +183,10 @@ export default function AdminTags() {
           type="text"
           placeholder="Search tags..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -178,35 +196,57 @@ export default function AdminTags() {
       ) : tags.length === 0 ? (
         <p className="text-gray-600">No tags found</p>
       ) : (
-        <ul className="space-y-6">
-          {filteredtags.map((tag) => (
-            <li
-              key={tag.id}
-              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
-            >
-              <div className="flex-1">
-                <span className="text-lg font-medium text-gray-900">{tag.name}</span>
-              </div>
+        <>
+          <ul className="space-y-6">
+            {filteredtags.map((tag) => (
+              <li
+                key={tag.id}
+                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex-1">
+                  <span className="text-lg font-medium text-gray-900">{tag.name}</span>
+                </div>
 
-              <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                <button
-                  onClick={() => handleEdit(tag)}
-                  className="text-blue-600 hover:underline font-medium"
-                  aria-label={`Edit ${tag.name}`}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(tag.id)}
-                  className="text-red-600 hover:underline font-medium"
-                  aria-label={`Delete ${tag.name}`}
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
+                  <button
+                    onClick={() => handleEdit(tag)}
+                    className="text-blue-600 hover:underline font-medium"
+                    aria-label={`Edit ${tag.name}`}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(tag.id)}
+                    className="text-red-600 hover:underline font-medium"
+                    aria-label={`Delete ${tag.name}`}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex justify-center items-center gap-3 mt-6">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
