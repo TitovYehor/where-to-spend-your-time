@@ -1,5 +1,6 @@
 ﻿using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Pagination;
 
 namespace WhereToSpendYourTime.Api.Services.Category;
 
@@ -7,7 +8,7 @@ public interface ICategoryService
 {
     Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
 
-    Task<PagedCategoryResult> GetPagedCategoriesAsync(CategoryFilterRequest filter);
+    Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(CategoryFilterRequest filter);
 
     Task<CategoryDto?> GetByIdAsync(int id);
 

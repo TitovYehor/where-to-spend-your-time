@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Services.Category;
@@ -29,7 +30,7 @@ public class CategoryService : ICategoryService
         return categories;
     }
 
-    public async Task<PagedCategoryResult> GetPagedCategoriesAsync(CategoryFilterRequest filter)
+    public async Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(CategoryFilterRequest filter)
     { 
         var query = _db.Categories.AsNoTracking().AsQueryable();
 
@@ -38,19 +39,13 @@ public class CategoryService : ICategoryService
             query = query.Where(c => c.Name.ToLower().Contains(filter.Search.ToLower()));
         }
 
-        var totalCount = await query.CountAsync();
-
         query = query.OrderBy(c => c.Name);
 
-        var paged = await query
+        var pagedResult = await query
             .Select(c => _mapper.Map<CategoryDto>(c))
             .ToPagedResultAsync(filter.Page, filter.PageSize);
 
-        return new PagedCategoryResult 
-        { 
-            Categories = paged.Items,
-            TotalCount = totalCount
-        };
+        return pagedResult;
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id)
