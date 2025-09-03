@@ -24,6 +24,14 @@ public class TagsController : ControllerBase
         return Ok(tags);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPagedTags([FromQuery] TagFilterRequest filter)
+    {
+        var tags = await _tagService.GetPagedTagsAsync(filter);
+
+        return Ok(tags);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTagById(int id)
     {
