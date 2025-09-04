@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Comment;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Data;
@@ -38,6 +40,39 @@ public class UserService : IUserService
         }
 
         return usersDto.OrderBy(u => u.Role);
+    }
+
+    public async Task<PagedResult<ApplicationUserDto>> GetPagedUsersAsync(UserFilterRequest filter)
+    {
+        var queryDto = _db.Users
+            .AsNoTracking()
+            .GroupJoin(_db.UserRoles,
+                u => u.Id,
+                ur => ur.UserId,
+                (user, userRoles) => new { user, userRoles })
+            .SelectMany(x => x.userRoles.DefaultIfEmpty(),
+                (x, userRole) => new { x.user, userRole })
+            .GroupJoin(_db.Roles,
+                t => t.userRole!.RoleId,
+                r => r.Id,
+                (t, roles) => new { t.user, roles })
+            .SelectMany(t => t.roles.DefaultIfEmpty(),
+                (t, role) => new ApplicationUserDto
+                {
+                    Id = t.user.Id,
+                    DisplayName = t.user.DisplayName,
+                    Email = t.user.Email,
+                    Role = role != null ? role.Name : null
+                });
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            queryDto = queryDto.Where(u => u.DisplayName.ToLower().Contains(filter.Search.ToLower()));
+        }
+
+        queryDto = queryDto.OrderBy(u => u.Role).ThenBy(u => u.DisplayName).ThenBy(u => u.DisplayName);
+
+        return await queryDto.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)

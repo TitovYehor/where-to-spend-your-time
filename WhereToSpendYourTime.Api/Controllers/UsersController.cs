@@ -28,6 +28,15 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPagedUsers([FromQuery] UserFilterRequest filter)
+    {
+        var pagedUsers = await _userService.GetPagedUsersAsync(filter);
+
+        return Ok(pagedUsers);
+    }
+
     [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile()
