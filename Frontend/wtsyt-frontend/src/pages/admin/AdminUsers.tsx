@@ -1,23 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { deleteUser, getAllUsers, getRoles, updateUserRole } from "../../services/userService.ts";
+import { deleteUser, getPagedUsers, getRoles, updateUserRole } from "../../services/userService.ts";
 import type { AuthUser } from "../../types/authUser.ts";
 import { handleApiError } from "../../utils/handleApi";
 import Select from "react-select";
 import { useAuth } from "../../contexts/AuthContext.tsx";
 import UserProfileLink from "../../components/users/UserProfileLinks.tsx";
+import type { UserPagedResult } from "../../types/pagination/pagedResult.ts";
 
 export default function AdminUsers() {
   const { user } = useAuth();
 
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
 
   const [role, setRole] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>(""); 
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -31,12 +36,14 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     try {
-      const[usersList, rolesList] = await Promise.all([
-        getAllUsers(),
-        getRoles(),
-      ]);
-      setUsers(usersList);
-      setRoles(rolesList);
+      setLoading(true);
+      const data: UserPagedResult = await getPagedUsers({
+        search,
+        page,
+        pageSize
+      });
+      setUsers(data.items);
+      setTotalCount(data.totalCount);
     } catch (err) {
       handleApiError(err);
       setError("Failed to load data");
@@ -47,7 +54,23 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchData();
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try
+      {
+        const roles = await getRoles();
+        setRoles(roles);
+      } catch (e) {
+        handleApiError(e);
+      }
+    };
+    
+    fetchRoles();
   }, []);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +82,7 @@ export default function AdminUsers() {
     try {
       if (editingId !== null) {
         await updateUserRole(editingId, { Role: role });
+        fetchData();
         setEditingId(null);
         setMessage("User role updated");
       }
@@ -200,7 +224,10 @@ export default function AdminUsers() {
             type="text"
             placeholder="Search users..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full border border-gray-300 px-4 py-1.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -224,55 +251,77 @@ export default function AdminUsers() {
       ) : filteredUsers.length === 0 ? (
         <p className="text-gray-600 text-center">No users found</p>
       ) : (
-        <ul className="space-y-4">
-          {filteredUsers.map((user) => (
-            <li
-              key={user.id}
-              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+        <>
+          <ul className="space-y-4">
+            {filteredUsers.map((user) => (
+              <li
+                key={user.id}
+                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex-1">
+                  <p className="text-lg font-semibold text-gray-900">
+                    <UserProfileLink
+                      userId={user.id}
+                      name={user.displayName}
+                      className="text-lg font-semibold"
+                    />
+                  </p>
+                </div>
+
+                <div className="mt-2 sm:mt-0">
+                  <span
+                    className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
+                      user.role === "Admin"
+                        ? "bg-red-100 text-red-700"
+                        : user.role === "Moderator"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </div>
+
+                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
+                  <button
+                    onClick={() => handleEdit(user)}
+                    className="text-blue-600 hover:underline font-medium"
+                    aria-label={`Edit ${user.displayName}`}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="text-red-600 hover:underline font-medium"
+                    aria-label={`Delete ${user.displayName}`}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex justify-center items-center gap-3 mt-6">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
             >
-              <div className="flex-1">
-                <p className="text-lg font-semibold text-gray-900">
-                  <UserProfileLink
-                    userId={user.id}
-                    name={user.displayName}
-                    className="text-lg font-semibold"
-                  />
-                </p>
-              </div>
-
-              <div className="mt-2 sm:mt-0">
-                <span
-                  className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                    user.role === "Admin"
-                      ? "bg-red-100 text-red-700"
-                      : user.role === "Moderator"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {user.role}
-                </span>
-              </div>
-
-              <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                <button
-                  onClick={() => handleEdit(user)}
-                  className="text-blue-600 hover:underline font-medium"
-                  aria-label={`Edit ${user.displayName}`}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(user.id)}
-                  className="text-red-600 hover:underline font-medium"
-                  aria-label={`Delete ${user.displayName}`}
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+              Prev
+            </button>
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
