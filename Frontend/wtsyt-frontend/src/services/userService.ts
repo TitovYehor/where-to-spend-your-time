@@ -1,9 +1,34 @@
 import api from '../api/axios.ts';
 import type { AuthUser } from '../types/authUser.ts';
+import type { UserPagedResult } from '../types/pagination/pagedResult.ts';
 import type { ChangePasswordRequest, UpdateProfileRequest, UpdateUserRoleRequest } from '../types/profileRequests.ts';
+
+export const buildUserQuery = (params: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): string => {
+  const query = new URLSearchParams();
+
+  if (params.search) query.append("search", params.search);
+  if (params.page !== undefined) query.append("page", params.page.toString());
+  if (params.pageSize !== undefined) query.append("pageSize", params.pageSize.toString());
+  
+  return query.toString();
+};
 
 export const getAllUsers = async (): Promise<AuthUser[]> => {
   const res = await api.get<AuthUser[]>('/users');
+  return res.data;
+};
+
+export const getPagedUsers = async (params: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<UserPagedResult> => {
+  const query = buildUserQuery(params);
+  const res = await api.get<UserPagedResult>(`/users/paged?${query}`);
   return res.data;
 };
 
