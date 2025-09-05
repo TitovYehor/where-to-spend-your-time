@@ -1,8 +1,30 @@
 import api from '../api/axios.ts';
+import type { ReviewPagedResult } from '../types/pagination/pagedResult.ts';
 import type { Review, ReviewCreateRequest, ReviewUpdateRequest } from '../types/review.ts';
+
+export const buildReviewQuery = (params: {
+  page?: number;
+  pageSize?: number;
+}): string => {
+  const query = new URLSearchParams();
+
+  if (params.page !== undefined) query.append("page", params.page.toString());
+  if (params.pageSize !== undefined) query.append("pageSize", params.pageSize.toString());
+  
+  return query.toString();
+};
 
 export const getReviewsForItem = async (itemId: number): Promise<Review[]> => {
   const res = await api.get<Review[]>(`/items/${itemId}/reviews`);
+  return res.data;
+};
+
+export const getPagedReviewsForItem = async (itemId: number, params: {
+  page?: number;
+  pageSize?: number;
+}): Promise<ReviewPagedResult> => {
+  const query = buildReviewQuery(params);
+  const res = await api.get<ReviewPagedResult>(`/items/${itemId}/reviews/paged?${query}`);
   return res.data;
 };
 
