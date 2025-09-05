@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Extensions;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Data;
 
@@ -25,6 +27,23 @@ public class ReviewService : IReviewService
             .ToListAsync();
 
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+    }
+
+    public async Task<PagedResult<ReviewDto>> GetPagedReviewsForItemAsync(int itemId, ReviewFilterRequest filter)
+    {
+        var query = _db.Reviews
+            .AsNoTracking()
+            .AsQueryable()
+            .Include(r => r.User)
+            .Where(r => r.ItemId == itemId);
+
+        query = query.OrderByDescending(r => r.CreatedAt);
+
+        var pagedResult = await query
+            .Select(r => _mapper.Map<ReviewDto>(r))
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return pagedResult;
     }
 
     public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
