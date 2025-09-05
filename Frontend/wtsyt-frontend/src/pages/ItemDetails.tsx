@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import type { Item } from "../types/item";
 import type { Review } from "../types/review";
 import { getItemById } from "../services/itemService";
-import { getMyReviewForItem, getReviewsForItem, addReview, updateReview, deleteReview } from "../services/reviewService";
+import { getMyReviewForItem, addReview, updateReview, deleteReview, getPagedReviewsForItem } from "../services/reviewService";
 import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
 
@@ -17,6 +17,10 @@ export default function ItemDetails() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [myReview, setMyReview] = useState<Review | null>(null);
 
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(3);
+  
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
@@ -24,43 +28,48 @@ export default function ItemDetails() {
 
   const itemId = Number(id);
 
-  const fetchData = async () => {
-    if (isNaN(itemId)) {
-      console.error("Invalid item id", id);
-      return;
-    }
-
+  const fetchItem = async () => {
+    if (isNaN(itemId)) return;
     try {
-      const [itemData, reviewsData] = await Promise.all([
-        getItemById(itemId),
-        getReviewsForItem(itemId),
-      ]);
+      const itemData = await getItemById(itemId);
       setItem(itemData);
-      setReviews(reviewsData);
     } catch (e) {
       handleApiError(e);
-      return;
     }
+  };
 
-    if (user) {
-      try {
-        const myReviewData = await getMyReviewForItem(itemId);
-        setMyReview(myReviewData);
-        setTitle(myReviewData.title);
-        setContent(myReviewData.content);
-        setRating(myReviewData.rating);
-      } catch {
-        setMyReview(null);
-        setTitle("");
-        setContent("");
-        setRating(0);
-      }
+  const fetchReviews = async () => {
+    if (isNaN(itemId)) return;
+    try {
+      const reviewsData = await getPagedReviewsForItem(itemId, { page, pageSize });
+      setReviews(reviewsData.items);
+      setTotalReviews(reviewsData.totalCount);
+    } catch (e) {
+      handleApiError(e);
+    }
+  };
+
+  const fetchMyReview = async () => {
+    if (!user || isNaN(itemId)) return;
+    try {
+      const myReviewData = await getMyReviewForItem(itemId);
+      setMyReview(myReviewData);
+      setTitle(myReviewData.title);
+      setContent(myReviewData.content);
+      setRating(myReviewData.rating);
+    } catch {
+      setMyReview(null);
+      setTitle("");
+      setContent("");
+      setRating(0);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [id, user]);
+    fetchItem();
+    fetchReviews();
+    fetchMyReview();
+  }, [id, user, page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +87,8 @@ export default function ItemDetails() {
         await addReview({ itemId, title, content, rating });
       }
 
-      await fetchData();
+      await fetchReviews();
+      await fetchMyReview();
     } catch (e: any) {
       setError(e?.response?.data?.message || "Failed to submit review");
     }
@@ -94,7 +104,8 @@ export default function ItemDetails() {
       setContent("");
       setRating(0);
 
-      await fetchData();
+      await fetchReviews();
+      await fetchMyReview();
     } catch (e) {
       handleApiError(e);
     }
@@ -193,24 +204,46 @@ export default function ItemDetails() {
           {reviews.length === 0 ? (
             <p className="text-gray-500">No reviews yet</p>
           ) : (
-            <ul className="space-y-4">
-              {reviews.map((review) => (
-                <li key={review.id}>
-                  <Link 
-                    to={`/reviews/${review.id}`}
-                    className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                  >
-                    <h3 className="text-lg font-semibold mb-1">{review.title}</h3>
-                    <p className="text-sm text-gray-500 mb-1">By {review.author}</p>
-                    <p className="text-sm text-gray-700 mb-1">Content: {review.content}</p>
-                    <p className="text-yellow-500 font-medium mb-1">Rating: {review.rating}/5</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="space-y-4">
+                {reviews.map((review) => (
+                  <li key={review.id}>
+                    <Link 
+                      to={`/reviews/${review.id}`}
+                      className="block p-4 bg-white rounded shadow hover:shadow-md transition"
+                    >
+                      <h3 className="text-lg font-semibold mb-1">{review.title}</h3>
+                      <p className="text-sm text-gray-500 mb-1">By {review.author}</p>
+                      <p className="text-sm text-gray-700 mb-1">Content: {review.content}</p>
+                      <p className="text-yellow-500 font-medium mb-1">Rating: {review.rating}/5</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-700">
+                  Page {page} of {Math.ceil(totalReviews / pageSize)}
+                </span>
+                <button
+                  disabled={page * pageSize >= totalReviews}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </>
           )}
         </section>
 
