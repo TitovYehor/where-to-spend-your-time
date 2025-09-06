@@ -21,6 +21,9 @@ public class CategoryServiceTests
             .Options;
         _db = new AppDbContext(options);
 
+        _db.Database.EnsureDeleted();
+        _db.Database.EnsureCreated();
+
         var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<Category, CategoryDto>();
@@ -41,6 +44,83 @@ public class CategoryServiceTests
 
         Assert.Equal(2, result.Count());
     }
+
+    [Fact]
+    public async Task GetPagedCategoriesAsync_ReturnsPagedResults()
+    {
+        _db.Categories.AddRange(
+            new Category { Name = "Alpha" },
+            new Category { Name = "Beta" },
+            new Category { Name = "Gamma" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new CategoryFilterRequest { Page = 1, PageSize = 2 };
+
+        var result = await _service.GetPagedCategoriesAsync(filter);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal("Alpha", result.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task GetPagedCategoriesAsync_AppliesSearchFilter()
+    {
+        _db.Categories.AddRange(
+            new Category { Name = "Books" },
+            new Category { Name = "Movies" },
+            new Category { Name = "Music" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new CategoryFilterRequest { Page = 1, PageSize = 10, Search = "Mo" };
+
+        var result = await _service.GetPagedCategoriesAsync(filter);
+
+        Assert.Single(result.Items);
+        Assert.Equal("Movies", result.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task GetPagedCategoriesAsync_ReturnsEmpty_WhenNoMatches()
+    {
+        _db.Categories.AddRange(
+            new Category { Name = "Books" },
+            new Category { Name = "Games" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new CategoryFilterRequest { Page = 1, PageSize = 10, Search = "zzz" };
+
+        var result = await _service.GetPagedCategoriesAsync(filter);
+
+        Assert.NotNull(result);
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
+    }
+
+    [Fact]
+    public async Task GetPagedCategoriesAsync_ReturnsCorrectPage()
+    {
+        _db.Categories.AddRange(
+            new Category { Name = "Alpha" },
+            new Category { Name = "Beta" },
+            new Category { Name = "Gamma" },
+            new Category { Name = "Delta" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new CategoryFilterRequest { Page = 2, PageSize = 2 };
+
+        var result = await _service.GetPagedCategoriesAsync(filter);
+
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal("Delta", result.Items[0].Name);
+        Assert.Equal("Gamma", result.Items[result.Items.Count - 1].Name);
+    }
+
 
     [Fact]
     public async Task GetByIdAsync_ReturnsCategory_WhenExists()
