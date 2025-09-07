@@ -46,6 +46,82 @@ public class TagServiceTests
     }
 
     [Fact]
+    public async Task GetPagedTagsAsync_ReturnsPagedResults()
+    {
+        _db.Tags.AddRange(
+            new Tag { Name = "Alpha" },
+            new Tag { Name = "Beta" },
+            new Tag { Name = "Gamma" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new TagFilterRequest { Page = 1, PageSize = 2 };
+
+        var result = await _service.GetPagedTagsAsync(filter);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal("Alpha", result.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task GetPagedTagsAsync_AppliesSearchFilter()
+    {
+        _db.Tags.AddRange(
+            new Tag { Name = "Books" },
+            new Tag { Name = "Movies" },
+            new Tag { Name = "Music" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new TagFilterRequest { Page = 1, PageSize = 10, Search = "Mo" };
+
+        var result = await _service.GetPagedTagsAsync(filter);
+
+        Assert.Single(result.Items);
+        Assert.Equal("Movies", result.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task GetPagedTagsAsync_ReturnsEmpty_WhenNoMatches()
+    {
+        _db.Tags.AddRange(
+            new Tag { Name = "Books" },
+            new Tag { Name = "Games" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new TagFilterRequest { Page = 1, PageSize = 10, Search = "zzz" };
+
+        var result = await _service.GetPagedTagsAsync(filter);
+
+        Assert.NotNull(result);
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
+    }
+
+    [Fact]
+    public async Task GetPagedTagsAsync_ReturnsCorrectPage()
+    {
+        _db.Tags.AddRange(
+            new Tag { Name = "Alpha" },
+            new Tag { Name = "Beta" },
+            new Tag { Name = "Gamma" },
+            new Tag { Name = "Delta" }
+        );
+        await _db.SaveChangesAsync();
+
+        var filter = new TagFilterRequest { Page = 2, PageSize = 2 };
+
+        var result = await _service.GetPagedTagsAsync(filter);
+
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal("Delta", result.Items[0].Name);
+        Assert.Equal("Gamma", result.Items[result.Items.Count - 1].Name);
+    }
+
+    [Fact]
     public async Task GetTagByIdAsync_ReturnsTag_WhenExists()
     {
         var tag = new Tag { Name = "Test" };
