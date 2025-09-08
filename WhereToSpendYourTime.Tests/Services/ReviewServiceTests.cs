@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Review;
+using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Review;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -50,6 +52,62 @@ public class ReviewServiceTests
 
         Assert.Equal(2, result.Count);
         Assert.Equal("New", result[0].Title);
+    }
+
+    [Fact]
+    public async Task GetPagedReviewsForItemAsync_ReturnsPagedResults()
+    {
+        var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
+        var item = new Item { Title = "Item" };
+
+        var reviews = new List<Review>
+        {
+            new Review { Title = "One", Item = item, User = user, CreatedAt = DateTime.UtcNow },
+            new Review { Title = "Two", Item = item, User = user, CreatedAt = DateTime.UtcNow.AddMinutes(1) },
+            new Review { Title = "Three", Item = item, User = user, CreatedAt = DateTime.UtcNow.AddMinutes(2) }
+        };
+
+        _db.Users.Add(user);
+        _db.Items.Add(item);
+        _db.Reviews.AddRange(reviews);
+        await _db.SaveChangesAsync();
+
+        var filter = new ReviewFilterRequest { Page = 1, PageSize = 2 };
+
+        var result = await _service.GetPagedReviewsForItemAsync(item.Id, filter);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal("Three", result.Items[0].Title);
+    }
+
+    [Fact]
+    public async Task GetPagedTagsAsync_ReturnsCorrectPage()
+    {
+        var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
+        var item = new Item { Title = "Item" };
+
+        var reviews = new List<Review>
+        {
+            new Review { Title = "One", Item = item, User = user, CreatedAt = DateTime.UtcNow },
+            new Review { Title = "Two", Item = item, User = user, CreatedAt = DateTime.UtcNow.AddMinutes(1) },
+            new Review { Title = "Three", Item = item, User = user, CreatedAt = DateTime.UtcNow.AddMinutes(2) },
+            new Review { Title = "Four", Item = item, User = user, CreatedAt = DateTime.UtcNow.AddMinutes(3) }
+        };
+
+        _db.Users.Add(user);
+        _db.Items.Add(item);
+        _db.Reviews.AddRange(reviews);
+        await _db.SaveChangesAsync();
+
+        var filter = new ReviewFilterRequest { Page = 2, PageSize = 2 };
+
+        var result = await _service.GetPagedReviewsForItemAsync(item.Id, filter);
+
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal("Two", result.Items[0].Title);
+        Assert.Equal("One", result.Items[result.Items.Count - 1].Title);
     }
 
     [Fact]
