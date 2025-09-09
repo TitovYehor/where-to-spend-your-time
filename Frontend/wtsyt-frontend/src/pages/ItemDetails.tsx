@@ -123,7 +123,7 @@ export default function ItemDetails() {
             <img
               src={getMediaUrl(firstMedia.url)}
               alt="Background"
-              className="w-full h-full object-cover opacity-50"
+              className="w-full h-full object-cover"
             />
           ) : (
             <video
@@ -131,12 +131,13 @@ export default function ItemDetails() {
               autoPlay
               muted
               loop
-              className="w-full h-full object-cover opacity-50"
+              className="w-full h-full object-cover"
             />
           )}
           <div className="absolute inset-0 bg-black/40" />
         </div>
       )}
+
       <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
         <article className="mb-7">
           <h1 className="text-4xl font-bold mb-4 text-gray-900">{item.title}</h1>
