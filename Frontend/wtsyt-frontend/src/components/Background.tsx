@@ -1,8 +1,11 @@
 interface BackgroundProps {
   solid?: boolean;
+  disabled?: boolean;
 }
 
-export default function Background({ solid = false }: BackgroundProps) {
+export default function Background({ solid = false, disabled = false }: BackgroundProps) {
+  if (disabled) return null;
+  
   if (solid) {
     return (
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
