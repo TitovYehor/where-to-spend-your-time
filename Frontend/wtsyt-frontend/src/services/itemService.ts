@@ -38,7 +38,6 @@ export const getItems = async (params: {
 }): Promise<ItemPagedResult> => {
   const query = buildItemQuery(params);
   const res = await api.get<ItemPagedResult>(`/items?${query}`);
-  console.log(res.data);
   return res.data;
 };
 
