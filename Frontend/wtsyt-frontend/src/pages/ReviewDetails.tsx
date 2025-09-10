@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
 import { deleteReview, getReviewById, updateReview } from "../services/reviewService";
-import { getCommentsForReview, addComment, deleteComment } from "../services/commentService";
+import { addComment, deleteComment, getPagedCommentsForReview } from "../services/commentService";
 import { handleApiError } from "../utils/handleApi";
 import UserProfileLink from "../components/users/UserProfileLinks";
 
@@ -17,6 +17,10 @@ export default function ReviewDetails() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
+
+  const [totalComments, setTotalComments] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(4);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -32,12 +36,13 @@ export default function ReviewDetails() {
     if (isNaN(id)) return;
 
     try {
-      const [reviewData, commentData] = await Promise.all([
+      const [reviewData, commentPagedData] = await Promise.all([
         getReviewById(id),
-        getCommentsForReview(id),
+        getPagedCommentsForReview(id, { page, pageSize }),
       ]);
       setReview(reviewData);
-      setComments(commentData);
+      setComments(commentPagedData.items);
+      setTotalComments(commentPagedData.totalCount);
     } catch (e) {
       handleApiError(e);
     }
@@ -45,7 +50,7 @@ export default function ReviewDetails() {
 
   useEffect(() => {
     fetchData();
-  }, [reviewId, user]);
+  }, [reviewId, user, page]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +59,7 @@ export default function ReviewDetails() {
     try {
       await addComment(id, { content: newComment });
       setNewComment("");
-
+      setPage(1);
       await fetchData();
     } catch (err: any) {
       handleApiError(err);
@@ -85,7 +90,6 @@ export default function ReviewDetails() {
 
     try {
       await deleteComment(commentId);
-      
       await fetchData();
     } catch (err: any) {
       handleApiError(err);
@@ -220,30 +224,54 @@ export default function ReviewDetails() {
             {comments.length === 0 ? (
               <p className="text-sm text-gray-500 mb-4">No comments yet.</p>
             ) : (
-              <ul className="space-y-4 mb-4">
-                {comments.map((c) => (
-                  <li 
-                    key={c.id} 
-                    className="border rounded-lg p-3 bg-gray-50 shadow-sm"
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <p className="text-sm text-gray-600 flex items-center gap-1"> 
-                        <UserProfileLink userId={c.userId} name={c.author} />
-                        <span>• {new Date(c.createdAt).toLocaleString()}</span>
-                      </p>
-                      {(isAdmin || c.author === user?.displayName) && (
-                        <button
-                          onClick={() => handleDeleteComment(c.id, c.author)}
-                          className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-gray-800">{c.content}</p>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="space-y-4 mb-4">
+                  {comments.map((c) => (
+                    <li 
+                      key={c.id} 
+                      className="border rounded-lg p-3 bg-gray-50 shadow-sm"
+                    >
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="text-sm text-gray-600 flex items-center gap-1"> 
+                          <UserProfileLink userId={c.userId} name={c.author} />
+                          <span>• {new Date(c.createdAt).toLocaleString()}</span>
+                        </p>
+                        {(isAdmin || c.author === user?.displayName) && (
+                          <button
+                            onClick={() => handleDeleteComment(c.id, c.author)}
+                            className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-gray-800">{c.content}</p>
+                    </li>
+                  ))}
+                </ul>
+
+                {totalComments > pageSize && (
+                  <div className="flex justify-center items-center gap-2 mt-4">
+                    <button
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => p - 1)}
+                      className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+                    >
+                      Prev
+                    </button>
+                    <span className="text-sm">
+                      Page {page} of {Math.ceil(totalComments / pageSize)}
+                    </span>
+                    <button
+                      disabled={page >= Math.ceil(totalComments / pageSize)}
+                      onClick={() => setPage((p) => p + 1)}
+                      className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             {user && (
