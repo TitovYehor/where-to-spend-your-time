@@ -28,6 +28,15 @@ export const getPagedCommentsForReview = async (reviewId: number, params: {
   return res.data;
 };
 
+export const getPagedCommentsForUser = async (userId: string, params: {
+  page?: number;
+  pageSize?: number;
+}): Promise<CommentPagedResult> => {
+  const query = buildCommentQuery(params);
+  const res = await api.get<CommentPagedResult>(`/users/${userId}/comments/paged?${query}`);
+  return res.data;
+};
+
 export const addComment = async (reviewId: number, data: CommentCreateRequest): Promise<Comment> => {
   const res = await api.post<Comment>(`/reviews/${reviewId}/comments`, data);
   return res.data;
