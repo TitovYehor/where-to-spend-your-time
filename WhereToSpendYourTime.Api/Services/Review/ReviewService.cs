@@ -46,6 +46,23 @@ public class ReviewService : IReviewService
         return pagedResult;
     }
 
+    public async Task<PagedResult<ReviewDto>> GetPagedReviewsForUserAsync(string userId, ReviewFilterRequest filter)
+    {
+        var query = _db.Reviews
+            .AsNoTracking()
+            .AsQueryable()
+            .Include(r => r.User)
+            .Where(r => r.UserId == userId);
+
+        query = query.OrderByDescending(r => r.CreatedAt);
+
+        var pagedResult = await query
+            .Select(r => _mapper.Map<ReviewDto>(r))
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return pagedResult;
+    }
+
     public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
     {
         var review = await _db.Reviews

@@ -36,6 +36,14 @@ public class ReviewsController : ControllerBase
         return Ok(pagedReviews);
     }
 
+    [HttpGet("users/{userId}/reviews/paged")]
+    public async Task<IActionResult> GetPagedReviewsForUser(string userId, [FromQuery] ReviewFilterRequest filter)
+    {
+        var pagedReviews = await _reviewService.GetPagedReviewsForUserAsync(userId, filter);
+
+        return Ok(pagedReviews);
+    }
+
     [Authorize]
     [HttpGet("items/{itemId}/reviews/my")]
     public async Task<IActionResult> GetMyReviewForItem(int itemId)

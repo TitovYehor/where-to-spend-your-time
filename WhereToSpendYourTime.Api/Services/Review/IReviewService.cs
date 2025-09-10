@@ -9,6 +9,8 @@ public interface IReviewService
 
     Task<PagedResult<ReviewDto>> GetPagedReviewsForItemAsync(int itemId, ReviewFilterRequest filter);
 
+    Task<PagedResult<ReviewDto>> GetPagedReviewsForUserAsync(string userId, ReviewFilterRequest filter);
+
     Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId);
 
     Task<ReviewDto?> GetByIdAsync(int id);
