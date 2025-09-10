@@ -17,7 +17,13 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<Item, ItemDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category!.Name))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : "Unknown"))
+            .ForMember(dest => dest.AverageRating,
+                opt => opt.MapFrom(src => src.Reviews.Select(r => (double?)r.Rating).Average() ?? 0))
+            .ForMember(dest => dest.Media,
+                opt => opt.MapFrom(src => src.Media
+                    .OrderByDescending(m => m.Type)
+                    .ThenBy(m => m.Id)))
             .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ItemTags.Select(it => it.Tag)));
         CreateMap<Review, ReviewDto>()
             .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
