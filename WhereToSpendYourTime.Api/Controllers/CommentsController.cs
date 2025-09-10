@@ -28,6 +28,14 @@ public class CommentsController : ControllerBase
         return Ok(comments);
     }
 
+    [HttpGet("reviews/{reviewId}/comments/paged")]
+    public async Task<IActionResult> GetPagedComments(int reviewId, [FromQuery] CommentFilterRequest filter)
+    { 
+        var comments = await _commentService.GetPagedCommentsByReviewIdAsync(reviewId, filter);
+
+        return Ok(comments);
+    }
+
     [Authorize]
     [HttpPost("reviews/{reviewId}/comments")]
     public async Task<IActionResult> AddComment(int reviewId, CommentCreateRequest request)
