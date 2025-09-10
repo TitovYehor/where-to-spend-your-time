@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -18,19 +22,19 @@ public class ItemService : IItemService
         _mapper = mapper;
     }
 
-    public async Task<PagedItemResult> GetFilteredItemsAsync(ItemFilterRequest filter)
+    public async Task<PagedResult<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter)
     {
+        const double ratingWeight = 2.0;
+        const double reviewWeight = 0.5;
+
         var query = _db.Items
-            .Include(i => i.Category)
-            .Include(i => i.Reviews)
-            .Include(i => i.ItemTags)
-                .ThenInclude(it => it.Tag)
-            .Include(i => i.Media)
+            .AsNoTracking()
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            query = query.Where(i => i.Title.ToLower().Contains(filter.Search.ToLower()));
+            var search = filter.Search.ToLower();
+            query = query.Where(i => i.Title.ToLower().Contains(search));
         }
 
         if (filter.CategoryId.HasValue)
@@ -38,57 +42,36 @@ public class ItemService : IItemService
             query = query.Where(i => i.CategoryId == filter.CategoryId.Value);
         }
 
-        if (filter.TagsIds.Count > 0)
+        if (filter.TagsIds?.Any() == true)
         {
             query = query.Where(i => filter.TagsIds.All(tagId => i.ItemTags.Any(it => it.TagId == tagId)));
         }
-        
-        var totalCount = await query.CountAsync();
 
-        const double ratingWeight = 2.0;
-        const double reviewWeight = 0.5;
+        Expression<Func<Data.Entities.Item, double>> avgRatingExpr = i =>
+            i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0;
 
         query = filter.SortBy?.ToLower() switch
         {
             "title" => filter.Descending ? query.OrderByDescending(i => i.Title) : query.OrderBy(i => i.Title),
+
             "rating" => filter.Descending
-                ? query
-                    .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
-                    .ThenByDescending(i => i.Reviews.Count)
-                : query
-                    .OrderBy(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
-                    .ThenBy(i => i.Reviews.Count),
+                ? query.OrderByDescending(avgRatingExpr).ThenByDescending(i => i.Reviews.Count)
+                : query.OrderBy(avgRatingExpr).ThenBy(i => i.Reviews.Count),
+
             "popularity" => filter.Descending
                 ? query.OrderByDescending(i =>
-                    (i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) * ratingWeight : 0) +
-                    (i.Reviews.Count * reviewWeight))
+                    (i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * ratingWeight
+                    + i.Reviews.Count * reviewWeight)
                 : query.OrderBy(i =>
-                    (i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) * ratingWeight : 0) +
-                    (i.Reviews.Count * reviewWeight)),
+                    (i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * ratingWeight
+                    + i.Reviews.Count * reviewWeight),
+
             _ => query.OrderByDescending(i => i.Id)
         };
 
-        int skip = (filter.Page - 1) * filter.PageSize;
+        var dtoQuery = query.ProjectTo<ItemDto>(_mapper.ConfigurationProvider);
 
-        var items = await query
-            .Skip(skip)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        var mappedItems = items.Select(i =>
-        {
-            var dto = _mapper.Map<ItemDto>(i);
-            dto.CategoryName = i.Category?.Name ?? "Unknown";
-            dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
-            dto.Media = dto.Media.OrderByDescending(m => m.Type).ThenBy(m => m.Id).ToList();
-            return dto;
-        }).ToList();
-
-        return new PagedItemResult
-        {
-            Items = mappedItems,
-            TotalCount = totalCount,
-        };
+        return await dtoQuery.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<ItemDto?> GetByIdAsync(int id)

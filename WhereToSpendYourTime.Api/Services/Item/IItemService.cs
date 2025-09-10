@@ -1,11 +1,12 @@
 ﻿using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Tags;
 
 namespace WhereToSpendYourTime.Api.Services.Item;
 
 public interface IItemService
 {
-    Task<PagedItemResult> GetFilteredItemsAsync(ItemFilterRequest filter);
+    Task<PagedResult<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter);
 
     Task<ItemDto?> GetByIdAsync(int id);
 
