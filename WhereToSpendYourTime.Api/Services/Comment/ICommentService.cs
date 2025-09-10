@@ -9,6 +9,8 @@ public interface ICommentService
 
     Task<PagedResult<CommentDto>> GetPagedCommentsByReviewIdAsync(int reviewId, CommentFilterRequest filter);
 
+    Task<PagedResult<CommentDto>> GetPagedCommentsByUserIdAsync(string userId, CommentFilterRequest filter);
+
     Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content);
 
     Task<bool> UpdateCommentAsync(int commentId, string userId, string newContent);

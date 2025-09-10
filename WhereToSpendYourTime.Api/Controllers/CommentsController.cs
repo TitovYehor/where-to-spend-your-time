@@ -29,9 +29,17 @@ public class CommentsController : ControllerBase
     }
 
     [HttpGet("reviews/{reviewId}/comments/paged")]
-    public async Task<IActionResult> GetPagedComments(int reviewId, [FromQuery] CommentFilterRequest filter)
+    public async Task<IActionResult> GetPagedCommentsByReviewId(int reviewId, [FromQuery] CommentFilterRequest filter)
     { 
         var comments = await _commentService.GetPagedCommentsByReviewIdAsync(reviewId, filter);
+
+        return Ok(comments);
+    }
+
+    [HttpGet("users/{userId}/comments/paged")]
+    public async Task<IActionResult> GetPagedCommentsByUserId(string userId, [FromQuery] CommentFilterRequest filter)
+    {
+        var comments = await _commentService.GetPagedCommentsByUserIdAsync(userId, filter);
 
         return Ok(comments);
     }
