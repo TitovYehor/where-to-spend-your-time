@@ -1,5 +1,6 @@
 import api from '../api/axios.ts';
-import type { Item, ItemsResult, ItemCreateRequest, ItemUpdateRequest } from '../types/item.ts';
+import type { Item, ItemCreateRequest, ItemUpdateRequest } from '../types/item.ts';
+import type { ItemPagedResult } from '../types/pagination/pagedResult.ts';
 import type { Tag, TagRequest } from '../types/tag.ts';
 
 export const buildItemQuery = (params: {
@@ -34,9 +35,10 @@ export const getItems = async (params: {
   descending?: boolean;
   page?: number;
   pageSize?: number;
-}): Promise<ItemsResult> => {
+}): Promise<ItemPagedResult> => {
   const query = buildItemQuery(params);
-  const res = await api.get<ItemsResult>(`/items?${query}`);
+  const res = await api.get<ItemPagedResult>(`/items?${query}`);
+  console.log(res.data);
   return res.data;
 };
 

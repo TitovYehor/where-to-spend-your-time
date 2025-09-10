@@ -12,11 +12,6 @@ export type Item = {
   media: Media[];
 };
 
-export type ItemsResult = {
-  items: Item[];
-  totalCount: number; 
-};
-
 export type ItemCreateRequest = {
   title: string;
   description: string;
