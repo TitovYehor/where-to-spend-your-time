@@ -1,10 +1,13 @@
 ﻿using WhereToSpendYourTime.Api.Models.Comment;
+using WhereToSpendYourTime.Api.Models.Pagination;
 
 namespace WhereToSpendYourTime.Api.Services.Comment;
 
 public interface ICommentService
 {
     Task<List<CommentDto>> GetCommentsByReviewIdAsync(int reviewId);
+
+    Task<PagedResult<CommentDto>> GetPagedCommentsByReviewIdAsync(int reviewId, CommentFilterRequest filter);
 
     Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content);
 

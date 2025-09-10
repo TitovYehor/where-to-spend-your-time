@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Comment;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Services.Comment;
@@ -26,6 +28,24 @@ public class CommentService : ICommentService
             .ToListAsync();
 
         return _mapper.Map<List<CommentDto>>(comments);
+    }
+
+    public async Task<PagedResult<CommentDto>> GetPagedCommentsByReviewIdAsync(int reviewId, CommentFilterRequest filter)
+    {
+        var query = _db.Comments
+            .AsNoTracking()
+            .AsQueryable()
+            .Include(r => r.User)
+            .Include(r => r.Review)
+            .Where(r => r.ReviewId == reviewId);
+
+        query = query.OrderByDescending(r => r.CreatedAt);
+
+        var pagedResult = await query
+            .Select(r => _mapper.Map<CommentDto>(r))
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return pagedResult;
     }
 
     public async Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content)
