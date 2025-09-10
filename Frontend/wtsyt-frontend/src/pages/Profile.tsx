@@ -2,18 +2,26 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
-import { getMyProfile } from "../services/userService";
 import { updatePassword, updateProfile } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
 import ReviewCard from "../components/reviews/ReviewCard";
 import CommentCard from "../components/comments/CommentCard";
+import { getPagedReviewsForUser } from "../services/reviewService";
+import { getPagedCommentsForUser } from "../services/commentService";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [totalComments, setTotalComments] = useState(0);
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentPageSize] = useState(4);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewPageSize] = useState(4);
   
   const [newDisplayName, setNewDisplayName] = useState(user?.displayName ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -23,25 +31,33 @@ const Profile = () => {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
+
       try {
-        const data = await getMyProfile();
-        setReviews(data.reviews);
-        setComments(data.comments);
+        const [reviewsData, commentsData] = await Promise.all([
+          getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize }),
+          getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize }),
+        ]);
+
+        setReviews(reviewsData.items);
+        setTotalReviews(reviewsData.totalCount);
+
+        setComments(commentsData.items);
+        setTotalComments(commentsData.totalCount);
       } catch (err) {
-        console.error("Failed to fetch profile", err);
+        handleApiError(err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (user) {
-      fetchProfile();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+    fetchData();
+  }, [user, reviewPage, commentPage]);
 
   if (!user && !loading) {
     return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;
@@ -107,8 +123,8 @@ const Profile = () => {
         <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
         <p><strong>Name:</strong> {user?.displayName}</p>
         <p className="mb-3"><strong>Email:</strong> {user?.email ?? "Not available"}</p>
-        <p><strong>Reviews count:</strong> {user?.reviews.length}</p>
-        <p><strong>Comments count:</strong> {user?.comments.length}</p>
+        <p><strong>Reviews count:</strong> {totalReviews}</p>
+        <p><strong>Comments count:</strong> {totalComments}</p>
       </article>
 
       <div className="mb-8 space-y-6">
@@ -201,6 +217,28 @@ const Profile = () => {
             ))}
           </div>
         )}
+
+        {totalReviews > reviewPageSize && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              disabled={reviewPage === 1}
+              onClick={() => setReviewPage((p) => p - 1)}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="text-sm">
+              Page {reviewPage} of {Math.ceil(totalReviews / reviewPageSize)}
+            </span>
+            <button
+              disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
+              onClick={() => setReviewPage((p) => p + 1)}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mb-10 space-y-6">
@@ -213,6 +251,28 @@ const Profile = () => {
             {comments.map((comment) => (
               <CommentCard key={comment.id} comment={comment} />
             ))}
+          </div>
+        )}
+
+        {totalComments > commentPageSize && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              disabled={commentPage === 1}
+              onClick={() => setCommentPage((p) => p - 1)}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="text-sm">
+              Page {commentPage} of {Math.ceil(totalComments / commentPageSize)}
+            </span>
+            <button
+              disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
+              onClick={() => setCommentPage((p) => p + 1)}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
