@@ -1,7 +1,7 @@
 import api from '../api/axios.ts';
 import type { Media, MediaUploadRequest } from '../types/media.ts';
 
-export const uploadMedia = async (request: MediaUploadRequest): Promise<Media> => {
+export const uploadMedia = async (request: MediaUploadRequest): Promise<Media> => {  
   const formData = new FormData();
   formData.append('itemId', request.itemId.toString());
   formData.append('type', request.type);
@@ -15,7 +15,8 @@ export const uploadMedia = async (request: MediaUploadRequest): Promise<Media> =
 };
 
 export const getMediaUrl = (relativeUrl: string) => {
-  return `https://localhost:7005${relativeUrl}`;
+  const apiUrl = import.meta.env.VITE_API_URL;
+  return `${apiUrl}${relativeUrl}`;
 };
 
 export const deleteMedia = async (mediaId: number): Promise<boolean> => {
