@@ -21,7 +21,7 @@ string? connStr = builder.Configuration.GetConnectionString("DefaultConnection")
                  ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
                  ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
-if (!string.IsNullOrWhiteSpace(connStr) && connStr.StartsWith("postgres://"))
+if (!string.IsNullOrWhiteSpace(connStr) && connStr.StartsWith("postgresql://"))
 {
     connStr = PostgreUrlConverter.ConvertPostgresUrlToConnectionString(connStr);
 }
@@ -81,16 +81,17 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseRouting();
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await DbInitializer.SeedAsync(services);
-}
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbInitializer.SeedAsync(services);
 }
 
 app.MapControllers();
