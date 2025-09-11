@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Item;
 using WhereToSpendYourTime.Data;
@@ -25,6 +26,7 @@ public class ItemServiceTests
         {
             cfg.CreateMap<Item, ItemDto>();
             cfg.CreateMap<Tag, TagDto>();
+            cfg.CreateMap<Media, MediaDto>();
         });
         _mapper = config.CreateMapper();
 
@@ -54,7 +56,7 @@ public class ItemServiceTests
             Descending = true
         };
 
-        var result = (await _service.GetFilteredItemsAsync(filter));
+        var result = await _service.GetFilteredItemsAsync(filter);
 
         Assert.Equal(2, result.Items.Count);
         Assert.Equal("Second", result.Items[0].Title);
