@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
-using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Review;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -31,6 +30,23 @@ public class ReviewServiceTests
         _service = new ReviewService(_db, _mapper);
     }
 
+    public delegate Task<PagedResult<ReviewDto>> ReviewQueryDelegate(ReviewService service, string userId, int itemId, ReviewFilterRequest filter);
+
+    public static TheoryData<string, ReviewQueryDelegate> GetReviewQueryMethods =>
+        new()
+        {
+            {
+                "Item",
+                (ReviewQueryDelegate)((s, userId, itemId, filter) =>
+                    s.GetPagedReviewsForItemAsync(itemId, filter))
+            },
+            {
+                "User",
+                (ReviewQueryDelegate)((s, userId, itemId, filter) =>
+                    s.GetPagedReviewsForUserAsync(userId, filter))
+            }
+        };
+
     [Fact]
     public async Task GetReviewsForItemAsync_ReturnsOrderedReviews()
     {
@@ -54,8 +70,9 @@ public class ReviewServiceTests
         Assert.Equal("New", result[0].Title);
     }
 
-    [Fact]
-    public async Task GetPagedReviewsForItemAsync_ReturnsPagedResults()
+    [Theory]
+    [MemberData(nameof(GetReviewQueryMethods))]
+    public async Task GetPagedReviewsAsync_ReturnsPagedResults(string label, ReviewQueryDelegate queryMethod)
     {
         var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
         var item = new Item { Title = "Item" };
@@ -74,7 +91,7 @@ public class ReviewServiceTests
 
         var filter = new ReviewFilterRequest { Page = 1, PageSize = 2 };
 
-        var result = await _service.GetPagedReviewsForItemAsync(item.Id, filter);
+        var result = await queryMethod(_service, user.Id, item.Id, filter);
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Items.Count);
@@ -82,8 +99,9 @@ public class ReviewServiceTests
         Assert.Equal("Three", result.Items[0].Title);
     }
 
-    [Fact]
-    public async Task GetPagedTagsAsync_ReturnsCorrectPage()
+    [Theory]
+    [MemberData(nameof(GetReviewQueryMethods))]
+    public async Task GetPagedReviewsAsync_ReturnsCorrectPage(string label, ReviewQueryDelegate queryMethod)
     {
         var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
         var item = new Item { Title = "Item" };
@@ -103,7 +121,7 @@ public class ReviewServiceTests
 
         var filter = new ReviewFilterRequest { Page = 2, PageSize = 2 };
 
-        var result = await _service.GetPagedReviewsForItemAsync(item.Id, filter);
+        var result = await queryMethod(_service, user.Id, item.Id, filter);
 
         Assert.Equal(2, result.Items.Count);
         Assert.Equal("Two", result.Items[0].Title);
