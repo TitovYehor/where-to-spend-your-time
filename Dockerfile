@@ -5,6 +5,7 @@ COPY *.sln ./
 COPY ./WhereToSpendYourTime.Api/*.csproj ./WhereToSpendYourTime.Api/
 COPY ./WhereToSpendYourTime.Data/*.csproj ./WhereToSpendYourTime.Data/
 COPY ./WhereToSpendYourTime.ShareLib/*.csproj ./WhereToSpendYourTime.ShareLib/
+COPY ./WhereToSpendYourTime.Tests/*.csproj ./WhereToSpendYourTime.Tests/
 
 RUN dotnet restore
 
