@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using System.Text.Json.Serialization;
 using WhereToSpendYourTime.Api.Handlers;
 using WhereToSpendYourTime.Api.Services.Auth;
@@ -14,13 +13,21 @@ using WhereToSpendYourTime.Api.Services.Tags;
 using WhereToSpendYourTime.Api.Services.User;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
+using WhereToSpendYourTime.Api.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string? connStr = builder.Configuration.GetConnectionString("DefaultConnection")
+                 ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+                 ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrWhiteSpace(connStr) && connStr.StartsWith("postgres://"))
+{
+    connStr = PostgreUrlConverter.ConvertPostgresUrlToConnectionString(connStr);
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connStr));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
@@ -78,6 +85,12 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await DbInitializer.SeedAsync(services);
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
 }
 
 app.MapControllers();
