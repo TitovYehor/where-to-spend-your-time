@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Data;
 
@@ -43,13 +44,22 @@ public class MediaService : IMediaService
             await blobClient.UploadAsync(stream, overwrite: false);
         }
 
-        var blobUrl = blobClient.Uri.ToString();
+        var sasBuilder = new BlobSasBuilder
+        {
+            BlobContainerName = _containerClient.Name,
+            BlobName = blobName,
+            Resource = "b",
+            ExpiresOn = DateTimeOffset.UtcNow.AddHours(3)
+        };
+        sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+        var sasUri = blobClient.GenerateSasUri(sasBuilder);
 
         var media = new Data.Entities.Media
         {
             ItemId = dto.ItemId,
             Type = dto.Type,
-            Url = blobUrl
+            Url = sasUri.ToString()
         };
 
         _db.Media.Add(media);
