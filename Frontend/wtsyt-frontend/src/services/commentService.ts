@@ -1,6 +1,10 @@
 import api from '../api/axios.ts';
+import { API_BASES } from '../api/endpoints.ts';
 import type { Comment, CommentCreateRequest, CommentUpdateRequest } from '../types/comment.ts';
 import type { CommentPagedResult } from '../types/pagination/pagedResult.ts';
+
+const reviewComments = (reviewId: number) => `${API_BASES.reviews}/${reviewId}${API_BASES.comments}`;
+const userComments = (userId: string) => `${API_BASES.users}/${userId}${API_BASES.comments}`;
 
 export const buildCommentQuery = (params: {
   page?: number;
@@ -15,7 +19,7 @@ export const buildCommentQuery = (params: {
 };
 
 export const getCommentsForReview = async (reviewId: number): Promise<Comment[]> => {
-  const res = await api.get<Comment[]>(`/reviews/${reviewId}/comments`);
+  const res = await api.get<Comment[]>(reviewComments(reviewId));
   return res.data;
 };
 
@@ -24,7 +28,7 @@ export const getPagedCommentsForReview = async (reviewId: number, params: {
   pageSize?: number;
 }): Promise<CommentPagedResult> => {
   const query = buildCommentQuery(params);
-  const res = await api.get<CommentPagedResult>(`/reviews/${reviewId}/comments/paged?${query}`);
+  const res = await api.get<CommentPagedResult>(`${reviewComments(reviewId)}/paged?${query}`);
   return res.data;
 };
 
@@ -33,19 +37,19 @@ export const getPagedCommentsForUser = async (userId: string, params: {
   pageSize?: number;
 }): Promise<CommentPagedResult> => {
   const query = buildCommentQuery(params);
-  const res = await api.get<CommentPagedResult>(`/users/${userId}/comments/paged?${query}`);
+  const res = await api.get<CommentPagedResult>(`${userComments(userId)}/paged?${query}`);
   return res.data;
 };
 
 export const addComment = async (reviewId: number, data: CommentCreateRequest): Promise<Comment> => {
-  const res = await api.post<Comment>(`/reviews/${reviewId}/comments`, data);
+  const res = await api.post<Comment>(reviewComments(reviewId), data);
   return res.data;
 };
 
 export const updateComment = async (commentId: number, data: CommentUpdateRequest): Promise<void> => {
-  await api.put(`/comments/${commentId}`, data);
+  await api.put(`${API_BASES.comments}/${commentId}`, data);
 };
 
 export const deleteComment = async (commentId: number): Promise<void> => {
-  await api.delete(`/comments/${commentId}`);
+  await api.delete(`${API_BASES.comments}/${commentId}`);
 };

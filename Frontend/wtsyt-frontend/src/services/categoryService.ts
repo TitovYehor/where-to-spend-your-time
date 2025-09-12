@@ -1,4 +1,5 @@
 import api from '../api/axios.ts';
+import { API_BASES } from '../api/endpoints.ts';
 import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from '../types/category.ts';
 import type { Item } from '../types/item.ts';
 import type { CategoryPagedResult } from '../types/pagination/pagedResult.ts';
@@ -18,7 +19,7 @@ export const buildCategoryQuery = (params: {
 };
 
 export const getCategories = async (): Promise<Category[]> => {
-  const res = await api.get<Category[]>('/categories');
+  const res = await api.get<Category[]>(`${API_BASES.categories}`);
   return res.data;
 };
 
@@ -28,29 +29,29 @@ export const getPagedCategories = async (params: {
   pageSize?: number;
 }): Promise<CategoryPagedResult> => {
   const query = buildCategoryQuery(params);
-  const res = await api.get<CategoryPagedResult>(`/categories/paged?${query}`);
+  const res = await api.get<CategoryPagedResult>(`${API_BASES.categories}/paged?${query}`);
   return res.data;
 };
 
 export const getCategoryById = async (id: number): Promise<Category> => {
-  const res = await api.get<Category>(`/categories/${id}`);
+  const res = await api.get<Category>(`${API_BASES.categories}/${id}`);
   return res.data;
 };
 
 export const getItemsInCategory = async (id: number): Promise<Item[]> => {
-  const res = await api.get<Item[]>(`/categories/${id}/items`);
+  const res = await api.get<Item[]>(`${API_BASES.categories}/${id}/items`);
   return res.data;
 };
 
 export const addCategory = async (data: CategoryCreateRequest): Promise<Category> => {
-  const res = await api.post<Category>(`/categories`, data);
+  const res = await api.post<Category>(`${API_BASES.categories}`, data);
   return res.data;
 };
 
 export const updateCategory = async (categoryId: number, data: CategoryUpdateRequest): Promise<void> => {
-  await api.put(`/categories/${categoryId}`, data);
+  await api.put(`${API_BASES.categories}/${categoryId}`, data);
 };
 
 export const deleteCategory = async (categoryId: number): Promise<void> => {
-  await api.delete(`/categories/${categoryId}`);
+  await api.delete(`${API_BASES.categories}/${categoryId}`);
 };

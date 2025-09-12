@@ -1,4 +1,5 @@
 import api from '../api/axios.ts';
+import { API_BASES } from '../api/endpoints.ts';
 import type { Item, ItemCreateRequest, ItemUpdateRequest } from '../types/item.ts';
 import type { ItemPagedResult } from '../types/pagination/pagedResult.ts';
 import type { Tag, TagRequest } from '../types/tag.ts';
@@ -37,33 +38,33 @@ export const getItems = async (params: {
   pageSize?: number;
 }): Promise<ItemPagedResult> => {
   const query = buildItemQuery(params);
-  const res = await api.get<ItemPagedResult>(`/items?${query}`);
+  const res = await api.get<ItemPagedResult>(`${API_BASES.items}?${query}`);
   return res.data;
 };
 
 export const getItemById = async (id: number): Promise<Item> => {
-  const res = await api.get<Item>(`/items/${id}`);
+  const res = await api.get<Item>(`${API_BASES.items}/${id}`);
   return res.data;
 };
 
 export const addItem = async (data: ItemCreateRequest): Promise<Item> => {
-  const res = await api.post<Item>(`/items`, data);
+  const res = await api.post<Item>(`${API_BASES.items}`, data);
   return res.data;
 };
 
 export const updateItem = async (itemId: number, data: ItemUpdateRequest): Promise<void> => {
-  await api.put(`/items/${itemId}`, data);
+  await api.put(`${API_BASES.items}/${itemId}`, data);
 };
 
 export const deleteItem = async (itemId: number): Promise<void> => {
-  await api.delete(`/items/${itemId}`);
+  await api.delete(`${API_BASES.items}/${itemId}`);
 };
 
 export const addTagForItem = async (itemId: number, tag: TagRequest): Promise<Tag> => {
-  const res = await api.post(`/items/${itemId}/tags`, tag);
+  const res = await api.post(`${API_BASES.items}/${itemId}${API_BASES.tags}`, tag);
   return res.data;
 };
 
 export const removeTagFromItem = async (itemId: number, tagName: string): Promise<void> => {
-  await api.delete(`/items/${itemId}/tags/remove/${tagName}`);
+  await api.delete(`${API_BASES.items}/${itemId}${API_BASES.tags}/remove/${tagName}`);
 };

@@ -1,6 +1,10 @@
 import api from '../api/axios.ts';
+import { API_BASES } from '../api/endpoints.ts';
 import type { ReviewPagedResult } from '../types/pagination/pagedResult.ts';
 import type { Review, ReviewCreateRequest, ReviewUpdateRequest } from '../types/review.ts';
+
+const itemReviews = (itemId: number) => `${API_BASES.items}/${itemId}${API_BASES.reviews}`;
+const userReviews = (userId: string) => `${API_BASES.users}/${userId}${API_BASES.reviews}`;
 
 export const buildReviewQuery = (params: {
   page?: number;
@@ -15,7 +19,7 @@ export const buildReviewQuery = (params: {
 };
 
 export const getReviewsForItem = async (itemId: number): Promise<Review[]> => {
-  const res = await api.get<Review[]>(`/items/${itemId}/reviews`);
+  const res = await api.get<Review[]>(itemReviews(itemId));
   return res.data;
 };
 
@@ -24,7 +28,7 @@ export const getPagedReviewsForItem = async (itemId: number, params: {
   pageSize?: number;
 }): Promise<ReviewPagedResult> => {
   const query = buildReviewQuery(params);
-  const res = await api.get<ReviewPagedResult>(`/items/${itemId}/reviews/paged?${query}`);
+  const res = await api.get<ReviewPagedResult>(`${itemReviews(itemId)}/paged?${query}`);
   return res.data;
 };
 
@@ -33,29 +37,29 @@ export const getPagedReviewsForUser = async (userId: string, params: {
   pageSize?: number;
 }): Promise<ReviewPagedResult> => {
   const query = buildReviewQuery(params);
-  const res = await api.get<ReviewPagedResult>(`/users/${userId}/reviews/paged?${query}`);
+  const res = await api.get<ReviewPagedResult>(`${userReviews(userId)}/paged?${query}`);
   return res.data;
 };
 
 export const getMyReviewForItem = async (itemId: number): Promise<Review> => {
-  const res = await api.get<Review>(`/items/${itemId}/reviews/my`);
+  const res = await api.get<Review>(`${itemReviews(itemId)}/my`);
   return res.data;
 };
 
 export const getReviewById = async (reviewId: number): Promise<Review> => {
-  const res = await api.get<Review>(`/reviews/${reviewId}`);
+  const res = await api.get<Review>(`${API_BASES.reviews}/${reviewId}`);
   return res.data;
 };
 
 export const addReview = async (data: ReviewCreateRequest): Promise<Review> => {
-  const res = await api.post<Review>(`/reviews`, data);
+  const res = await api.post<Review>(`${API_BASES.reviews}`, data);
   return res.data;
 };
 
 export const updateReview = async (reviewId: number, data: ReviewUpdateRequest): Promise<void> => {
-  await api.put(`/reviews/${reviewId}`, data);
+  await api.put(`${API_BASES.reviews}/${reviewId}`, data);
 };
 
 export const deleteReview = async (reviewId: number): Promise<void> => {
-  await api.delete(`/reviews/${reviewId}`);
+  await api.delete(`${API_BASES.reviews}/${reviewId}`);
 };
