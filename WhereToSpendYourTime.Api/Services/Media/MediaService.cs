@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Storage.Blobs;
 using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Data;
 
@@ -6,15 +7,25 @@ namespace WhereToSpendYourTime.Api.Services.Media;
 
 public class MediaService : IMediaService
 {
-    private readonly IWebHostEnvironment _env;
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly BlobContainerClient _containerClient;
 
-    public MediaService(IWebHostEnvironment env, AppDbContext db, IMapper mapper)
+    public MediaService(AppDbContext db, IMapper mapper, IConfiguration config)
     {
-        this._env = env;
         this._db = db;
         this._mapper = mapper;
+
+        var connectionString = config["Azure:BlobConnectionString"];
+        var containerName = config["Azure:BlobContainerName"];
+
+        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(containerName))
+        {
+            throw new InvalidOperationException("Azure Blob Storage is not configured properly");
+        }
+
+        _containerClient = new BlobContainerClient(connectionString, containerName);
+        _containerClient.CreateIfNotExists();
     }
 
     public async Task<MediaDto> UploadAsync(CreateMediaDto dto)
@@ -24,24 +35,21 @@ public class MediaService : IMediaService
             throw new ArgumentException("File is empty");
         }
 
-        var uploadPath = Path.Combine(_env.WebRootPath, "uploads", "items", dto.ItemId.ToString());
-        Directory.CreateDirectory(uploadPath);
+        var blobName = $"items/{dto.ItemId}/{Guid.NewGuid()}{Path.GetExtension(dto.File.FileName)}";
+        var blobClient = _containerClient.GetBlobClient(blobName);
 
-        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.File.FileName)}";
-        var filePath = Path.Combine(uploadPath, fileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        using (var stream = dto.File.OpenReadStream())
         {
-            await dto.File.CopyToAsync(stream);
+            await blobClient.UploadAsync(stream, overwrite: false);
         }
 
-        var relativeUrl = $"/uploads/items/{dto.ItemId}/{fileName}";
+        var blobUrl = blobClient.Uri.ToString();
 
         var media = new Data.Entities.Media
         {
             ItemId = dto.ItemId,
             Type = dto.Type,
-            Url = relativeUrl
+            Url = blobUrl
         };
 
         _db.Media.Add(media);
@@ -58,14 +66,23 @@ public class MediaService : IMediaService
             return false;
         }
 
-        var filePath = Path.Combine(
-            _env.WebRootPath,
-            media.Url.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString())
-        );
-
-        if (File.Exists(filePath))
+        try
         {
-            File.Delete(filePath);
+            var blobUri = new Uri(media.Url);
+            var blobName = blobUri.AbsolutePath.TrimStart('/');
+
+            var containerName = _containerClient.Name;
+            if (blobName.StartsWith(containerName + "/"))
+            {
+                blobName = blobName.Substring(containerName.Length + 1);
+            }
+
+            var blobClient = _containerClient.GetBlobClient(blobName);
+            await blobClient.DeleteIfExistsAsync();
+        }
+        catch
+        {
+            Console.WriteLine("Failed to delete blob from storage");
         }
 
         _db.Media.Remove(media);
