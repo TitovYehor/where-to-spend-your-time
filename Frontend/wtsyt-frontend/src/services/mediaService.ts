@@ -15,10 +15,7 @@ export const uploadMedia = async (request: MediaUploadRequest): Promise<Media> =
   return res.data;
 };
 
-export const getMediaUrl = (relativeUrl: string) => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  return `${apiUrl}${relativeUrl}`;
-};
+export const getMediaUrl = (url: string) => url;
 
 export const deleteMedia = async (mediaId: number): Promise<boolean> => {
   const res = await api.delete<boolean>(`${API_BASES.media}/${mediaId}`);
