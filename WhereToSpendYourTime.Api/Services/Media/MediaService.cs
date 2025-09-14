@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Azure.Storage.Blobs;
-using Azure.Storage.Sas;
 using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Data;
 
@@ -44,22 +43,13 @@ public class MediaService : IMediaService
             await blobClient.UploadAsync(stream, overwrite: false);
         }
 
-        var sasBuilder = new BlobSasBuilder
-        {
-            BlobContainerName = _containerClient.Name,
-            BlobName = blobName,
-            Resource = "b",
-            ExpiresOn = DateTimeOffset.UtcNow.AddHours(3)
-        };
-        sasBuilder.SetPermissions(BlobSasPermissions.Read);
-
-        var sasUri = blobClient.GenerateSasUri(sasBuilder);
+        var blobUrl = blobClient.Uri.ToString();
 
         var media = new Data.Entities.Media
         {
             ItemId = dto.ItemId,
             Type = dto.Type,
-            Url = sasUri.ToString()
+            Url = blobUrl
         };
 
         _db.Media.Add(media);
@@ -79,20 +69,18 @@ public class MediaService : IMediaService
         try
         {
             var blobUri = new Uri(media.Url);
-            var blobName = blobUri.AbsolutePath.TrimStart('/');
 
-            var containerName = _containerClient.Name;
-            if (blobName.StartsWith(containerName + "/"))
-            {
-                blobName = blobName.Substring(containerName.Length + 1);
-            }
+            var containerSegment = $"/{_containerClient.Name}/";
+            var blobName = blobUri.AbsolutePath.Substring(
+                blobUri.AbsolutePath.IndexOf(containerSegment, StringComparison.Ordinal) + containerSegment.Length
+            );
 
             var blobClient = _containerClient.GetBlobClient(blobName);
             await blobClient.DeleteIfExistsAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            Console.WriteLine("Failed to delete blob from storage");
+            Console.WriteLine($"Failed to delete blob from storage: {ex.Message}");
         }
 
         _db.Media.Remove(media);
