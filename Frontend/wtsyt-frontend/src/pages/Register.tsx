@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { register } from "../services/authService";
+import { handleApiError } from "../utils/handleApi";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -49,10 +50,20 @@ const Register = () => {
 
       window.location.replace("/login?register=true");
     } catch (err: any) {
-      const messages = err?.response?.data;
-      const errorList = Array.isArray(messages)
-        ? messages
-        : [messages?.message || "Failed to register"];
+      const data = err?.response?.data;
+
+      let errorList: string[] = [];
+
+      if (Array.isArray(data)) {
+        errorList = data.map((e: any) => e.description || e.toString());
+      } else if (typeof data === "string") {
+        errorList = [data];
+      } else if (data?.message) {
+        errorList = [data.message];
+      } else {
+        errorList = ["Failed to register"];
+      }
+      handleApiError(err);
       setErrors(errorList);
     } finally {
       setLoading(false);
