@@ -80,7 +80,7 @@ It is intended both as a **portfolio project** and as a practical playground for
 
 ---
 
-## 🔗 Links
+## Links
 
 * **Live App:** [where-to-spend-your-time.onrender.com](https://where-to-spend-your-time.onrender.com)
 * **Database Schema:** see ERD diagram above
