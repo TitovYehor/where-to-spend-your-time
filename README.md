@@ -1,10 +1,12 @@
 # Where To Spend Your Time
 
+> **Note:** This project is still in development. All core features are working, but there may be some validation issues and unexpected errors that are in the process of being fixed.
+
 **Live Demo:** [where-to-spend-your-time.onrender.com](https://where-to-spend-your-time.onrender.com)
 
 This project is a **full-stack web application** where users can discover, review, and discuss various time spending activities such as books, movies, games and so on. It was built with the intention of practicing clean architecture, full-stack development, and role-based authorization.
 
-**Note:** The project is still under development. All core features are implemented and functional, but there may be issues with validation and unexpected errors that are currently being addressed.
+> **Note about performance:** Due to low-level deployment subscription, Render servers spin down after inactivity. The first request after inactivity may be delayed by up to 50 seconds while the server spins up.
 
 ---
 
@@ -55,6 +57,14 @@ This project is a **full-stack web application** where users can discover, revie
 
 * **Backend, Frontend, Database:** Deployed on [Render](https://render.com)
 * **Media Storage:** Azure Storage Account
+
+### **Demo Account**
+To make it easier to test the platform, you can log in using this demo account:
+```text
+Login: demo@example.com
+Password: Demoaccount333!
+```
+This account has the **User** role and already contains some reviews and comments, which allows you to test managing comments and reviews without previous registration and data set up.
 
 ---
 
