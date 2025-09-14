@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { login, register } from "../services/authService";
-import { getMyProfile } from "../services/userService";
+import { register } from "../services/authService";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const Register = () => {
-  const { setUser } = useAuth();
-
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,12 +46,8 @@ const Register = () => {
     setLoading(true);
     try {
       await register({ displayName, email, password });
-      await login({ email, password });
 
-      const profile = await getMyProfile();
-      setUser(profile);
-
-      window.location.replace("/");
+      window.location.replace("/login?register=true");
     } catch (err: any) {
       const messages = err?.response?.data;
       const errorList = Array.isArray(messages)

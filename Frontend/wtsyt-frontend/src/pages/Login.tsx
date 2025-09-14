@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { login } from "../services/authService";
@@ -10,7 +10,15 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("registered") === "true") {
+      setSuccess("Registration successful! Please log in");
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +26,6 @@ const Login = () => {
 
     try {
       await login({ email: email.trim(), password: password.trim() });
-      
       const profile = await getMyProfile();
       setUser(profile);
 
@@ -40,6 +47,7 @@ const Login = () => {
           Login
         </h2>
         
+        {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         
         <form onSubmit={handleSubmit} className="space-y-4">
