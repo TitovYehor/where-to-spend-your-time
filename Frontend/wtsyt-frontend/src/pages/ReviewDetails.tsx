@@ -28,6 +28,7 @@ export default function ReviewDetails() {
   const [editRating, setEditRating] = useState(5);
 
   const isAuthor = user && review?.author === user.displayName;
+  const isModerator = user?.role == "Moderator";
   const isAdmin = user?.role == "Admin";
 
   const id = Number(reviewId);
@@ -194,7 +195,7 @@ export default function ReviewDetails() {
               </div>
             </form>
           ) : ( 
-            (isAuthor || isAdmin) && (
+            (isAuthor || isAdmin || isModerator) && (
               <div className="flex gap-2 mb-6">
                 {isAuthor && (
                   <button
@@ -236,7 +237,7 @@ export default function ReviewDetails() {
                           <UserProfileLink userId={c.userId} name={c.author} />
                           <span>• {new Date(c.createdAt).toLocaleString()}</span>
                         </p>
-                        {(isAdmin || c.author === user?.displayName) && (
+                        {(isAdmin || isAuthor || isModerator) && (
                           <button
                             onClick={() => handleDeleteComment(c.id, c.author)}
                             className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
