@@ -117,6 +117,8 @@ const Profile = () => {
       }
   };
 
+  const isDemoAccount = user?.email === "demo@example.com"
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       <article className="mb-6">
@@ -155,15 +157,24 @@ const Profile = () => {
                 setNewDisplayName(e.target.value)
                 setSuccessMessage("");
               }}
+              disabled={isDemoAccount}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
 
             <button
               onClick={handleProfileUpdate}
+              disabled={isDemoAccount}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
               Save Display Name
             </button>
+
+            {isDemoAccount && (
+              <p className="text-sm text-gray-600 mt-1">
+                Display name changes are disabled for the demo account.  
+                Please register to try this feature.
+              </p>
+            )}
           </div>
         
           <div className="space-y-2">
@@ -178,6 +189,7 @@ const Profile = () => {
                 setCurrentPassword(e.target.value)
                 setSuccessMessage("");
               }}
+              disabled={isDemoAccount}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
 
@@ -192,15 +204,24 @@ const Profile = () => {
                 setNewPassword(e.target.value)
                 setSuccessMessage("");
               }}
+              disabled={isDemoAccount}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
 
             <button
               onClick={handlePasswordChange}
+              disabled={isDemoAccount}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
               Change Password
             </button>
+
+            {isDemoAccount && (
+              <p className="text-sm text-gray-600 mt-1">
+                Password changes are disabled for the demo account.  
+                Please register to try this feature.
+              </p>
+            )}
           </div>
         </div>
       </div>
