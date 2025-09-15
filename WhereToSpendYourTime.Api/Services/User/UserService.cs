@@ -141,6 +141,11 @@ public class UserService : IUserService
             return false;
         }
 
+        if (user.Email == "demo@example.com")
+        {
+            return false;
+        }
+
         user.DisplayName = displayName;
         var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
@@ -152,6 +157,11 @@ public class UserService : IUserService
         if (user == null)
         {
             return (false, new[] { new IdentityError { Description = "User not found" } });
+        }
+
+        if (user.Email == "demo@example.com")
+        {
+            return (false, new[] { new IdentityError { Description = "Password change is disabled for the demo account." } });
         }
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
