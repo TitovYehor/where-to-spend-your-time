@@ -30,8 +30,21 @@ const Profile = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+  const [scrollTarget, setScrollTarget] = useState<"reviews" | "comments" | null>(null);
+
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollTarget === "reviews" && reviewsRef.current) {
+      reviewsRef.current.scrollIntoView({ behavior: "smooth" });
+      setScrollTarget(null);
+    }
+    if (scrollTarget === "comments" && commentsRef.current) {
+      commentsRef.current.scrollIntoView({ behavior: "smooth" });
+      setScrollTarget(null);
+    }
+  }, [scrollTarget, reviews, comments]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -245,10 +258,11 @@ const Profile = () => {
         {totalReviews > reviewPageSize && (
           <div className="flex justify-center items-center gap-2 mt-4">
             <button
+              type="button"
               disabled={reviewPage === 1}
               onClick={() => {
                 setReviewPage((p) => p - 1);
-                reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -258,10 +272,11 @@ const Profile = () => {
               Page {reviewPage} of {Math.ceil(totalReviews / reviewPageSize)}
             </span>
             <button
+              type="button"
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
               onClick={() => {
                 setReviewPage((p) => p + 1);
-                reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -287,10 +302,11 @@ const Profile = () => {
         {totalComments > commentPageSize && (
           <div className="flex justify-center items-center gap-2 mt-4">
             <button
+              type="button"
               disabled={commentPage === 1}
               onClick={() => {
                 setCommentPage((p) => p - 1);
-                commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -300,10 +316,11 @@ const Profile = () => {
               Page {commentPage} of {Math.ceil(totalComments / commentPageSize)}
             </span>
             <button
+              type="button"
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
               onClick={() => {
                 setCommentPage((p) => p + 1);
-                commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
