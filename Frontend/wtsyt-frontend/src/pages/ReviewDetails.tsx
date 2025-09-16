@@ -237,7 +237,7 @@ export default function ReviewDetails() {
                           <UserProfileLink userId={c.userId} name={c.author} />
                           <span>• {new Date(c.createdAt).toLocaleString()}</span>
                         </p>
-                        {(isAdmin || isAuthor || isModerator) && (
+                        {(isAdmin || (c.author == user?.displayName) || isModerator) && (
                           <button
                             onClick={() => handleDeleteComment(c.id, c.author)}
                             className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
