@@ -32,15 +32,18 @@ export default function PublicProfile() {
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!scrollTarget) return;
+
+    if (loading) return;
+
     if (scrollTarget === "reviews" && reviewsRef.current) {
       reviewsRef.current.scrollIntoView({ behavior: "smooth" });
       setScrollTarget(null);
-    }
-    if (scrollTarget === "comments" && commentsRef.current) {
+    } else if (scrollTarget === "comments" && commentsRef.current) {
       commentsRef.current.scrollIntoView({ behavior: "smooth" });
       setScrollTarget(null);
     }
-  }, [scrollTarget, reviews, comments]);
+  }, [scrollTarget, loading, reviews, comments]);
 
   useEffect(() => {
     if (!userId) return;
