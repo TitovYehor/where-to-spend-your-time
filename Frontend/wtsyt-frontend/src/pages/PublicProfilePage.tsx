@@ -26,6 +26,9 @@ export default function PublicProfile() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewPageSize] = useState(4);
 
+  const reviewsRef = useRef<HTMLDivElement | null>(null);
+  const commentsRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -62,9 +65,6 @@ export default function PublicProfile() {
   if (!user) {
     return <p className="text-center mt-8 text-red-500">User not found</p>;
   }
-
-  const reviewsRef = useRef<HTMLDivElement | null>(null);
-  const commentsRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">

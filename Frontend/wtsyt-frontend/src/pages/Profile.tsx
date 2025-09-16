@@ -30,6 +30,9 @@ const Profile = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+  const reviewsRef = useRef<HTMLDivElement | null>(null);
+  const commentsRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
@@ -118,9 +121,6 @@ const Profile = () => {
   };
 
   const isDemoAccount = user?.email === "demo@example.com";
-  
-  const reviewsRef = useRef<HTMLDivElement | null>(null);
-  const commentsRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
