@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
@@ -117,7 +117,10 @@ const Profile = () => {
       }
   };
 
-  const isDemoAccount = user?.email === "demo@example.com"
+  const isDemoAccount = user?.email === "demo@example.com";
+  
+  const reviewsRef = useRef<HTMLDivElement | null>(null);
+  const commentsRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
@@ -226,7 +229,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="mb-10 space-y-6">
+      <div ref={reviewsRef} className="mb-10 space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Reviews</h2>
 
         {reviews.length === 0 ? (
@@ -243,7 +246,10 @@ const Profile = () => {
           <div className="flex justify-center items-center gap-2 mt-4">
             <button
               disabled={reviewPage === 1}
-              onClick={() => setReviewPage((p) => p - 1)}
+              onClick={() => {
+                setReviewPage((p) => p - 1);
+                reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
               Prev
@@ -253,7 +259,10 @@ const Profile = () => {
             </span>
             <button
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
-              onClick={() => setReviewPage((p) => p + 1)}
+              onClick={() => {
+                setReviewPage((p) => p + 1);
+                reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
               Next
@@ -262,7 +271,7 @@ const Profile = () => {
         )}
       </div>
 
-      <div className="mb-10 space-y-6">
+      <div ref={commentsRef} className="mb-10 space-y-6">
         <h2 className="text-2xl font-semibold mb-4">Your Comments</h2>
 
         {comments.length === 0 ? (
@@ -279,7 +288,10 @@ const Profile = () => {
           <div className="flex justify-center items-center gap-2 mt-4">
             <button
               disabled={commentPage === 1}
-              onClick={() => setCommentPage((p) => p - 1)}
+              onClick={() => {
+                setCommentPage((p) => p - 1);
+                commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
               Prev
@@ -289,7 +301,10 @@ const Profile = () => {
             </span>
             <button
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
-              onClick={() => setCommentPage((p) => p + 1)}
+              onClick={() => {
+                setCommentPage((p) => p + 1);
+                commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
               Next
