@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
@@ -35,6 +35,9 @@ const Profile = () => {
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
+  const prevReviewPageRef = useRef(1);
+  const prevCommentPageRef = useRef(1);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
@@ -54,6 +57,17 @@ const Profile = () => {
 
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
+
+        setTimeout(() => {
+          if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
+            reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
+            commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          prevReviewPageRef.current = reviewPage;
+          prevCommentPageRef.current = commentPage;
+        }, 0);
       } catch (err) {
         handleApiError(err);
       } finally {
@@ -63,16 +77,6 @@ const Profile = () => {
 
     fetchData();
   }, [user, reviewPage, commentPage]);
-
-  useLayoutEffect(() => {
-    if (!scrollTarget) return;
-
-    const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget, reviews, comments]);
 
   if (!user && !loading) {
     return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;

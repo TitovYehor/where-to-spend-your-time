@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
 import { getProfileById } from "../services/userService";
@@ -31,6 +31,9 @@ export default function PublicProfile() {
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
+  const prevReviewPageRef = useRef(1);
+  const prevCommentPageRef = useRef(1);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -50,6 +53,17 @@ export default function PublicProfile() {
 
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
+
+        setTimeout(() => {
+          if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
+            reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
+            commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          prevReviewPageRef.current = reviewPage;
+          prevCommentPageRef.current = commentPage;
+        }, 0);
       } catch (err) {
         handleApiError(err);
       } finally {
@@ -59,16 +73,6 @@ export default function PublicProfile() {
 
     fetchData();
   }, [userId, reviewPage, commentPage]);
-
-  useLayoutEffect(() => {
-    if (!scrollTarget) return;
-
-    const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget, reviews, comments]);
 
   if (loading) {
     return <p className="text-center mt-8">Loading...</p>;
