@@ -95,6 +95,10 @@ export default function Home() {
     fetchMeta();
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [filters.page]);
+
   const searchValue = filters.search;
 
   return (
