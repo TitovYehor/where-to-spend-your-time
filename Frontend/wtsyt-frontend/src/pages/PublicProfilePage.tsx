@@ -61,15 +61,14 @@ export default function PublicProfile() {
   }, [userId, reviewPage, commentPage]);
 
   useEffect(() => {
-    if (scrollTarget === "reviews") {
-      reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!scrollTarget) return;
+
+    const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
       setScrollTarget(null);
     }
-    if (scrollTarget === "comments") {
-      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget]);
+  }, [scrollTarget, reviews, comments]);
 
   if (loading) {
     return <p className="text-center mt-8">Loading...</p>;

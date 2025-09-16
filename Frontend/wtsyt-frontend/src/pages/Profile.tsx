@@ -65,15 +65,14 @@ const Profile = () => {
   }, [user, reviewPage, commentPage]);
 
   useEffect(() => {
-    if (scrollTarget === "reviews") {
-      reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!scrollTarget) return;
+
+    const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
       setScrollTarget(null);
     }
-    if (scrollTarget === "comments") {
-      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget]);
+  }, [scrollTarget, reviews, comments]);
 
   if (!user && !loading) {
     return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;
