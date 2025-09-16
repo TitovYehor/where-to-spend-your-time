@@ -1,12 +1,12 @@
 # Where To Spend Your Time
 
-> **Note:** This project is still in development. All core features are working, but there may be some validation issues and unexpected errors that are in the process of being fixed.
+> **Note about performance:** Due to low-level deployment subscription, Render servers spin down after inactivity. The first request after inactivity may be delayed by up to 50 seconds while the server spins up. So, **_~1 minute needed for the app in the link to start working._**
 
 **Live Demo:** [where-to-spend-your-time.onrender.com](https://where-to-spend-your-time.onrender.com)
 
 This project is a **full-stack web application** where users can discover, review, and discuss various time spending activities such as books, movies, games and so on. It was built with the intention of practicing clean architecture, full-stack development, and role-based authorization.
 
-> **Note about performance:** Due to low-level deployment subscription, Render servers spin down after inactivity. The first request after inactivity may be delayed by up to 50 seconds while the server spins up.
+> **Note:** This project is still in development. All core features are working, but there may be some validation issues and unexpected errors that are in the process of being fixed.
 
 ---
 
