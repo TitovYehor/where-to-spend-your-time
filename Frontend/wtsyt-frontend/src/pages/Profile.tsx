@@ -36,20 +36,6 @@ const Profile = () => {
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!scrollTarget) return;
-
-    if (loading) return;
-
-    if (scrollTarget === "reviews" && reviewsRef.current) {
-      reviewsRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollTarget(null);
-    } else if (scrollTarget === "comments" && commentsRef.current) {
-      commentsRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget, loading, reviews, comments]);
-
-  useEffect(() => {
     const fetchData = async () => {
       if (!user) {
         setLoading(false);
@@ -77,6 +63,17 @@ const Profile = () => {
 
     fetchData();
   }, [user, reviewPage, commentPage]);
+
+  useEffect(() => {
+    if (scrollTarget === "reviews") {
+      reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollTarget(null);
+    }
+    if (scrollTarget === "comments") {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollTarget(null);
+    }
+  }, [scrollTarget]);
 
   if (!user && !loading) {
     return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;

@@ -32,20 +32,6 @@ export default function PublicProfile() {
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!scrollTarget) return;
-
-    if (loading) return;
-
-    if (scrollTarget === "reviews" && reviewsRef.current) {
-      reviewsRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollTarget(null);
-    } else if (scrollTarget === "comments" && commentsRef.current) {
-      commentsRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollTarget(null);
-    }
-  }, [scrollTarget, loading, reviews, comments]);
-
-  useEffect(() => {
     if (!userId) return;
 
     const fetchData = async () => {
@@ -73,6 +59,17 @@ export default function PublicProfile() {
 
     fetchData();
   }, [userId, reviewPage, commentPage]);
+
+  useEffect(() => {
+    if (scrollTarget === "reviews") {
+      reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollTarget(null);
+    }
+    if (scrollTarget === "comments") {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollTarget(null);
+    }
+  }, [scrollTarget]);
 
   if (loading) {
     return <p className="text-center mt-8">Loading...</p>;
