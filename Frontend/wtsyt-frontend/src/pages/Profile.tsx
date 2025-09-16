@@ -30,8 +30,6 @@ const Profile = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
-  const [scrollTarget, setScrollTarget] = useState<"reviews" | "comments" | null>(null);
-
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
@@ -265,7 +263,6 @@ const Profile = () => {
               disabled={reviewPage === 1}
               onClick={() => {
                 setReviewPage((p) => p - 1);
-                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -279,7 +276,6 @@ const Profile = () => {
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
               onClick={() => {
                 setReviewPage((p) => p + 1);
-                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -309,7 +305,6 @@ const Profile = () => {
               disabled={commentPage === 1}
               onClick={() => {
                 setCommentPage((p) => p - 1);
-                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -323,7 +318,6 @@ const Profile = () => {
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
               onClick={() => {
                 setCommentPage((p) => p + 1);
-                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >

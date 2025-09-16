@@ -26,8 +26,6 @@ export default function PublicProfile() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewPageSize] = useState(4);
 
-  const [scrollTarget, setScrollTarget] = useState<"reviews" | "comments" | null>(null);
-
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,7 +107,6 @@ export default function PublicProfile() {
               disabled={reviewPage === 1}
               onClick={() => {
                 setReviewPage((p) => p - 1);
-                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -123,7 +120,6 @@ export default function PublicProfile() {
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
               onClick={() => {
                 setReviewPage((p) => p + 1);
-                setScrollTarget("reviews");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -152,7 +148,6 @@ export default function PublicProfile() {
               disabled={commentPage === 1}
               onClick={() => {
                 setCommentPage((p) => p - 1);
-                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -166,7 +161,6 @@ export default function PublicProfile() {
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
               onClick={() => {
                 setCommentPage((p) => p + 1);
-                setScrollTarget("comments");
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
