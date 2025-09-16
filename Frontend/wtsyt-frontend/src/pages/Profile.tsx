@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
@@ -64,7 +64,7 @@ const Profile = () => {
     fetchData();
   }, [user, reviewPage, commentPage]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!scrollTarget) return;
 
     const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;

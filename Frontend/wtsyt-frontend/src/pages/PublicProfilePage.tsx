@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
 import { getProfileById } from "../services/userService";
@@ -60,7 +60,7 @@ export default function PublicProfile() {
     fetchData();
   }, [userId, reviewPage, commentPage]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!scrollTarget) return;
 
     const ref = scrollTarget === "reviews" ? reviewsRef : commentsRef;
