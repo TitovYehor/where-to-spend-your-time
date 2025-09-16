@@ -37,35 +37,19 @@ const Profile = () => {
   const prevCommentPageRef = useRef(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    if (!user) return;
+
+    const fetchReviews = async () => {
       setLoading(true);
-
       try {
-        const [reviewsData, commentsData] = await Promise.all([
-          getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize }),
-          getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize }),
-        ]);
-
+        const reviewsData = await getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize });
         setReviews(reviewsData.items);
         setTotalReviews(reviewsData.totalCount);
 
-        setComments(commentsData.items);
-        setTotalComments(commentsData.totalCount);
-
-        setTimeout(() => {
-          if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
-            reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
-            commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          prevReviewPageRef.current = reviewPage;
-          prevCommentPageRef.current = commentPage;
-        }, 0);
+        if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
+          reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        prevReviewPageRef.current = reviewPage;
       } catch (err) {
         handleApiError(err);
       } finally {
@@ -73,8 +57,32 @@ const Profile = () => {
       }
     };
 
-    fetchData();
-  }, [user, reviewPage, commentPage]);
+    fetchReviews();
+  }, [user, reviewPage]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchComments = async () => {
+      setLoading(true);
+      try {
+        const commentsData = await getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize });
+        setComments(commentsData.items);
+        setTotalComments(commentsData.totalCount);
+
+        if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
+          commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        prevCommentPageRef.current = commentPage;
+      } catch (err) {
+        handleApiError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComments();
+  }, [user, commentPage]);
 
   if (!user && !loading) {
     return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;
@@ -261,7 +269,8 @@ const Profile = () => {
             <button
               type="button"
               disabled={reviewPage === 1}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setReviewPage((p) => p - 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -274,7 +283,8 @@ const Profile = () => {
             <button
               type="button"
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setReviewPage((p) => p + 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -303,7 +313,8 @@ const Profile = () => {
             <button
               type="button"
               disabled={commentPage === 1}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setCommentPage((p) => p - 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -316,7 +327,8 @@ const Profile = () => {
             <button
               type="button"
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setCommentPage((p) => p + 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"

@@ -29,48 +29,60 @@ export default function PublicProfile() {
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
-  const prevReviewPageRef = useRef(1);
-  const prevCommentPageRef = useRef(1);
-
   useEffect(() => {
     if (!userId) return;
 
-    const fetchData = async () => {
+    const fetchProfile = async () => {
       setLoading(true);
       try {
-        const [profile, reviewsData, commentsData] = await Promise.all([
-          getProfileById(userId),
-          getPagedReviewsForUser(userId, { page: reviewPage, pageSize: reviewPageSize }),
-          getPagedCommentsForUser(userId, { page: commentPage, pageSize: commentPageSize }),
-        ]);
-
+        const profile = await getProfileById(userId);
         setUser(profile);
-
-        setReviews(reviewsData.items);
-        setTotalReviews(reviewsData.totalCount);
-
-        setComments(commentsData.items);
-        setTotalComments(commentsData.totalCount);
-
-        setTimeout(() => {
-          if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
-            reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
-            commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          prevReviewPageRef.current = reviewPage;
-          prevCommentPageRef.current = commentPage;
-        }, 0);
       } catch (err) {
         handleApiError(err);
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [userId, reviewPage, commentPage]);
+    fetchProfile();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchReviews = async () => {
+      try {
+        const reviewsData = await getPagedReviewsForUser(userId, { page: reviewPage, pageSize: reviewPageSize });
+        setReviews(reviewsData.items);
+        setTotalReviews(reviewsData.totalCount);
+
+        reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        handleApiError(err);
+      }
+    };
+
+    fetchReviews();
+  }, [userId, reviewPage]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchComments = async () => {
+      try {
+        const commentsData = await getPagedCommentsForUser(userId, { page: commentPage, pageSize: commentPageSize });
+        setComments(commentsData.items);
+        setTotalComments(commentsData.totalCount);
+
+        commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        handleApiError(err);
+      }
+    };
+
+    fetchComments();
+  }, [userId, commentPage]);
 
   if (loading) {
     return <p className="text-center mt-8">Loading...</p>;
@@ -105,7 +117,8 @@ export default function PublicProfile() {
             <button
               type="button"
               disabled={reviewPage === 1}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setReviewPage((p) => p - 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -118,7 +131,8 @@ export default function PublicProfile() {
             <button
               type="button"
               disabled={reviewPage >= Math.ceil(totalReviews / reviewPageSize)}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setReviewPage((p) => p + 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -146,7 +160,8 @@ export default function PublicProfile() {
             <button
               type="button"
               disabled={commentPage === 1}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setCommentPage((p) => p - 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
@@ -159,7 +174,8 @@ export default function PublicProfile() {
             <button
               type="button"
               disabled={commentPage >= Math.ceil(totalComments / commentPageSize)}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setCommentPage((p) => p + 1);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
