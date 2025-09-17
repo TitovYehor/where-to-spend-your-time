@@ -29,6 +29,9 @@ export default function PublicProfile() {
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
+  const [reviewPageChanged, setReviewPageChanged] = useState(false);
+  const [commentPageChanged, setCommentPageChanged] = useState(false);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -81,15 +84,17 @@ export default function PublicProfile() {
   }, [userId, commentPage]);
 
   useLayoutEffect(() => {
-    if (reviews.length > 0 && reviewsRef.current) {
+    if (reviewPageChanged && reviews.length > 0 && reviewsRef.current) {
       const y = reviewsRef.current.getBoundingClientRect().top + window.scrollY - 60;
       window.scrollTo({ top: y, behavior: "smooth" });
+      setReviewPageChanged(false);
     }
   }, [reviews]);
 
   useLayoutEffect(() => {
-    if (comments.length > 0) {
-      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (commentPageChanged && comments.length > 0 && commentsRef.current) {
+      commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      setCommentPageChanged(false);
     }
   }, [comments]);
 
@@ -129,6 +134,7 @@ export default function PublicProfile() {
               onClick={(e) => {
                 e.preventDefault();
                 setReviewPage((p) => p - 1);
+                setReviewPageChanged(true);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -143,6 +149,7 @@ export default function PublicProfile() {
               onClick={(e) => {
                 e.preventDefault();
                 setReviewPage((p) => p + 1);
+                setReviewPageChanged(true);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -172,6 +179,7 @@ export default function PublicProfile() {
               onClick={(e) => {
                 e.preventDefault();
                 setCommentPage((p) => p - 1);
+                setCommentPageChanged(true);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
@@ -186,6 +194,7 @@ export default function PublicProfile() {
               onClick={(e) => {
                 e.preventDefault();
                 setCommentPage((p) => p + 1);
+                setCommentPageChanged(true);
               }}
               className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
             >
