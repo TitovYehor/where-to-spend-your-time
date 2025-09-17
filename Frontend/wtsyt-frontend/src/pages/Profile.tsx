@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
@@ -11,7 +11,6 @@ import { getPagedCommentsForUser } from "../services/commentService";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
-  const [loading, setLoading] = useState(true);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [totalComments, setTotalComments] = useState(0);
@@ -33,27 +32,22 @@ const Profile = () => {
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
 
-  const prevReviewPageRef = useRef(1);
-  const prevCommentPageRef = useRef(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
 
     const fetchReviews = async () => {
-      setLoading(true);
+      setReviewsLoading(true);
       try {
         const reviewsData = await getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize });
         setReviews(reviewsData.items);
         setTotalReviews(reviewsData.totalCount);
-
-        if (reviewPage !== prevReviewPageRef.current && reviewsRef.current) {
-          reviewsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-        prevReviewPageRef.current = reviewPage;
       } catch (err) {
         handleApiError(err);
       } finally {
-        setLoading(false);
+        setReviewsLoading(false);
       }
     };
 
@@ -64,32 +58,36 @@ const Profile = () => {
     if (!user) return;
 
     const fetchComments = async () => {
-      setLoading(true);
+      setCommentsLoading(true);
       try {
         const commentsData = await getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize });
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
-
-        if (commentPage !== prevCommentPageRef.current && commentsRef.current) {
-          commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-        prevCommentPageRef.current = commentPage;
       } catch (err) {
         handleApiError(err);
       } finally {
-        setLoading(false);
+        setCommentsLoading(false);
       }
     };
 
     fetchComments();
   }, [user, commentPage]);
 
-  if (!user && !loading) {
-    return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;
-  }
+  useLayoutEffect(() => {
+    if (reviews.length > 0 && reviewsRef.current) {
+      const y = reviewsRef.current.getBoundingClientRect().top + window.scrollY - 60;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [reviews]);
 
-  if (loading) {
-    return <p className="text-center mt-8">Loading...</p>;
+  useLayoutEffect(() => {
+    if (comments.length > 0 && commentsRef.current) {
+      commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [comments]);
+
+  if (!user) {
+    return <p className="text-center mt-8 text-gray-600">You must be logged in to view this page</p>;
   }
 
   const handleProfileUpdate = async () => {
@@ -261,6 +259,12 @@ const Profile = () => {
             {reviews.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
+
+            {reviewsLoading && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded">
+                <p className="text-gray-500">Loading reviews...</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -305,6 +309,12 @@ const Profile = () => {
             {comments.map((comment) => (
               <CommentCard key={comment.id} comment={comment} />
             ))}
+
+            {commentsLoading && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded">
+                <p className="text-gray-500">Loading comments...</p>
+              </div>
+            )}
           </div>
         )}
 

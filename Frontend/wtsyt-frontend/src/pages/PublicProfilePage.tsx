@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { AuthUser } from "../types/authUser";
 import { getProfileById } from "../services/userService";
@@ -56,8 +56,6 @@ export default function PublicProfile() {
         const reviewsData = await getPagedReviewsForUser(userId, { page: reviewPage, pageSize: reviewPageSize });
         setReviews(reviewsData.items);
         setTotalReviews(reviewsData.totalCount);
-
-        reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {
         handleApiError(err);
       }
@@ -74,8 +72,6 @@ export default function PublicProfile() {
         const commentsData = await getPagedCommentsForUser(userId, { page: commentPage, pageSize: commentPageSize });
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
-
-        commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {
         handleApiError(err);
       }
@@ -83,6 +79,19 @@ export default function PublicProfile() {
 
     fetchComments();
   }, [userId, commentPage]);
+
+  useLayoutEffect(() => {
+    if (reviews.length > 0 && reviewsRef.current) {
+      const y = reviewsRef.current.getBoundingClientRect().top + window.scrollY - 60;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [reviews]);
+
+  useLayoutEffect(() => {
+    if (comments.length > 0) {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [comments]);
 
   if (loading) {
     return <p className="text-center mt-8">Loading...</p>;
