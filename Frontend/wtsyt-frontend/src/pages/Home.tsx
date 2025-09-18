@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
@@ -14,6 +14,8 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   
+  const [pageChangedByUser, setPageChangedByUser] = useState(false);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const pageSize = 5;
   const totalCountRef = useRef(0);
@@ -57,14 +59,6 @@ export default function Home() {
     });
   }, [searchParams]);
 
-  const updateFilters = (changes: Partial<typeof filters>) => {
-    const newFilters = { ...filters, ...changes };
-    setFilters(newFilters);
-    setSearchParams(buildItemQuery({ ...newFilters, pageSize }), {
-      replace: false,
-    });
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,9 +89,23 @@ export default function Home() {
     fetchMeta();
   }, []);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [filters.page]);
+  useLayoutEffect(() => {
+    if (pageChangedByUser && items.length > 0) { 
+      window.scrollTo({ top: 0, behavior: "auto" });
+      setPageChangedByUser(false);
+    }
+  }, [items, pageChangedByUser]);
+
+  const updateFilters = (changes: Partial<typeof filters>, userTriggered = false) => {
+    const newFilters = { ...filters, ...changes };
+    setFilters(newFilters);
+    setSearchParams(buildItemQuery({ ...newFilters, pageSize }), {
+      replace: false,
+    });
+    if (userTriggered) {
+      setPageChangedByUser(true);
+    }
+  };
 
   const searchValue = filters.search;
 
@@ -260,7 +268,7 @@ export default function Home() {
         <button
           disabled={filters.page === 1}
           onClick={() => {
-            updateFilters({ page: filters.page - 1 })
+            updateFilters({ page: filters.page - 1 }, true);
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
@@ -274,7 +282,7 @@ export default function Home() {
         <button
           disabled={isLastPage}
           onClick={() => {
-            updateFilters({ page: filters.page + 1 })
+            updateFilters({ page: filters.page + 1 }, true);
           }}
           className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
         >
