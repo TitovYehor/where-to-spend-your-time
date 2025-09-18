@@ -21,6 +21,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<ApplicationUser>()
+            .Property(u => u.DisplayName)
+            .IsRequired();
+
+        builder.Entity<ApplicationUser>()
+            .HasIndex(u => u.DisplayName)
+            .IsUnique();
+
         builder.Entity<Category>()
             .HasIndex(c => c.Name)
             .IsUnique();
