@@ -22,6 +22,7 @@ public static class DbInitializer
         var users = await SeedUsers(userManager);
 
         await SeedCategories(db);
+        await SeedTags(db);
         await SeedItems(db);
         await SeedReviewsAndComments(db, users);
 
@@ -87,6 +88,20 @@ public static class DbInitializer
             result["user2"] = user;
         }
 
+        if (await userManager.FindByEmailAsync("demo@example.com") == null)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = "demo@example.com",
+                Email = "demo@example.com",
+                DisplayName = "DemoAccount"
+            };
+
+            await userManager.CreateAsync(user, "Demoaccount333!");
+            await userManager.AddToRoleAsync(user, "User");
+            result["demo"] = user;
+        }
+
         return result;
     }
 
@@ -106,6 +121,25 @@ public static class DbInitializer
         await db.SaveChangesAsync();
     }
 
+    private static async Task SeedTags(AppDbContext db)
+    {
+        if (await db.Tags.AnyAsync())
+        {
+            return;
+        }
+
+        db.Tags.AddRange(
+            new Tag { Name = "Action" },
+            new Tag { Name = "Adventure" },
+            new Tag { Name = "Fantasy" },
+            new Tag { Name = "Detective" },
+            new Tag { Name = "Sci-fi" },
+            new Tag { Name = "Management" }
+        );
+
+        await db.SaveChangesAsync();
+    }
+
     private static async Task SeedItems(AppDbContext db)
     {
         if (await db.Items.AnyAsync())
@@ -114,6 +148,14 @@ public static class DbInitializer
         }
 
         var categories = await db.Categories.ToListAsync();
+        var tags = await db.Tags.ToListAsync();
+
+        var actionTag = tags.First(t => t.Name == "Action");
+        var adventureTag = tags.First(t => t.Name == "Adventure");
+        var fantasyTag = tags.First(t => t.Name == "Fantasy");
+        var detectiveTag = tags.First(t => t.Name == "Detective");
+        var scifiTag = tags.First(t => t.Name == "Sci-fi");
+        var managementTag = tags.First(t => t.Name == "Management");
 
         var games = categories.First(c => c.Name == "Games");
         var movies = categories.First(c => c.Name == "Movies");
@@ -124,40 +166,74 @@ public static class DbInitializer
                 Title = "The Witcher 3", 
                 Description = "Open-world, action RPG where players control Geralt of Rivia," +
                     " a monster hunter, on a quest to find his adopted daughter, Ciri",
-                CategoryId = games.Id 
+                CategoryId = games.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = adventureTag },
+                    new ItemTag { Tag = fantasyTag },
+                    new ItemTag { Tag = detectiveTag }
+                }
             },
             new Item {  
                 Title = "The Witcher 2", 
                 Description = "Action RPG sequel to The Witcher, where players control Geralt of Rivia, a monster hunter, " +
                     "as he navigates a world of political intrigue and conspiracy following an attempt on King Foltest's life",
-                CategoryId = games.Id 
+                CategoryId = games.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = adventureTag },
+                    new ItemTag { Tag = fantasyTag }
+                }
             },
             new Item {
                 Title = "Factorio", 
                 Description = "A construction and management simulation game where players build and automate" +
                     " factories to produce increasingly complex items, ultimately launching a rocket into space", 
-                CategoryId = games.Id 
+                CategoryId = games.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = managementTag },
+                    new ItemTag { Tag = scifiTag }
+                }
             },
 
             new Item { 
                 Title = "Avatar", 
                 Description = "Science-fiction film, which tells the story of Jake Sully, a paraplegic Marine, " +
                     "who is sent to the alien world of Pandora", 
-                CategoryId = movies.Id 
+                CategoryId = movies.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = scifiTag },
+                    new ItemTag { Tag = actionTag }
+                }
             },
             new Item
             {
                 Title = "The Avengers",
                 Description = "A superhero film where Earth's mightiest heroes unite to stop Loki " +
                     "and his alien army from enslaving humanity",
-                CategoryId = movies.Id
+                CategoryId = movies.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = fantasyTag },
+                    new ItemTag { Tag = scifiTag }
+                }
             },
             new Item
             {
                 Title = "Django Unchained",
                 Description = "Western film, which tells the story of Django, a freed slave, who teams up with a German bounty hunter" +
                     " named Dr. King Schultz to rescue Django's wife, Broomhilda, from a cruel plantation owner named Calvin Candie",
-                CategoryId = movies.Id
+                CategoryId = movies.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = adventureTag }
+                }
             },
 
             new Item
@@ -165,21 +241,37 @@ public static class DbInitializer
                 Title = "The Lord of the Rings",
                 Description = "Epic high fantasy novel about the war of the peoples of the fantasy world" +
                     " Middle-earth against a dark lord known as 'Sauron'",
-                CategoryId = books.Id
+                CategoryId = books.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = adventureTag },
+                    new ItemTag { Tag = fantasyTag }
+                }
             },
             new Item
             {
                 Title = "The Adventures of Sherlock Holmes",
                 Description = "A collection of twelve short stories, which introduce the brilliant, eccentric detective Sherlock Holmes" +
                     " and his companion, Dr. John Watson, as they solve various mysteries in London",
-                CategoryId = books.Id
+                CategoryId = books.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = detectiveTag },
+                    new ItemTag { Tag = adventureTag }
+                }
             },
             new Item
             {
                 Title = "The Witcher",
                 Description = "a collection of fantasy novels and short stories centered around Geralt of Rivia," +
                     " a monster hunter known as a Witcher",
-                CategoryId = books.Id
+                CategoryId = books.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = adventureTag },
+                    new ItemTag { Tag = fantasyTag }
+                }
             }
         );
 
@@ -195,6 +287,7 @@ public static class DbInitializer
 
         var user1 = users["user1"];
         var user2 = users["user2"];
+        var demoUser = users["demo"];
         var admin = users["admin"];
 
         var witcher3 = await db.Items.FirstAsync(i => i.Title == "The Witcher 3");
@@ -243,6 +336,33 @@ public static class DbInitializer
             UserId = admin.Id,
             ItemId = factorio.Id
         };
+        var reviewGame5 = new Review
+        {
+            Title = "Awesome factory builder",
+            Content = "In the game you can craft, build, automate craft and build....",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
+            UserId = demoUser.Id,
+            ItemId = factorio.Id
+        };
+        var reviewGame6 = new Review
+        {
+            Title = "Game of the year",
+            Content = "I enjoyed playing so much, I have spend 1000 hours in the game",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
+            UserId = demoUser.Id,
+            ItemId = witcher3.Id
+        };
+        var reviewGame7 = new Review
+        {
+            Title = "Good enough, but no perfect",
+            Content = "Much better than the first Witcher, but obviously worse than 3rd part",
+            Rating = 4,
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
+            UserId = demoUser.Id,
+            ItemId = witcher2.Id
+        };
 
         var reviewMovie1 = new Review
         {
@@ -262,10 +382,19 @@ public static class DbInitializer
             UserId = user2.Id,
             ItemId = django.Id
         };
+        var reviewMovie3 = new Review
+        {
+            Title = "Incredible western",
+            Content = "In that movie....",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+            UserId = demoUser.Id,
+            ItemId = django.Id
+        };
 
         var reviewBook1 = new Review
         {
-            Title = "Incredible book wit a lot of world-building",
+            Title = "Incredible book with a lot of world-building",
             Content = "Cool story, interesting world descriptions",
             Rating = 5,
             CreatedAt = DateTime.UtcNow.AddDays(-1),
@@ -274,15 +403,24 @@ public static class DbInitializer
         };
         var reviewBook2 = new Review
         {
-            Title = "Cool slavic fantasy book",
-            Content = "Fascinating plot, great world-building",
+            Title = "Cool detective stories",
+            Content = "Fascinating attention to details",
             Rating = 5,
             CreatedAt = DateTime.UtcNow.AddDays(-1),
             UserId = user2.Id,
             ItemId = sherlock.Id
         };
+        var reviewBook3 = new Review
+        {
+            Title = "Great book",
+            Content = "Iconic book, but rather boring for me",
+            Rating = 4,
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+            UserId = demoUser.Id,
+            ItemId = lotr.Id
+        };
 
-        db.Reviews.AddRange(reviewGame1, reviewGame2, reviewGame3, reviewGame4, reviewMovie1, reviewMovie2, reviewBook1, reviewBook2);
+        db.Reviews.AddRange(reviewGame1, reviewGame2, reviewGame3, reviewGame4, reviewGame5, reviewGame6, reviewGame7, reviewMovie1, reviewMovie2, reviewMovie3, reviewBook1, reviewBook2, reviewBook3);
 
         db.Comments.AddRange(
             new Comment
@@ -321,6 +459,46 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow,
                 Review = reviewBook2,
                 UserId = user1.Id
+            },
+
+            new Comment
+            {
+                Content = "Agree, but optimization is really bad there",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewGame3,
+                UserId = demoUser.Id
+            },
+
+            new Comment
+            {
+                Content = "meh",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewMovie1,
+                UserId = demoUser.Id
+            },
+
+            new Comment
+            {
+                Content = "Agree",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewBook2,
+                UserId = demoUser.Id
+            },
+
+            new Comment
+            {
+                Content = "+",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewMovie2,
+                UserId = demoUser.Id
+            },
+
+            new Comment
+            {
+                Content = "ok",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewBook1,
+                UserId = demoUser.Id
             }
         );
 
