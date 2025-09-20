@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Hosting;
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -14,7 +16,8 @@ public class MediaServiceTests
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
-    private readonly Mock<IWebHostEnvironment> _envMock;
+    private readonly Mock<BlobContainerClient> _containerMock;
+    private readonly Mock<BlobClient> _blobClientMock;
     private readonly MediaService _service;
 
     public MediaServiceTests()
@@ -30,10 +33,14 @@ public class MediaServiceTests
         });
         _mapper = config.CreateMapper();
 
-        _envMock = new Mock<IWebHostEnvironment>();
-        _envMock.Setup(e => e.WebRootPath).Returns(Path.GetTempPath());
+        _containerMock = new Mock<BlobContainerClient>();
+        _blobClientMock = new Mock<BlobClient>();
 
-        _service = new MediaService(_envMock.Object, _db, _mapper);
+        _containerMock
+            .Setup(c => c.GetBlobClient(It.IsAny<string>()))
+            .Returns(_blobClientMock.Object);
+
+        _service = new MediaService(_db, _mapper, _containerMock.Object);
     }
 
     [Fact]
@@ -55,6 +62,10 @@ public class MediaServiceTests
         var content = new MemoryStream(new byte[] { 1, 2, 3 });
         var formFile = new FormFile(content, 0, content.Length, "file", "test.png");
 
+        _blobClientMock.Setup(b => b.Uri).Returns(new Uri("https://fake.blob/items/123/test.png"));
+        _blobClientMock.Setup(b => b.UploadAsync(It.IsAny<Stream>(), false, default))
+                       .ReturnsAsync(Mock.Of<Response<BlobContentInfo>>());
+
         var dto = new CreateMediaDto
         {
             ItemId = 123,
@@ -66,7 +77,7 @@ public class MediaServiceTests
 
         Assert.NotNull(result);
         Assert.Equal(MediaType.Image, result.Type);
-        Assert.Contains($"/uploads/items/123/", result.Url);
+        Assert.Contains($"/items/123/", result.Url);
 
         var dbMedia = await _db.Media.FirstOrDefaultAsync(m => m.Id == result.Id);
         Assert.NotNull(dbMedia);
@@ -86,19 +97,22 @@ public class MediaServiceTests
         {
             ItemId = 1,
             Type = MediaType.Image,
-            Url = "/uploads/items/1/test.png"
+            Url = "https://fake.blob/test-container/items/1/test.png"
         };
         _db.Media.Add(media);
         await _db.SaveChangesAsync();
 
-        var filePath = Path.Combine(_envMock.Object.WebRootPath, "uploads", "items", "1", "test.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        await File.WriteAllTextAsync(filePath, "test content");
+        _blobClientMock
+            .Setup(b => b.DeleteIfExistsAsync(
+                DeleteSnapshotsOption.None,
+                null,
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Response.FromValue(true, null!));
 
         var result = await _service.DeleteAsync(media.Id);
 
         Assert.True(result);
-        Assert.False(File.Exists(filePath));
         Assert.False(await _db.Media.AnyAsync(m => m.Id == media.Id));
     }
 }
