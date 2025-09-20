@@ -1,7 +1,9 @@
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using WhereToSpendYourTime.Api.Handlers;
+using WhereToSpendYourTime.Api.Helpers;
 using WhereToSpendYourTime.Api.Services.Auth;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Api.Services.Comment;
@@ -13,7 +15,6 @@ using WhereToSpendYourTime.Api.Services.Tags;
 using WhereToSpendYourTime.Api.Services.User;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
-using WhereToSpendYourTime.Api.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddScoped(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config["Azure:BlobConnectionString"];
+    var containerName = config["Azure:BlobContainerName"];
+
+    return new BlobContainerClient(connectionString, containerName);
+});
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

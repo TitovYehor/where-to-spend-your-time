@@ -11,20 +11,11 @@ public class MediaService : IMediaService
     private readonly IMapper _mapper;
     private readonly BlobContainerClient _containerClient;
 
-    public MediaService(AppDbContext db, IMapper mapper, IConfiguration config)
+    public MediaService(AppDbContext db, IMapper mapper, BlobContainerClient containerClient)
     {
         this._db = db;
         this._mapper = mapper;
-
-        var connectionString = config["Azure:BlobConnectionString"];
-        var containerName = config["Azure:BlobContainerName"];
-
-        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(containerName))
-        {
-            throw new InvalidOperationException("Azure Blob Storage is not configured properly");
-        }
-
-        _containerClient = new BlobContainerClient(connectionString, containerName);
+        _containerClient = containerClient ?? throw new ArgumentNullException(nameof(containerClient));
         _containerClient.CreateIfNotExists();
     }
 
