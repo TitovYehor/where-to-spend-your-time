@@ -138,10 +138,21 @@ const Profile = () => {
         setCurrentPassword("");
         setNewPassword("");
       } catch (err: any) {
-        handleApiError(err);
         const data = err?.response?.data;
-        const errors = Array.isArray(data) ? data : [data?.message || "Failed to change password."];
-        setErrorMessages(errors);
+
+        let errorList: string[] = [];
+
+        if (Array.isArray(data)) {
+          errorList = data.map((e: any) => e.description || e.toString());
+        } else if (typeof data === "string") {
+          errorList = [data];
+        } else if (data?.message) {
+          errorList = [data.message];
+        } else {
+          errorList = ["Failed to change password"];
+        }
+        handleApiError(err);
+        setErrorMessages(errorList);
       }
   };
 
