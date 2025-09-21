@@ -6,12 +6,14 @@ import type { ChangePasswordRequest, UpdateProfileRequest, UpdateUserRoleRequest
 
 export const buildUserQuery = (params: {
   search?: string;
+  role?: string;
   page?: number;
   pageSize?: number;
 }): string => {
   const query = new URLSearchParams();
 
   if (params.search) query.append("search", params.search);
+  if (params.role) query.append("role", params.role);
   if (params.page !== undefined) query.append("page", params.page.toString());
   if (params.pageSize !== undefined) query.append("pageSize", params.pageSize.toString());
   
@@ -25,6 +27,7 @@ export const getAllUsers = async (): Promise<AuthUser[]> => {
 
 export const getPagedUsers = async (params: {
   search?: string;
+  role?: string;
   page?: number;
   pageSize?: number;
 }): Promise<UserPagedResult> => {

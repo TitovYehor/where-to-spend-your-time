@@ -39,6 +39,7 @@ export default function AdminUsers() {
       setLoading(true);
       const data: UserPagedResult = await getPagedUsers({
         search,
+        role: roleFilter || undefined,
         page,
         pageSize
       });
@@ -54,7 +55,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchData();
-  }, [search, page, pageSize]);
+  }, [search, page, pageSize, roleFilter]);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -69,8 +70,6 @@ export default function AdminUsers() {
     
     fetchRoles();
   }, []);
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,18 +115,15 @@ export default function AdminUsers() {
       fetchData();
       setError("");
       setMessage("User deleted");
+      setEditingId(null);
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete user");
       setMessage("");
     }
   };
-
-  const filteredUsers = users.filter(u =>
-    u.displayName.toLowerCase().includes(search.toLowerCase()) &&
-    (roleFilter === "" || u.role === roleFilter) &&
-    (u.id != user?.id)
-  );
+  
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <section
@@ -248,21 +244,21 @@ export default function AdminUsers() {
 
       {loading ? (
         <p className="text-gray-500 text-center">Loading...</p>
-      ) : filteredUsers.length === 0 ? (
+      ) : users.length === 0 ? (
         <p className="text-gray-600 text-center">No users found</p>
       ) : (
         <>
           <ul className="space-y-4">
-            {filteredUsers.map((user) => (
+            {users.map((u) => (
               <li
-                key={user.id}
+                key={u.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
               >
                 <div className="flex-1">
                   <p className="text-lg font-semibold text-gray-900">
                     <UserProfileLink
-                      userId={user.id}
-                      name={user.displayName}
+                      userId={u.id}
+                      name={u.displayName}
                       className="text-lg font-semibold"
                     />
                   </p>
@@ -271,33 +267,35 @@ export default function AdminUsers() {
                 <div className="mt-2 sm:mt-0">
                   <span
                     className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      user.role === "Admin"
+                      u.role === "Admin"
                         ? "bg-red-100 text-red-700"
-                        : user.role === "Moderator"
+                        : u.role === "Moderator"
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-blue-100 text-blue-700"
                     }`}
                   >
-                    {user.role}
+                    {u.role}
                   </span>
                 </div>
 
-                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                  <button
-                    onClick={() => handleEdit(user)}
-                    className="text-blue-600 hover:underline font-medium"
-                    aria-label={`Edit ${user.displayName}`}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="text-red-600 hover:underline font-medium"
-                    aria-label={`Delete ${user.displayName}`}
-                  >
-                    Delete
-                  </button>
-                </div>
+                {user?.id != u.id && (
+                  <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
+                    <button
+                      onClick={() => handleEdit(u)}
+                      className="text-blue-600 hover:underline font-medium"
+                      aria-label={`Edit ${u.displayName}`}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u.id)}
+                      className="text-red-600 hover:underline font-medium"
+                      aria-label={`Delete ${u.displayName}`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
