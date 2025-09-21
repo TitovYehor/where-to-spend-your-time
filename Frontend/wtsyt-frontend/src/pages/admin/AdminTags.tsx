@@ -94,6 +94,8 @@ export default function AdminTags() {
       fetchTags();
       setError("");
       setMessage("Tag deleted");
+      setEditingId(null);
+      setName("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete tag");

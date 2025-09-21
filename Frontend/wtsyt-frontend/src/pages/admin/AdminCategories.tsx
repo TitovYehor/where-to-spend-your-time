@@ -94,6 +94,8 @@ export default function AdminCategories() {
       fetchCategories();
       setMessage("Category deleted");
       setError("");
+      setEditingId(null);
+      setName("");
     } catch (err) {
       handleApiError(err);
       setError("Failed to delete category");
