@@ -44,33 +44,28 @@ public class UserService : IUserService
 
     public async Task<PagedResult<ApplicationUserDto>> GetPagedUsersAsync(UserFilterRequest filter)
     {
-        var queryDto = _db.Users
-            .AsNoTracking()
-            .GroupJoin(_db.UserRoles,
-                u => u.Id,
-                ur => ur.UserId,
-                (user, userRoles) => new { user, userRoles })
-            .SelectMany(x => x.userRoles.DefaultIfEmpty(),
-                (x, userRole) => new { x.user, userRole })
-            .GroupJoin(_db.Roles,
-                t => t.userRole!.RoleId,
-                r => r.Id,
-                (t, roles) => new { t.user, roles })
-            .SelectMany(t => t.roles.DefaultIfEmpty(),
-                (t, role) => new ApplicationUserDto
-                {
-                    Id = t.user.Id,
-                    DisplayName = t.user.DisplayName,
-                    Email = t.user.Email,
-                    Role = role != null ? role.Name : null
-                });
+        var queryDto = from u in _db.Users.AsNoTracking()
+                       join ur in _db.UserRoles on u.Id equals ur.UserId
+                       join r in _db.Roles on ur.RoleId equals r.Id
+                       select new ApplicationUserDto
+                       {
+                           Id = u.Id,
+                           DisplayName = u.DisplayName,
+                           Email = u.Email,
+                           Role = r.Name
+                       };
+        
+        if (!string.IsNullOrEmpty(filter.Role))
+        {
+            queryDto = queryDto.Where(u => u.Role!.ToLower() == filter.Role.ToLower());
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
             queryDto = queryDto.Where(u => u.DisplayName.ToLower().Contains(filter.Search.ToLower()));
         }
 
-        queryDto = queryDto.OrderBy(u => u.Role).ThenBy(u => u.DisplayName).ThenBy(u => u.DisplayName);
+        queryDto = queryDto.OrderBy(u => u.Role).ThenBy(u => u.DisplayName);
 
         return await queryDto.ToPagedResultAsync(filter.Page, filter.PageSize);
     }

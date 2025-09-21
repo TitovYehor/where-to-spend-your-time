@@ -86,7 +86,7 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("me/change-password")]
+    [HttpPut("me/change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.NewPassword) && request.NewPassword.Length < 6)
