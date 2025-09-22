@@ -75,7 +75,7 @@ export default function ReviewDetails() {
     try {
       await deleteReview(id);
 
-      navigate("/items");
+      navigate(-1);
     } catch (err: any) {
       handleApiError(err);
       setError(err.message || "Failed to delete review");
@@ -121,7 +121,7 @@ export default function ReviewDetails() {
       {review ? (
         <>
           <header className="mb-4">
-            <h2 className="text-3xl font-bold mb-1">{review.title}</h2>
+            <h2 className="text-3xl font-bold mb-1 break-words">{review.title}</h2>
             <p className="text-sm text-black flex items-center gap-1">
               <span>By</span> 
               <UserProfileLink userId={review.userId} name={review.author} />
@@ -130,7 +130,7 @@ export default function ReviewDetails() {
           </header>
           
           <section className="mb-6">
-            <p className="text-gray-800">{review.content}</p>
+            <p className="text-gray-800 break-words">{review.content}</p>
           </section>
 
           {isEditing ? (
@@ -145,8 +145,12 @@ export default function ReviewDetails() {
                   className="w-full border px-4 py-2 rounded-md"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
+                  maxLength={80}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {editTitle?.length || 0}/80 characters
+                </p>
               </div>
 
               <div>
@@ -158,8 +162,12 @@ export default function ReviewDetails() {
                   className="w-full border px-3 py-2 rounded"
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
+                  maxLength={1000}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {editContent?.length || 0}/1000 characters
+                </p>
               </div>
 
               <div>
@@ -287,8 +295,12 @@ export default function ReviewDetails() {
                     onChange={(e) => setNewComment(e.target.value)}
                     className="w-full border px-4 py-2 rounded-md"
                     placeholder="Write a comment..."
+                    maxLength={200}
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {newComment.length}/200 characters
+                  </p>
                 </div>
 
                 <div className="flex justify-between items-center">
