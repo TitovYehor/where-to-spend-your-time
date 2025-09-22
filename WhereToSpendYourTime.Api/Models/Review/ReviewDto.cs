@@ -12,6 +12,8 @@ public class ReviewDto
 
     public string UserId { get; set; } = string.Empty;
 
+    public int ItemId { get; set; }
+
     public int Rating { get; set; }
 
     public DateTime CreatedAt { get; set; }
