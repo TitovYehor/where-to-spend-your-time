@@ -8,6 +8,7 @@ import { getItemById } from "../services/itemService";
 import { getMyReviewForItem, addReview, updateReview, deleteReview, getPagedReviewsForItem } from "../services/reviewService";
 import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
+import ReviewCard from "../components/reviews/ReviewCard";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -209,18 +210,7 @@ export default function ItemDetails() {
               <ul className="space-y-4">
                 {reviews.map((review) => (
                   <li key={review.id}>
-                    <Link 
-                      to={`/reviews/${review.id}`}
-                      className="block p-4 bg-white rounded shadow hover:shadow-md transition"
-                    >
-                      <h3 className="text-lg font-semibold mb-1">{review.title}</h3>
-                      <p className="text-sm text-gray-500 mb-1">By {review.author}</p>
-                      <p className="text-sm text-gray-700 mb-1">Content: {review.content}</p>
-                      <p className="text-yellow-500 font-medium mb-1">Rating: {review.rating}/5</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
-                    </Link>
+                    <ReviewCard key={review.id} review={review} />
                   </li>
                 ))}
               </ul>
@@ -270,8 +260,12 @@ export default function ItemDetails() {
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  maxLength={80}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {title?.length || 0}/80 characters
+                </p>
               </div>
 
               <div>
@@ -284,8 +278,12 @@ export default function ItemDetails() {
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
+                  maxLength={1000}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {content?.length || 0}/1000 characters
+                </p>
               </div>
 
               <div>
