@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
@@ -120,7 +120,14 @@ export default function ReviewDetails() {
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       {review ? (
         <>
-          <header className="mb-4">
+          <header className="mb-4 flex flex-col gap-2">
+            <Link
+              to={`/items/${review.itemId}`}
+              className="inline-block text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-4 py-1.5 rounded-full text-m text-center font-bold transition-colors"
+            >
+              Reviewed Item
+            </Link>
+
             <h2 className="text-3xl font-bold mb-1 break-words">{review.title}</h2>
             <p className="text-sm text-black flex items-center gap-1">
               <span>By</span> 
