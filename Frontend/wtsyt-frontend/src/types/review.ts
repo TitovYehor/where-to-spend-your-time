@@ -6,6 +6,7 @@ export type Review = {
   createdAt: string;
   author: string;
   userId: string;
+  itemId: number;
 };
 
 export type ReviewCreateRequest = {
