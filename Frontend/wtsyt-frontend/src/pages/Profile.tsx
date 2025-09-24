@@ -163,7 +163,7 @@ const Profile = () => {
       <article className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
         <p><strong>Name:</strong> {user?.displayName}</p>
-        <p className="mb-3"><strong>Email:</strong> {user?.email ?? "Not available"}</p>
+        <p className="mb-3 break-words"><strong>Email:</strong> {user?.email ?? "Not available"}</p>
         <p><strong>Reviews count:</strong> {totalReviews}</p>
         <p><strong>Comments count:</strong> {totalComments}</p>
       </article>
@@ -197,8 +197,13 @@ const Profile = () => {
                 setSuccessMessage("");
               }}
               disabled={isDemoAccount}
+              minLength={2}
+              maxLength={40}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              {newDisplayName?.length || 0}/40 characters
+            </p>
 
             <button
               onClick={handleProfileUpdate}
