@@ -261,7 +261,7 @@ export default function ReviewDetails() {
                           </button>
                         )}
                       </div>
-                      <p className="text-gray-800">{c.content}</p>
+                      <p className="text-gray-800 break-words">{c.content}</p>
                     </li>
                   ))}
                 </ul>
