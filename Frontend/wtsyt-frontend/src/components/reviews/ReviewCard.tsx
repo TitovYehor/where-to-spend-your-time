@@ -11,7 +11,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
       to={`/reviews/${review.id}`}
       className="flex flex-col h-full border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
     >
-      <h3 className="text-lg font-semibold">{review.title}</h3>
+      <h3 className="text-lg font-semibold break-words">{review.title}</h3>
       <p className="text-sm text-gray-500">By {review.author}</p>
       <div className="mt-auto">
         <p className="mt-2 flex items-center justify-between text-sm text-gray-500">
