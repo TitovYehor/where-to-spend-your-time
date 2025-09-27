@@ -8,6 +8,7 @@ import ReviewCard from "../components/reviews/ReviewCard";
 import CommentCard from "../components/comments/CommentCard";
 import { getPagedReviewsForUser } from "../services/reviewService";
 import { getPagedCommentsForUser } from "../services/commentService";
+import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings } from "lucide-react";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
@@ -161,15 +162,33 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       <article className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-        <p><strong>Name:</strong> {user?.displayName}</p>
-        <p className="mb-3 break-words"><strong>Email:</strong> {user?.email ?? "Not available"}</p>
-        <p><strong>Reviews count:</strong> {totalReviews}</p>
-        <p><strong>Comments count:</strong> {totalComments}</p>
+        <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
+          <User className="w-8 h-8 text-blue-600" />
+          Your Profile
+        </h1>
+        <p className="flex items-center gap-2">
+          <User className="w-4 h-4 text-gray-500" />
+          <strong>Name:</strong> {user?.displayName}
+        </p>
+        <p className="flex items-center gap-2 break-words">
+          <Mail className="w-4 h-4 text-gray-500" />
+          <strong>Email:</strong> {user?.email ?? "Not available"}
+        </p>
+        <p className="flex items-center gap-2">
+          <FileText className="w-4 h-4 text-gray-500" />
+          <strong>Reviews count:</strong> {totalReviews}
+        </p>
+        <p className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-gray-500" />
+          <strong>Comments count:</strong> {totalComments}
+        </p>
       </article>
 
       <div className="mb-8 space-y-6">
-        <h2 className="text-xl font-semibold">Edit Profile</h2>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Settings className="w-5 h-5 text-blue-600" />
+          Edit Profile
+        </h2>
 
         {successMessage && (
           <p className="text-green-600">
@@ -186,7 +205,8 @@ const Profile = () => {
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="displayName" className="block font-medium">
+            <label htmlFor="displayName" className="block font-medium flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-gray-500" />
               Display Name
             </label>
             <input
@@ -208,8 +228,9 @@ const Profile = () => {
             <button
               onClick={handleProfileUpdate}
               disabled={isDemoAccount}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
+              <Save className="w-4 h-4" />
               Save Display Name
             </button>
 
@@ -222,7 +243,8 @@ const Profile = () => {
           </div>
         
           <div className="space-y-2">
-            <label htmlFor="currentPassword" className="block font-medium">
+            <label htmlFor="currentPassword" className="block font-medium flex items-center gap-2">
+              <Lock className="w-4 h-4 text-gray-500" />
               Current Password
             </label>
             <input
@@ -237,7 +259,8 @@ const Profile = () => {
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
 
-            <label htmlFor="newPassword" className="block font-medium mt-3">
+            <label htmlFor="newPassword" className="block font-medium mt-3 flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-gray-500" />
               New Password
             </label>
             <input
@@ -271,7 +294,10 @@ const Profile = () => {
       </div>
 
       <div ref={reviewsRef} className="mb-10 space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">Your Reviews</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <FileText className="w-6 h-6 text-blue-500" />
+          Your Reviews
+        </h2>
 
         {reviews.length === 0 ? (
           <p className="text-gray-600">You haven't written any reviews yet</p>
@@ -283,6 +309,7 @@ const Profile = () => {
 
             {reviewsLoading && (
               <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-500 mr-2" />
                 <p className="text-gray-500">Loading reviews...</p>
               </div>
             )}
@@ -323,7 +350,10 @@ const Profile = () => {
       </div>
 
       <div ref={commentsRef} className="mb-10 space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">Your Comments</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <MessageSquare className="w-6 h-6 text-green-600" />
+          Your Comments
+        </h2>
 
         {comments.length === 0 ? (
           <p className="text-gray-600">You haven't written any comments yet</p>

@@ -9,6 +9,7 @@ import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
 import { getPagedCommentsForUser } from "../services/commentService";
 import { getPagedReviewsForUser } from "../services/reviewService";
+import { FileText, MessageSquare, User } from "lucide-react";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -108,14 +109,26 @@ export default function PublicProfile() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
-      <article className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">{user?.displayName}'s Profile</h1>
-        <p><strong>Reviews count:</strong> {user?.reviews.length}</p>
-        <p><strong>Comments count:</strong> {user?.comments.length}</p>
+      <article className="mb-6">
+        <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
+          <User className="w-7 h-7 text-blue-600" />
+          {user?.displayName}'s Profile
+        </h1>
+        <p className="flex items-center gap-2">
+          <FileText className="w-4 h-4 text-gray-500" />
+          <strong>Reviews count:</strong> {user?.reviews.length}
+        </p>
+        <p className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-gray-500" />
+          <strong>Comments count:</strong> {user?.comments.length}
+        </p>
       </article>
 
       <div ref={reviewsRef} className="mb-12 space-y-6">
-        <h2 className="text-2xl font-semibold">User Reviews</h2>
+        <h2 className="text-2xl font-semibold flex items-center gap-2">
+          <FileText className="w-6 h-6 text-blue-500" />
+          User Reviews
+        </h2>
         {reviews.length === 0 ? (
           <p className="text-gray-600">User haven't written any reviews yet</p>
         ) : (
@@ -160,7 +173,10 @@ export default function PublicProfile() {
       </div>
 
       <div ref={commentsRef} className="mb-10  space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">User Comments</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <MessageSquare className="w-6 h-6 text-green-600" />
+          User Comments
+        </h2>
         {comments.length === 0 ? (
           <p className="text-gray-600">User haven't written any comments yet</p>
         ) : (
