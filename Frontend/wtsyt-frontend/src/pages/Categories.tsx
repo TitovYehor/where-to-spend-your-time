@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Category } from '../types/category';
 import { getCategories } from '../services/categoryService';
 import { handleApiError } from '../utils/handleApi';
+import { Layers, Search, Folder } from "lucide-react";
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -39,7 +40,8 @@ export default function Categories() {
       aria-labelledby="categories-heading"
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
-      <h1 id="categories-heading" className="text-2xl font-bold mb-4">
+      <h1 id="categories-heading" className="text-2xl font-bold mb-4 flex items-center gap-2">
+        <Layers className="w-6 h-6 text-blue-600" />
         Categories
       </h1>
 
@@ -50,7 +52,8 @@ export default function Categories() {
       ) : (
         <>
           <div>
-            <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
+            <label htmlFor="search" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
+              <Search className="w-4 h-4 text-gray-500" />
               Search
             </label>
             <input
@@ -71,8 +74,9 @@ export default function Categories() {
                 <Link
                   key={cat.id}
                   to={`/?categoryId=${cat.id}`}
-                  className="bg-white rounded-xl shadow p-4 hover:shadow-md transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="bg-white rounded-xl shadow p-4 hover:shadow-md transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2"
                 >
+                  <Folder className="w-5 h-5 text-blue-500" />
                   <h3 className="text-lg font-semibold text-gray-800">{cat.name}</h3>
                 </Link>
               ))}
