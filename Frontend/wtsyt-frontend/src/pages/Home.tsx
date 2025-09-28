@@ -8,6 +8,7 @@ import { handleApiError } from "../utils/handleApi";
 import type { Tag } from "../types/tag";
 import { getTags } from "../services/tagService";
 import Select from "react-select";
+import { Search, Layers, SortAsc, SortDesc, Tags, Folder, Star } from "lucide-react";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -114,15 +115,19 @@ export default function Home() {
       aria-labelledby="explore-heading" 
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
-      <h1 id="explore-heading" className="text-3xl font-bold mb-6 text-black">Explore Items</h1>
-      
+      <h1 id="explore-heading" className="text-3xl font-bold mb-6 text-black flex items-center gap-2">
+        <Layers className="w-7 h-7 text-blue-600" />
+        Explore Items
+      </h1>
+
       <div className="mb-4 text-black">
         {totalCountRef.current} item{totalCountRef.current !== 1 ? "s" : ""} found
       </div>
       
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
+            <Search className="w-4 h-4 text-gray-500" />
             Search
           </label>
           <input
@@ -140,7 +145,8 @@ export default function Home() {
         </div>
 
         <div className="min-w-[180px] flex-1 sm:flex-none">
-          <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-1">
+          <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
+            <Folder className="w-4 h-4 text-gray-500" />
             Category
           </label>
           <Select
@@ -163,7 +169,8 @@ export default function Home() {
         </div>
 
         <div className="min-w-[160px] flex-1 sm:flex-none">
-          <label htmlFor="sort" className="block text-sm font-medium text-black mb-1">
+          <label htmlFor="sort" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
+            <SortAsc className="w-4 h-4 text-gray-500" />
             Sort by
           </label>
           <Select 
@@ -189,29 +196,32 @@ export default function Home() {
           <div className="inline-flex w-full rounded-md shadow-sm border border-gray-300">
             <button
               onClick={() => updateFilters({ descending: false, page: 1 })}
-              className={`flex-1 px-3 py-2 text-sm rounded-l-md transition ${
+              className={`flex-1 px-3 py-2 text-sm flex items-center justify-center gap-1 rounded-l-md transition ${
                 !filters.descending
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              ↑ Asc
+              <SortAsc className="w-4 h-4" />
+              Asc
             </button>
             <button
               onClick={() => updateFilters({ descending: true, page: 1 })}
-              className={`flex-1 px-3 py-2 text-sm rounded-r-md transition ${
+              className={`flex-1 px-3 py-2 text-sm flex items-center justify-center gap-1 rounded-r-md transition ${
                 filters.descending
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              ↓ Desc
+              <SortDesc className="w-4 h-4" />
+              Desc
             </button>
           </div>
         </div>
 
         <div className="min-w-[200px] max-w-[600px] flex-1 sm:flex-none">
-          <label htmlFor="tags" className="block text-sm font-medium text-black mb-1">
+          <label htmlFor="tags" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
+            <Tags className="w-4 h-4 text-gray-500" />
             Tags
           </label>
           <Select
@@ -244,7 +254,10 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
                 <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
                 <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
-                <p className="text-yellow-500 font-medium">Rating: {item.averageRating}/5</p>
+                <p className="text-yellow-500 font-medium flex items-center gap-1">
+                  <Star className="w-5 h-5" />
+                  Rating: {item.averageRating}/5
+                </p>
 
                 {item.tags && item.tags.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">

@@ -5,6 +5,7 @@ import { handleApiError } from '../utils/handleApi';
 import ReviewCard from '../components/reviews/ReviewCard';
 import ItemStatCard from '../components/items/ItemStatCard';
 import UserProfileLink from '../components/users/UserProfileLinks';
+import { BarChart3, Star, MessageSquareText, Users, Clock } from "lucide-react";
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -30,10 +31,16 @@ export default function Stats() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">Platform Statistics</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2">
+        <BarChart3 className="w-8 h-8 text-blue-600" />
+        Platform Statistics
+      </h1>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Top Rated Items</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Star className="w-6 h-6 text-yellow-500" />
+          Top Rated Items
+        </h2>
 
         {stats.topRatedItems.length === 0 ? (
           <p className="text-gray-500 italic">No top rated items yet</p>
@@ -47,7 +54,11 @@ export default function Stats() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Most Reviewed Items</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <MessageSquareText className="w-6 h-6 text-blue-500" />
+          Most Reviewed Items
+        </h2>
+
         {stats.mostReviewedItems.length === 0 ? (
           <p className="text-gray-500 italic">No most reviewed items yet</p>
         ) : (
@@ -60,7 +71,11 @@ export default function Stats() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Top Reviewers</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Users className="w-6 h-6 text-green-600" />
+          Top Reviewers
+        </h2>
+
         {stats.topReviewers.length === 0 ? (
           <p className="text-gray-500 italic">No top reviewers yet</p>
         ) : (
@@ -81,7 +96,11 @@ export default function Stats() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Recent Reviews</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Clock className="w-6 h-6 text-purple-600" />
+          Recent Reviews
+        </h2>
+        
         {stats.recentReviews.length === 0 ? (
           <p className="text-gray-500 italic">No recent reviews yet</p>
         ) : (
