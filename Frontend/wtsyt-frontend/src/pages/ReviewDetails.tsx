@@ -7,6 +7,7 @@ import { deleteReview, getReviewById, updateReview } from "../services/reviewSer
 import { addComment, deleteComment, getPagedCommentsForReview } from "../services/commentService";
 import { handleApiError } from "../utils/handleApi";
 import UserProfileLink from "../components/users/UserProfileLinks";
+import { Star, Pencil, Trash2, MessageSquare, PlusCircle } from "lucide-react";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -133,7 +134,10 @@ export default function ReviewDetails() {
               <span>By</span> 
               <UserProfileLink userId={review.userId} name={review.author} />
             </p>
-            <p className="text-yellow-600 font-medium">Rating: {review.rating}/5</p>
+            <p className="text-yellow-600 font-medium flex items-center gap-1">
+              <Star className="w-4 h-4" />
+              {review.rating}/5
+            </p>
           </header>
           
           <section className="mb-6">
@@ -196,8 +200,9 @@ export default function ReviewDetails() {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
+                  className="flex items-center gap-1 bg-green-600 text-white px-4 py-2 rounded-md"
                 >
+                  <Pencil className="w-4 h-4" />
                   Save
                 </button>
                 <button
@@ -220,15 +225,17 @@ export default function ReviewDetails() {
                       setEditRating(review.rating);
                       setIsEditing(true);
                     }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                    className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-md"
                   >
+                    <Pencil className="w-4 h-4" />
                     Edit
                   </button>
                 )}
                 <button
                   onClick={handleDeleteReview}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md"
+                  className="flex items-center gap-1 bg-red-600 text-white px-4 py-2 rounded-md"
                 >
+                  <Trash2 className="w-4 h-4" />
                   Delete
                 </button>
               </div>
@@ -236,7 +243,10 @@ export default function ReviewDetails() {
           )}
           
           <section>
-            <h3 className="text-xl font-semibold mb-3">Comments</h3>
+            <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-indigo-600" />
+              Comments
+            </h3>
             {comments.length === 0 ? (
               <p className="text-sm text-gray-500 mb-4">No comments yet.</p>
             ) : (
@@ -313,8 +323,9 @@ export default function ReviewDetails() {
                 <div className="flex justify-between items-center">
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md"
+                    className="flex items-center gap-1 bg-indigo-600 text-white px-4 py-2 rounded-md"
                   >
+                    <PlusCircle className="w-4 h-4" />
                     Add Comment
                   </button>
                   {error && <p className="text-red-500 text-sm">{error}</p>}
