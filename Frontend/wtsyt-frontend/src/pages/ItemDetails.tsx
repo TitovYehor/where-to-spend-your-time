@@ -9,6 +9,7 @@ import { getMyReviewForItem, addReview, updateReview, deleteReview, getPagedRevi
 import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
 import ReviewCard from "../components/reviews/ReviewCard";
+import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2 } from "lucide-react";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -145,16 +146,25 @@ export default function ItemDetails() {
           <p className="text-lg text-gray-700 mb-3">{item.description}</p>
 
           <div className="flex items-center gap-4 mb-3">
-            <Link to={`/?categoryId=${item.categoryId}`} className="text-sm bg-gray-100 px-3 py-1 rounded-md">
+            <Link 
+              to={`/?categoryId=${item.categoryId}`} 
+              className="flex items-center gap-1 text-sm bg-gray-100 px-3 py-1 rounded-md"
+            >
+              <FolderOpen className="w-4 h-4 text-gray-600" />
               {item.categoryName}
             </Link>
-            <span className="text-yellow-600 font-semibold">
-              ⭐ {item.averageRating.toFixed(1)}
+            <span className="flex items-center gap-1 text-yellow-600 font-semibold">
+              <Star className="w-4 h-4" />
+              {item.averageRating.toFixed(1)}
             </span>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Media</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-blue-500" />
+              Media
+            </h3>
+
             {item.media.length === 0 ? (
               <p className="text-sm text-gray-500 italic">No media uploaded yet</p>
             ) : (
@@ -178,7 +188,8 @@ export default function ItemDetails() {
                         className="h-40 w-full object-cover"
                       />
                     )}
-                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                      {m.type === "Image" ? <ImageIcon className="w-3 h-3" /> : <Video className="w-3 h-3" />}
                       {m.type}
                     </span>
                   </div>
@@ -192,9 +203,10 @@ export default function ItemDetails() {
               <Link
                 key={tag.id}
                 to={`/?tagsids=${tag.id}`}
-                className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium px-3 py-1 
+                className="flex items-center gap-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium px-3 py-1 
                           rounded-full hover:scale-105 transition"
               >
+                <TagIcon className="w-3 h-3" />
                 #{tag.name}
               </Link>
             ))}
@@ -202,7 +214,11 @@ export default function ItemDetails() {
         </article>
 
         <section className="mb-7">
-          <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-indigo-600" />
+            Reviews
+          </h2>
+
           {reviews.length === 0 ? (
             <p className="text-gray-500">No reviews yet</p>
           ) : (
@@ -240,7 +256,8 @@ export default function ItemDetails() {
 
         {user && (
           <section>
-            <h3 className="text-lg font-bold mb-4">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-indigo-600" />
               {myReview ? "Edit your review" : "Write a review"}
             </h3>
 
@@ -306,17 +323,19 @@ export default function ItemDetails() {
               <div className="flex flex-wrap gap-4 mt-2">
                 <button
                   type="submit"
-                  className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition"
+                  className="flex items-center gap-1 bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition"
                 >
+                  <Pencil className="w-4 h-4" />
                   {myReview ? "Update Review" : "Submit Review"}
                 </button>
                 
                 {myReview && (
                   <button
                     type="button"
-                    className="text-red-600 text-sm hover:underline"
+                    className="flex items-center gap-1 text-red-600 text-sm hover:underline"
                     onClick={handleDelete}
                   >
+                    <Trash2 className="w-4 h-4" />
                     Delete Review
                   </button>
                 )}
