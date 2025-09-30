@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { login } from "../services/authService";
 import { getMyProfile } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 const Login = () => {
   const { setUser } = useAuth();
@@ -55,35 +56,42 @@ const Login = () => {
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <Mail className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="email"
+                type="email"
+                className="w-full py-2 focus:outline-none"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <Lock className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="password"
+                type="password"
+                className="w-full py-2 focus:outline-none"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
           >
+            <LogIn className="w-4 h-4" />
             Log In
           </button>
         </form>

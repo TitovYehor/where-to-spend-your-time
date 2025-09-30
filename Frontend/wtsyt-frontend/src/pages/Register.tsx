@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { register } from "../services/authService";
 import { handleApiError } from "../utils/handleApi";
+import { User, Mail, Lock, LogIn } from "lucide-react";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -88,17 +89,20 @@ const Register = () => {
             <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
               Display name
             </label>
-            <input
-              id="displayName"
-              type="text"
-              placeholder="Display Name"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              minLength={2}
-              maxLength={40}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <User className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="displayName"
+                type="text"
+                placeholder="Display Name"
+                className="w-full py-2 focus:outline-none"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                minLength={2}
+                maxLength={40}
+                required
+              />
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               {displayName?.length || 0}/40 characters
             </p>
@@ -108,47 +112,56 @@ const Register = () => {
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              maxLength={254}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <Mail className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="w-full py-2 focus:outline-none"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                maxLength={254}
+                required
+              />
+            </div>
           </div>
           
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Password"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <Lock className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                className="w-full py-2 focus:outline-none"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
               Confirm Password
             </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm password"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <Lock className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm password"
+                className="w-full py-2 focus:outline-none"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           {confirmPassword && password !== confirmPassword && (
@@ -157,9 +170,10 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             disabled={loading}
           >
+            <LogIn className="w-4 h-4" />
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
