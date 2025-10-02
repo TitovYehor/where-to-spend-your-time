@@ -9,6 +9,7 @@ import { getTags } from "../../services/tagService";
 import Select from "react-select";
 import type { MediaType } from "../../types/media";
 import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaService";
+import { Boxes, Pencil, PlusCircle, Search, Trash2 } from "lucide-react";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -244,7 +245,10 @@ export default function AdminItems() {
       aria-labelledby="manage-items-heading" 
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
-      <h1 className="text-2xl font-bold mb-6">Manage Items</h1>
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <Boxes className="w-6 h-6 text-blue-600" />
+        Manage Items
+      </h1>
 
       {message && (
         <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
@@ -317,8 +321,9 @@ export default function AdminItems() {
 
         <button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
         >
+          <PlusCircle className="w-4 h-4" />
           {editingId ? "Update Item" : "Add Item"}
         </button>
         
@@ -498,14 +503,17 @@ export default function AdminItems() {
         <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
           Search
         </label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search items..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            type="text"
+            placeholder="Search items..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full border border-gray-300 pl-10 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -544,17 +552,17 @@ export default function AdminItems() {
               <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col gap-3 items-center">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-blue-600 hover:text-blue-800 transition"
                   aria-label={`Edit ${item.title}`}
                 >
-                  Edit
+                  <Pencil className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="text-red-600 hover:underline font-medium"
+                  className="text-red-600 hover:text-red-800 transition"
                   aria-label={`Delete ${item.title}`}
                 >
-                  Delete
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </li>
