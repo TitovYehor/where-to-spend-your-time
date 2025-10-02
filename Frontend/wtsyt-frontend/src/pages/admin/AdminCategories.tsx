@@ -3,6 +3,7 @@ import { addCategory, updateCategory, deleteCategory, getPagedCategories } from 
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
 import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
+import { Layers, Folder, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -112,7 +113,10 @@ export default function AdminCategories() {
       aria-labelledby="manage-categories-heading" 
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
-      <h1 className="text-2xl font-bold mb-6">Manage Categories</h1>
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <Layers className="w-6 h-6 text-blue-600" />
+        Manage Categories
+      </h1>
 
       {message && (
         <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
@@ -153,8 +157,9 @@ export default function AdminCategories() {
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
           >
+            <PlusCircle className="w-4 h-4" />
             {editingId ? "Update Category" : "Add Category"}
           </button>
           {editingId && (
@@ -177,17 +182,20 @@ export default function AdminCategories() {
         <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
           Search
         </label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search categories..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            type="text"
+            placeholder="Search categories..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -202,21 +210,24 @@ export default function AdminCategories() {
                 key={cat.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
               >
-                <div className="flex-1">
+                <div className="flex-1 flex items-center gap-2">
+                  <Folder className="w-5 h-5 text-gray-500" />
                   <span className="text-lg font-medium text-gray-900">{cat.name}</span>
                 </div>
                 
                 <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
                   <button
                     onClick={() => handleEdit(cat)}
-                    className="text-blue-600 hover:underline font-medium"
+                    className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
                   >
+                    <Pencil className="w-4 h-4" />
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(cat.id)}
-                    className="text-red-600 hover:underline font-medium"
+                    className="flex items-center gap-1 text-red-600 hover:underline font-medium"
                   >
+                    <Trash2 className="w-4 h-4" />
                     Delete
                   </button>
                 </div>
@@ -228,19 +239,23 @@ export default function AdminCategories() {
             <button
               disabled={page === 1}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
+
             <span>
               Page {page} of {totalPages}
             </span>
+
             <button
               disabled={page === totalPages}
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </>

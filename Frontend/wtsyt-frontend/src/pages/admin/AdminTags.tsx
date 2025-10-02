@@ -3,6 +3,7 @@ import { addTag, updateTag, deleteTag, getPagedTags } from "../../services/tagSe
 import type { Tag } from "../../types/tag";
 import { handleApiError } from "../../utils/handleApi";
 import type { TagPagedResult } from "../../types/pagination/pagedResult.ts";
+import { Tags as TagsIcon, Tag as TagIcon, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AdminTags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -112,7 +113,8 @@ export default function AdminTags() {
       aria-labelledby="manage-tags-heading"
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
-      <h1 id="manage-tags-heading" className="text-2xl font-bold mb-6">
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <TagsIcon className="w-6 h-6 text-blue-600" />
         Manage Tags
       </h1>
 
@@ -155,8 +157,9 @@ export default function AdminTags() {
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
           >
+            <PlusCircle className="w-4 h-4" />
             {editingId ? "Update Tag" : "Add Tag"}
           </button>
 
@@ -180,17 +183,20 @@ export default function AdminTags() {
         <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
           Search
         </label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search tags..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          <input
+            id="search"
+            type="text"
+            placeholder="Search tags..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full border border-gray-300 pl-10 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -205,23 +211,24 @@ export default function AdminTags() {
                 key={tag.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
               >
-                <div className="flex-1">
+                <div className="flex-1 flex items-center gap-2">
+                  <TagIcon className="w-5 h-5 text-gray-500" />
                   <span className="text-lg font-medium text-gray-900">{tag.name}</span>
                 </div>
 
                 <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
                   <button
                     onClick={() => handleEdit(tag)}
-                    className="text-blue-600 hover:underline font-medium"
-                    aria-label={`Edit ${tag.name}`}
+                    className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
                   >
+                    <Pencil className="w-4 h-4" />
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(tag.id)}
-                    className="text-red-600 hover:underline font-medium"
-                    aria-label={`Delete ${tag.name}`}
+                    className="flex items-center gap-1 text-red-600 hover:underline font-medium"
                   >
+                    <Trash2 className="w-4 h-4" />
                     Delete
                   </button>
                 </div>
@@ -233,19 +240,23 @@ export default function AdminTags() {
             <button
               disabled={page === 1}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
+
             <span>
               Page {page} of {totalPages}
             </span>
+
             <button
               disabled={page === totalPages}
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </>
