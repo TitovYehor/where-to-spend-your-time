@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Tag, Boxes, FolderCog, User } from 'lucide-react';
+import { Tags, Boxes, FolderCog, Users } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <Tag className="w-8 h-8 text-blue-600 mb-2" />
+            <Tags className="w-8 h-8 text-blue-600 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Tags</h2>
             <p className="text-sm text-gray-600">Create, update, or delete tags</p>
           </div>
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <User className="w-8 h-8 text-blue-600 mb-2" />
+            <Users className="w-8 h-8 text-blue-600 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Users</h2>
             <p className="text-sm text-gray-600">Delete users, update user roles</p>
           </div>
