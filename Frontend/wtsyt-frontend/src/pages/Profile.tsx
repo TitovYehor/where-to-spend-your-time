@@ -8,7 +8,7 @@ import ReviewCard from "../components/reviews/ReviewCard";
 import CommentCard from "../components/comments/CommentCard";
 import { getPagedReviewsForUser } from "../services/reviewService";
 import { getPagedCommentsForUser } from "../services/commentService";
-import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings } from "lucide-react";
+import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
@@ -326,9 +326,10 @@ const Profile = () => {
                 setReviewPage((p) => p - 1);
                 setReviewPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm">
               Page {reviewPage} of {Math.ceil(totalReviews / reviewPageSize)}
@@ -341,9 +342,10 @@ const Profile = () => {
                 setReviewPage((p) => p + 1);
                 setReviewPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}
@@ -381,9 +383,10 @@ const Profile = () => {
                 setCommentPage((p) => p - 1);
                 setCommentPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm">
               Page {commentPage} of {Math.ceil(totalComments / commentPageSize)}
@@ -396,9 +399,10 @@ const Profile = () => {
                 setCommentPage((p) => p + 1);
                 setCommentPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}

@@ -9,7 +9,7 @@ import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
 import { getPagedCommentsForUser } from "../services/commentService";
 import { getPagedReviewsForUser } from "../services/reviewService";
-import { FileText, MessageSquare, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, MessageSquare, User } from "lucide-react";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -149,9 +149,10 @@ export default function PublicProfile() {
                 setReviewPage((p) => p - 1);
                 setReviewPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm">
               Page {reviewPage} of {Math.ceil(totalReviews / reviewPageSize)}
@@ -164,9 +165,10 @@ export default function PublicProfile() {
                 setReviewPage((p) => p + 1);
                 setReviewPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}
@@ -197,9 +199,10 @@ export default function PublicProfile() {
                 setCommentPage((p) => p - 1);
                 setCommentPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              Prev
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm">
               Page {commentPage} of {Math.ceil(totalComments / commentPageSize)}
@@ -212,9 +215,10 @@ export default function PublicProfile() {
                 setCommentPage((p) => p + 1);
                 setCommentPageChanged(true);
               }}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
             >
-              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}
