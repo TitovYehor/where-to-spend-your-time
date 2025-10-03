@@ -95,6 +95,8 @@ var app = builder.Build();
 app.UseExceptionHandler();
 app.UseRouting();
 
+app.UseCors("AllowFrontend");
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -107,13 +109,11 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedAsync(services);
 }
 
-app.MapControllers();
-
-app.UseCors("AllowFrontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
+
+app.MapControllers();
 
 await app.RunAsync();
