@@ -7,7 +7,7 @@ import { deleteReview, getReviewById, updateReview } from "../services/reviewSer
 import { addComment, deleteComment, getPagedCommentsForReview } from "../services/commentService";
 import { handleApiError } from "../utils/handleApi";
 import UserProfileLink from "../components/users/UserProfileLinks";
-import { Star, Pencil, Trash2, MessageSquare, PlusCircle } from "lucide-react";
+import { Star, Pencil, Trash2, MessageSquare, PlusCircle, ChevronLeft, ChevronRight, Box } from "lucide-react";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -124,8 +124,9 @@ export default function ReviewDetails() {
           <header className="mb-4 flex flex-col gap-2">
             <Link
               to={`/items/${review.itemId}`}
-              className="inline-block text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-4 py-1.5 rounded-full text-m text-center font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-2 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold transition-colors"
             >
+              <Box className="w-4 h-4" />
               Reviewed Item
             </Link>
 
@@ -281,9 +282,10 @@ export default function ReviewDetails() {
                     <button
                       disabled={page === 1}
                       onClick={() => setPage((p) => p - 1)}
-                      className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+                      className="p-2 rounded bg-gray-200 disabled:opacity-50"
+                      aria-label="Previous page"
                     >
-                      Prev
+                      <ChevronLeft className="w-5 h-5" />
                     </button>
                     <span className="text-sm">
                       Page {page} of {Math.ceil(totalComments / pageSize)}
@@ -291,9 +293,10 @@ export default function ReviewDetails() {
                     <button
                       disabled={page >= Math.ceil(totalComments / pageSize)}
                       onClick={() => setPage((p) => p + 1)}
-                      className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+                      className="p-2 rounded bg-gray-200 disabled:opacity-50"
+                      aria-label="Next page"
                     >
-                      Next
+                      <ChevronRight className="w-5 h-5" />
                     </button>
                   </div>
                 )}

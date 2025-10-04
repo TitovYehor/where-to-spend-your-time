@@ -9,7 +9,7 @@ import { getMyReviewForItem, addReview, updateReview, deleteReview, getPagedRevi
 import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
 import ReviewCard from "../components/reviews/ReviewCard";
-import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -235,9 +235,10 @@ export default function ItemDetails() {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  className="p-2 rounded bg-gray-200 disabled:opacity-50"
+                  aria-label="Previous page"
                 >
-                  Previous
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 <span className="text-sm text-gray-700">
                   Page {page} of {Math.ceil(totalReviews / pageSize)}
@@ -245,9 +246,10 @@ export default function ItemDetails() {
                 <button
                   disabled={page * pageSize >= totalReviews}
                   onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  className="p-2 rounded bg-gray-200 disabled:opacity-50"
+                  aria-label="Next page"
                 >
-                  Next
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </>
