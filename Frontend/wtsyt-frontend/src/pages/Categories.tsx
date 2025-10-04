@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Category } from '../types/category';
 import { getCategories } from '../services/categoryService';
 import { handleApiError } from '../utils/handleApi';
-import { Layers, Search, Folder } from "lucide-react";
+import { Search, Folder, Folders } from "lucide-react";
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,7 +41,7 @@ export default function Categories() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 id="categories-heading" className="text-2xl font-bold mb-4 flex items-center gap-2">
-        <Layers className="w-6 h-6 text-blue-600" />
+        <Folders className="w-6 h-6 text-blue-600" />
         Categories
       </h1>
 
