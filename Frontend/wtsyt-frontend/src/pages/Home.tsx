@@ -8,7 +8,7 @@ import { handleApiError } from "../utils/handleApi";
 import type { Tag } from "../types/tag";
 import { getTags } from "../services/tagService";
 import Select from "react-select";
-import { Search, Layers, SortAsc, SortDesc, Tags, Folder, Star } from "lucide-react";
+import { Search, Layers, SortAsc, SortDesc, Tags, Folder, Star, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -283,9 +283,10 @@ export default function Home() {
           onClick={() => {
             updateFilters({ page: filters.page - 1 }, true);
           }}
-          className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          className="p-2 rounded bg-gray-200 disabled:opacity-50"
+          aria-label="Previous page"
         >
-          Previous
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         <span className="text-sm text-black">
@@ -297,9 +298,10 @@ export default function Home() {
           onClick={() => {
             updateFilters({ page: filters.page + 1 }, true);
           }}
-          className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          className="p-2 rounded bg-gray-200 disabled:opacity-50"
+          aria-label="Next page"
         >
-          Next
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
