@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import type { Category } from "../types/category";
 import type { Item } from "../types/item";
 import { buildItemQuery, getItems } from "../services/itemService";
@@ -8,7 +8,8 @@ import { handleApiError } from "../utils/handleApi";
 import type { Tag } from "../types/tag";
 import { getTags } from "../services/tagService";
 import Select from "react-select";
-import { Search, Layers, SortAsc, SortDesc, Tags, Folder, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, SortAsc, SortDesc, Tags, Folder, ChevronLeft, ChevronRight, Boxes } from "lucide-react";
+import ItemFullCard from "../components/items/ItemFullCard";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -116,7 +117,7 @@ export default function Home() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 id="explore-heading" className="text-3xl font-bold mb-6 text-black flex items-center gap-2">
-        <Layers className="w-7 h-7 text-blue-600" />
+        <Boxes className="w-7 h-7 text-blue-600" />
         Explore Items
       </h1>
 
@@ -245,34 +246,7 @@ export default function Home() {
       ) : (
         <ul className="space-y-4">
           {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                to={`/items/${item.id}`}
-                className="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-transform 
-                  hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-                <p className="text-sm text-gray-600">Category: {item.categoryName}</p>
-                <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
-                <p className="text-yellow-500 font-medium flex items-center gap-1">
-                  <Star className="w-5 h-5" />
-                  Rating: {item.averageRating}/5
-                </p>
-
-                {item.tags && item.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            </li>
+            <ItemFullCard key={item.id} item={item} />
           ))}
         </ul>
       )}
