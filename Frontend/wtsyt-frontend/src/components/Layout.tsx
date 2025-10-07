@@ -43,7 +43,7 @@ export default function Layout() {
         </button>
       )}
 
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto pt-16">
         <Outlet />
       </div>
     </div>

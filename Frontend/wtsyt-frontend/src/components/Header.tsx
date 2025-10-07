@@ -27,7 +27,8 @@ export default function Header({ toggleBackground, solid }: HeaderProps) {
   };
 
   return (
-    <header className="bg-gray-900/90 shadow-lg border-b border-gray-700 sticky top-0 z-50 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 w-full bg-gray-900/90 shadow-lg border-b border-gray-700 z-50 backdrop-blur-xl">
+
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         <button
           onClick={() => handleReplaceNavigate("/")}
