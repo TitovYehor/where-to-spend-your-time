@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Home, BarChart3, User, LogOut, LogIn, UserPlus, Settings, Palette, Square, Folders, Tags } from 'lucide-react';
 
 interface HeaderProps {
   toggleBackground: () => void;
@@ -10,11 +11,11 @@ export default function Header({ toggleBackground, solid }: HeaderProps) {
   const { user, userLogout } = useAuth();
   
   const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Categories', path: '/categories' },
-    { label: 'Tags', path: '/tags' },
-    { label: 'Stats', path: '/stats' },
-    ...(user ? [{ label : 'Profile', path: '/profile' }] : []),
+    { label: 'Home', path: '/', icon: Home },
+    { label: 'Categories', path: '/categories', icon: Folders },
+    { label: 'Tags', path: '/tags', icon: Tags },
+    { label: 'Stats', path: '/stats', icon: BarChart3 },
+    ...(user ? [{ label: 'Profile', path: '/profile', icon: User }] : []),
   ];
 
   const handleReplaceNavigate = (path: string) => {
@@ -39,18 +40,19 @@ export default function Header({ toggleBackground, solid }: HeaderProps) {
         </button>
 
         <nav className="flex items-center gap-x-4">
-          {navItems.map(({ label, path }) => (
+          {navItems.map(({ label, path, icon: Icon }) => (
             <NavLink
               key={path}
               to={path}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
+                `flex items-center gap-1.5 text-sm font-medium transition-colors ${
                   isActive 
                   ? 'text-white underline font-semibold' 
                   : 'text-gray-300 hover:text-white'
                 }`
               }
             >
+              <Icon className="w-4 h-4" />
               {label}
             </NavLink>
           ))}
@@ -58,31 +60,42 @@ export default function Header({ toggleBackground, solid }: HeaderProps) {
           {user?.role === "Admin" && (
             <Link
               to="/admin"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-indigo-500 
-                focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all 
-                text-sm font-medium"
+              className="flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-md shadow-md hover:bg-indigo-500 
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all 
+              text-sm font-medium"
             >
+              <Settings className="w-4 h-4" />
               Admin Panel
             </Link>
           )}
 
           {user ? (
             <div className="flex items-center gap-x-4">
-              <span className="text-sm text-gray-200">Hello, {user.displayName}</span>
+              <span className="text-sm text-gray-200">
+                Hello, {user.displayName}
+              </span>
               <button
                 onClick={handleLogout}
-                className="text-red-300 hover:text-white text-sm font-medium transition-colors"
+                className="flex items-center gap-1 text-red-300 hover:text-white text-sm font-medium transition-colors"
               >
+                <LogOut className="w-4 h-4" />
                 Logout
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-x-4">
-              <NavLink to="/login" className="text-blue-300 hover:text-white font-medium transition-colors">
+              <NavLink 
+                to="/login" 
+                className="flex items-center gap-1 text-blue-300 hover:text-white font-medium transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
                 Login
               </NavLink>
-              <NavLink to="/register" className="bg-blue-600 text-white px-3 py-1.5 rounded-md 
-                shadow-sm hover:bg-blue-500 transition-colors font-medium">
+              <NavLink 
+                to="/register" 
+                className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-md shadow-sm hover:bg-blue-500 transition-colors font-medium"
+              >
+                <UserPlus className="w-4 h-4" />
                 Register
               </NavLink>
             </div>
@@ -90,10 +103,20 @@ export default function Header({ toggleBackground, solid }: HeaderProps) {
 
         <button
             onClick={toggleBackground}
-            className="px-3 py-1.5 rounded-md text-sm font-medium
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium
                        bg-gray-700/70 hover:bg-gray-600 text-white shadow-sm transition"
           >
-            {solid ? "Aurora Mode" : "Solid Mode"}
+            {solid ? (
+              <>
+                <Palette className="w-4 h-4" />
+                Aurora Mode
+              </>
+            ) : (
+              <>
+                <Square className="w-4 h-4" />
+                Solid Mode
+              </>
+            )}
           </button>
         </nav>
       </div>
