@@ -225,9 +225,7 @@ export default function ItemDetails() {
             <>
               <ul className="space-y-4">
                 {reviews.map((review) => (
-                  <li key={review.id}>
-                    <ReviewCard key={review.id} review={review} />
-                  </li>
+                  <ReviewCard key={review.id} review={review} />
                 ))}
               </ul>
 
