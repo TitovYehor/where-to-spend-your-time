@@ -8,6 +8,7 @@ import { addComment, deleteComment, getPagedCommentsForReview } from "../service
 import { handleApiError } from "../utils/handleApi";
 import UserProfileLink from "../components/users/UserProfileLinks";
 import { Star, Pencil, Trash2, MessageSquare, PlusCircle, ChevronLeft, ChevronRight, Box } from "lucide-react";
+import CommentManagementCard from "../components/comments/CommentManagementCard";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -253,28 +254,19 @@ export default function ReviewDetails() {
             ) : (
               <>
                 <ul className="space-y-4 mb-4">
-                  {comments.map((c) => (
-                    <li 
-                      key={c.id} 
-                      className="border rounded-lg p-3 bg-gray-50 shadow-sm"
-                    >
-                      <div className="flex justify-between items-center mb-1">
-                        <p className="text-sm text-gray-600 flex items-center gap-1"> 
-                          <UserProfileLink userId={c.userId} name={c.author} />
-                          <span>• {new Date(c.createdAt).toLocaleString()}</span>
-                        </p>
-                        {(isAdmin || (c.author == user?.displayName) || isModerator) && (
-                          <button
-                            onClick={() => handleDeleteComment(c.id, c.author)}
-                            className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-gray-800 break-words">{c.content}</p>
-                    </li>
-                  ))}
+                  {comments.map((c) => {
+                    const canManage =
+                      isAdmin || isModerator || c.author === user?.displayName;
+
+                    return (
+                      <CommentManagementCard
+                        key={c.id}
+                        comment={c}
+                        canManage={canManage}
+                        onDelete={handleDeleteComment}
+                      />
+                    );
+                  })}
                 </ul>
 
                 {totalComments > pageSize && (
