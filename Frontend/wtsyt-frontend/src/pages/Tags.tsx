@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { Tag } from '../types/tag';
 import { getTags } from '../services/tagService';
 import { handleApiError } from '../utils/handleApi';
-import { Tags as TagsIcon, Search as SearchIcon, Tag as TagIcon } from "lucide-react";
+import { Tags as TagsIcon, Search as SearchIcon } from "lucide-react";
+import TagCard from '../components/tags/TagCard';
 
 export default function Tags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -41,7 +41,7 @@ export default function Tags() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 id="tags-heading" className="text-2xl font-bold mb-4 flex items-center gap-2">
-        <TagsIcon className="w-6 h-6 text-blue-600" />
+        <TagsIcon className="w-6 h-6 text-green-500" />
         Tags
       </h1>
 
@@ -71,14 +71,7 @@ export default function Tags() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {filteredTags.map(t => (
-                <Link
-                  key={t.id}
-                  to={`/?tagsids=${t.id}`}
-                  className="bg-white rounded-xl shadow p-4 hover:shadow-md transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2"
-                >
-                  <TagIcon className="w-5 h-5 text-green-500" />
-                  <h3 className="text-lg font-semibold text-gray-800">{t.name}</h3>
-                </Link>
+                <TagCard key={t.id} tag={t} />
               ))}
             </div>
           )}
