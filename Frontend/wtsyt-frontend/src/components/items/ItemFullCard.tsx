@@ -21,7 +21,7 @@ export default function ItemCard({ item }: ItemCardProps) {
       <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
       <p className="text-yellow-500 font-medium flex items-center gap-1">
         <Star className="w-5 h-5" />
-        Rating: {item.averageRating}/5
+        Rating: {item.averageRating?.toFixed(1)}/5
       </p>
 
       {item.tags && item.tags.length > 0 && (
