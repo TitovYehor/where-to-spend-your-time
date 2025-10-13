@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Item } from "../../types/item";
 import { Star, Folder, Tag } from "lucide-react";
+import { formatRating } from "../../utils/formatters";
 
 type ItemCardProps = {
   item: Item;
@@ -21,7 +22,7 @@ export default function ItemCard({ item }: ItemCardProps) {
       <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
       <p className="text-yellow-500 font-medium flex items-center gap-1">
         <Star className="w-5 h-5" />
-        Rating: {item.averageRating?.toFixed(1)}/5
+        Rating: {formatRating(item.averageRating)}/5
       </p>
 
       {item.tags && item.tags.length > 0 && (

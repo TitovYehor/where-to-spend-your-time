@@ -10,6 +10,7 @@ import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
 import ReviewCard from "../components/reviews/ReviewCard";
 import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { formatRating } from "../utils/formatters";
 
 export default function ItemDetails() {
   const { id } = useParams<{ id: string }>();
@@ -155,7 +156,7 @@ export default function ItemDetails() {
             </Link>
             <span className="flex items-center gap-1 text-yellow-600 font-semibold">
               <Star className="w-4 h-4" />
-              {item.averageRating.toFixed(1)}
+              {formatRating(item.averageRating)}/5
             </span>
           </div>
 

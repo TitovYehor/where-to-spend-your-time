@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { ItemStat } from "../../types/stats";
 import { Star, Folder } from "lucide-react";
+import { formatRating } from "../../utils/formatters";
 
 type ItemStatCardProps = {
   item: ItemStat;
@@ -21,7 +22,7 @@ export default function ItemStatCard({ item }: ItemStatCardProps) {
         </p>
         <p className="flex items-center gap-2 text-yellow-600 font-medium">
           <Star className="w-4 h-4" />
-          {item.averageRating?.toFixed(1)}/5
+          {formatRating(item.averageRating)}/5
         </p>
       </div>
     </Link>
