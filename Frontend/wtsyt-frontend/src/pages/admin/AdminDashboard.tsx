@@ -1,10 +1,15 @@
 import { Link } from "react-router-dom";
-import { Tags, Boxes, FolderCog, Users } from 'lucide-react';
+import { Tags, Boxes, FolderCog, Users, Settings } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
     <section aria-labelledby="admin-heading" className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
-      <h1 id="admin-heading" className="text-3xl font-bold mb-6">Admin Panel</h1>
+      <div className="flex justify-center items-center gap-3 mb-6">
+        <Settings className="w-10 h-10 text-blue-600" />
+        <h1 id="admin-heading" className="text-3xl font-bold text-gray-900">
+          Admin Panel
+        </h1>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
