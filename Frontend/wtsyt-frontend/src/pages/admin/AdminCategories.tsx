@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addCategory, updateCategory, deleteCategory, getPagedCategories } from "../../services/categoryService";
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
@@ -23,6 +23,10 @@ export default function AdminCategories() {
 
   const formRef = useRef<HTMLFormElement>(null);
 
+  const categoriesRef = useRef<HTMLDivElement | null>(null);
+
+  const [categoryPageChanged, setCategoryPageChanged] = useState(false);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -44,6 +48,14 @@ export default function AdminCategories() {
   useEffect(() => {
     fetchCategories();
   }, [search, page, pageSize]);
+
+  useLayoutEffect(() => {
+    if (categoryPageChanged && categories.length > 0 && categoriesRef.current) {
+      const y = categoriesRef.current.getBoundingClientRect().top + window.scrollY - 60;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setCategoryPageChanged(false);
+    }
+  }, [categories]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -203,7 +215,7 @@ export default function AdminCategories() {
       ) : categories.length === 0 ? (
         <p className="text-gray-600">No categories found.</p>
       ) : (
-        <>
+        <div ref={categoriesRef}>
           <ul className="space-y-6">
             {filteredCategories.map((cat) => (
               <li
@@ -238,7 +250,11 @@ export default function AdminCategories() {
           <div className="flex justify-center items-center gap-3 mt-6">
             <button
               disabled={page === 1}
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.max(p - 1, 1));
+                setCategoryPageChanged(true);
+              }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Previous page"
             >
@@ -251,14 +267,18 @@ export default function AdminCategories() {
 
             <button
               disabled={page === totalPages}
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.min(p + 1, totalPages));
+                setCategoryPageChanged(true);
+              }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Next page"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </>
+        </div>
       )}
     </section>
   );

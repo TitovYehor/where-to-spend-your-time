@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addTag, updateTag, deleteTag, getPagedTags } from "../../services/tagService.ts";
 import type { Tag } from "../../types/tag";
 import { handleApiError } from "../../utils/handleApi";
@@ -23,6 +23,10 @@ export default function AdminTags() {
 
   const formRef = useRef<HTMLFormElement>(null);
 
+  const tagsRef = useRef<HTMLDivElement | null>(null);
+
+  const [tagPageChanged, setTagPageChanged] = useState(false);
+
   const fetchTags = async () => {
     try {
       setLoading(true);
@@ -44,6 +48,14 @@ export default function AdminTags() {
   useEffect(() => {
     fetchTags();
   }, [search, page, pageSize]);
+
+  useLayoutEffect(() => {
+    if (tagPageChanged && tags.length > 0 && tagsRef.current) {
+      const y = tagsRef.current.getBoundingClientRect().top + window.scrollY - 60;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setTagPageChanged(false);
+    }
+  }, [tags]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -204,7 +216,7 @@ export default function AdminTags() {
       ) : tags.length === 0 ? (
         <p className="text-gray-600">No tags found</p>
       ) : (
-        <>
+        <div ref={tagsRef}>
           <ul className="space-y-6">
             {filteredtags.map((tag) => (
               <li
@@ -239,7 +251,11 @@ export default function AdminTags() {
           <div className="flex justify-center items-center gap-3 mt-6">
             <button
               disabled={page === 1}
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.max(p - 1, 1));
+                setTagPageChanged(true);
+              }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Previous page"
             >
@@ -252,14 +268,18 @@ export default function AdminTags() {
 
             <button
               disabled={page === totalPages}
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.min(p + 1, totalPages));
+                setTagPageChanged(true);
+              }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Next page"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </>
+        </div>
       )}
     </section>
   );
