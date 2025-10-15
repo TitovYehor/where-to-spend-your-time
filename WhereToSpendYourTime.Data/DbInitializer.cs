@@ -46,6 +46,9 @@ public static class DbInitializer
     {
         var result = new Dictionary<string, ApplicationUser>();
 
+        var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "Admin123!";
+        var userPassword = Environment.GetEnvironmentVariable("USER_PASSWORD") ?? "User123!";
+
         if (await userManager.FindByEmailAsync("admin@example.com") == null)
         {
             var admin = new ApplicationUser
@@ -55,7 +58,7 @@ public static class DbInitializer
                 DisplayName = "Admin"
             };
 
-            await userManager.CreateAsync(admin, "Admin123!");
+            await userManager.CreateAsync(admin, adminPassword);
             await userManager.AddToRoleAsync(admin, "Admin");
             result.Add("admin", admin);
         }
@@ -69,7 +72,7 @@ public static class DbInitializer
                 DisplayName = "John Doe"
             };
 
-            await userManager.CreateAsync(user, "User123!");
+            await userManager.CreateAsync(user, userPassword);
             await userManager.AddToRoleAsync(user, "User");
             result["user1"] = user;
         }
@@ -83,7 +86,7 @@ public static class DbInitializer
                 DisplayName = "Greg Bor"
             };
 
-            await userManager.CreateAsync(user, "User123!");
+            await userManager.CreateAsync(user, userPassword);
             await userManager.AddToRoleAsync(user, "User");
             result["user2"] = user;
         }
