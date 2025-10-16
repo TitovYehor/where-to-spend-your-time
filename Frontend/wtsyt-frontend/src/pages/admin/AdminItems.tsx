@@ -9,10 +9,11 @@ import { getTags } from "../../services/tagService";
 import Select from "react-select";
 import type { MediaType } from "../../types/media";
 import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaService";
-import { Boxes, Pencil, PlusCircle, Search, Trash2 } from "lucide-react";
+import { Boxes, ChevronLeft, ChevronRight, Pencil, PlusCircle, Search, Trash2 } from "lucide-react";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
 
@@ -24,6 +25,9 @@ export default function AdminItems() {
   });
   
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+
   const [tagInput, setTagInput] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -46,13 +50,16 @@ export default function AdminItems() {
   const fetchItemsAndCategories = async () => {
     try {
       const [itemList, categoryList, tagList] = await Promise.all([
-        getItems({}),
+        getItems({
+          search: search,
+          page: page,
+          pageSize: pageSize
+        }),
         getCategories(),
         getTags(),
       ]);
-      console.log(itemList.items);
       setItems(itemList.items);
-      console.log(items);
+      setTotalCount(itemList.totalCount);
       setCategories(categoryList);
       setTags(tagList);
     } catch (err) {
@@ -65,7 +72,9 @@ export default function AdminItems() {
 
   useEffect(() => {
     fetchItemsAndCategories();
-  }, []);
+  }, [search, page, pageSize]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -235,10 +244,6 @@ export default function AdminItems() {
       setMessage("");
     }
   };
-
-  const filteredItems = items.filter(i =>
-    i.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <section 
@@ -510,7 +515,10 @@ export default function AdminItems() {
             type="text"
             placeholder="Search items..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full border border-gray-300 pl-10 px-4 py-2 rounded-lg shadow-sm mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -521,53 +529,85 @@ export default function AdminItems() {
       ) : items.length === 0 ? (
         <p className="text-gray-600">No items found</p>
       ) : (
-        <ul className="space-y-4">
-          {filteredItems.map((item) => (
-            <li
-              key={item.id}
-              className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+        <>
+          <ul className="space-y-4">
+            {items.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex-1 text-left">
+                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-3xl line-clamp-3">{item.description}</p>
+                  <p className="text-sm text-gray-500">
+                    <span className="font-medium">Category:</span>{" "}
+                    {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
+                  </p>
+
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {item.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col gap-3 items-center">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="text-blue-600 hover:text-blue-800 transition"
+                    aria-label={`Edit ${item.title}`}
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-600 hover:text-red-800 transition"
+                    aria-label={`Delete ${item.title}`}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex justify-center items-center gap-3 mt-6">
+            <button
+              disabled={page === 1}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.max(p - 1, 1));
+              }}
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Previous page"
             >
-              <div className="flex-1 text-left">
-                <h3 className="font-semibold text-lg">{item.title}</h3>
-                <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-3xl line-clamp-3">{item.description}</p>
-                <p className="text-sm text-gray-500">
-                  <span className="font-medium">Category:</span>{" "}
-                  {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
-                </p>
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-                {item.tags && item.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <span>
+              Page {page} of {totalPages}
+            </span>
 
-              <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col gap-3 items-center">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="text-blue-600 hover:text-blue-800 transition"
-                  aria-label={`Edit ${item.title}`}
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="text-red-600 hover:text-red-800 transition"
-                  aria-label={`Delete ${item.title}`}
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+            <button
+              disabled={page === totalPages}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.min(p + 1, totalPages));
+              }}
+              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              aria-label="Next page"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
