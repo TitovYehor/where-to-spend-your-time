@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { getItems, addItem, updateItem, deleteItem, addTagForItem, removeTagFromItem, getItemById } from "../../services/itemService";
 import { getCategories } from "../../services/categoryService";
 import type { Item, ItemCreateRequest } from "../../types/item";
@@ -46,6 +46,9 @@ export default function AdminItems() {
   const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
+  const itemsRef = useRef<HTMLDivElement | null>(null);
+
+  const [itemPageChanged, setItemPageChanged] = useState(false);
 
   const fetchItemsAndCategories = async () => {
     try {
@@ -73,6 +76,14 @@ export default function AdminItems() {
   useEffect(() => {
     fetchItemsAndCategories();
   }, [search, page, pageSize]);
+
+  useLayoutEffect(() => {
+      if (itemPageChanged && items.length > 0 && itemsRef.current) {
+        const y = itemsRef.current.getBoundingClientRect().top + window.scrollY - 160;
+        window.scrollTo({ top: y, behavior: "smooth" });
+        setItemPageChanged(false);
+      }
+    }, [items]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -529,7 +540,7 @@ export default function AdminItems() {
       ) : items.length === 0 ? (
         <p className="text-gray-600">No items found</p>
       ) : (
-        <>
+        <div ref={itemsRef}>
           <ul className="space-y-4">
             {items.map((item) => (
               <li
@@ -584,6 +595,7 @@ export default function AdminItems() {
               onClick={(e) => {
                 e.preventDefault();
                 setPage((p) => Math.max(p - 1, 1));
+                setItemPageChanged(true);
               }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Previous page"
@@ -600,6 +612,7 @@ export default function AdminItems() {
               onClick={(e) => {
                 e.preventDefault();
                 setPage((p) => Math.min(p + 1, totalPages));
+                setItemPageChanged(true);
               }}
               className="p-2 rounded bg-gray-200 disabled:opacity-50"
               aria-label="Next page"
@@ -607,7 +620,7 @@ export default function AdminItems() {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </>
+        </div>
       )}
     </section>
   );
