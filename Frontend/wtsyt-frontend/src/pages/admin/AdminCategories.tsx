@@ -116,10 +116,6 @@ export default function AdminCategories() {
     }
   };
 
-  const filteredCategories = categories.filter(cat =>
-    cat.name.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <section
       aria-labelledby="manage-categories-heading" 
@@ -213,11 +209,11 @@ export default function AdminCategories() {
       {loading ? (
         <p>Loading...</p>
       ) : categories.length === 0 ? (
-        <p className="text-gray-600">No categories found.</p>
+        <p className="text-gray-600">No categories found</p>
       ) : (
         <div ref={categoriesRef}>
           <ul className="space-y-6">
-            {filteredCategories.map((cat) => (
+            {categories.map((cat) => (
               <li
                 key={cat.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"

@@ -116,10 +116,6 @@ export default function AdminTags() {
     }
   };
 
-  const filteredtags = tags.filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <section
       aria-labelledby="manage-tags-heading"
@@ -218,7 +214,7 @@ export default function AdminTags() {
       ) : (
         <div ref={tagsRef}>
           <ul className="space-y-6">
-            {filteredtags.map((tag) => (
+            {tags.map((tag) => (
               <li
                 key={tag.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
