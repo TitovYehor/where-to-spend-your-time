@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Layout from "./components/Layout.js";
 import Login from "./pages/Login";
 import Register from './pages/Register.tsx';
@@ -23,13 +23,11 @@ import { useState } from 'react';
 
 export default function App() {
   const [solidBackground, setSolidBackground] = useState(false);
-
-  const location = useLocation();
-  const isItemDetails = location.pathname.startsWith("/items/");
+  const [disableBackground, setDisableBackground] = useState(false);
   
   return (
     <div className="min-h-screen text-gray-800 relative">
-      <Background solid={solidBackground} disabled={isItemDetails} />
+      <Background solid={solidBackground} disabled={disableBackground} />
       
       <div className="relative z-10">
         <Header toggleBackground={() => setSolidBackground(v => !v)} solid={solidBackground} />
@@ -51,7 +49,7 @@ export default function App() {
 
             <Route path="/profile" element={ <Profile/> } />
             <Route path="/users/:userId" element={ <PublicProfile/> } />
-            <Route path="/items/:id" element={ <ItemDetails/> } />
+            <Route path="/items/:id" element={ <ItemDetails setDisableBackground={setDisableBackground} /> } />
             <Route path="/reviews/:reviewId" element={ <ReviewDetails/> } />
             <Route path="/categories" element={ <Categories/>} />
             <Route path="/tags" element={ <Tags/> } />

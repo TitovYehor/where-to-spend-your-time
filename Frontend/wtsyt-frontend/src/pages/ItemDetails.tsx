@@ -12,7 +12,11 @@ import ReviewCard from "../components/reviews/ReviewCard";
 import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatRating } from "../utils/formatters";
 
-export default function ItemDetails() {
+interface ItemDetailsProps {
+  setDisableBackground?: (disabled: boolean) => void;
+}
+
+export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
 
@@ -74,6 +78,13 @@ export default function ItemDetails() {
     fetchMyReview();
   }, [id, user, page]);
 
+  useEffect(() => {
+    if (setDisableBackground) {
+      setDisableBackground(!!item?.media?.length);
+    }
+    return () => setDisableBackground?.(false);
+  }, [item, setDisableBackground]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -119,7 +130,7 @@ export default function ItemDetails() {
   const firstMedia = item.media[0];
 
   return (
-    <div className="relative min-h-screen">
+    <div className={firstMedia ? "relative min-h-screen" : ""}>
       {firstMedia && (
         <div className="fixed inset-0 z-0 overflow-hidden">
           {firstMedia.type === "Image" ? (
