@@ -125,10 +125,14 @@ export default function ReviewDetails() {
           <header className="mb-4 flex flex-col gap-2">
             <Link
               to={`/items/${review.itemId}`}
-              className="inline-flex items-center justify-center gap-2 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold transition-colors"
+              className="inline-flex w-fit items-center gap-1.5 text-white 
+                        bg-gradient-to-r from-blue-500 to-indigo-600 
+                        px-4 py-1.5 rounded-full text-xs font-semibold shadow-md 
+                        hover:shadow-lg hover:scale-105 active:scale-95 
+                        transition-all duration-200"
             >
-              <Box className="w-4 h-4" />
-              Reviewed Item
+              <Box className="w-3.5 h-3.5 text-white" />
+              <span>Reviewed Item</span>
             </Link>
 
             <h2 className="text-3xl font-bold mb-1 break-words">{review.title}</h2>
@@ -250,7 +254,7 @@ export default function ReviewDetails() {
               Comments
             </h3>
             {comments.length === 0 ? (
-              <p className="text-sm text-gray-500 mb-4">No comments yet.</p>
+              <p className="text-sm text-gray-500 mb-4">No comments yet</p>
             ) : (
               <>
                 <ul className="space-y-4 mb-4">
