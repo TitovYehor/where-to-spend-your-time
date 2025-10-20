@@ -250,7 +250,7 @@ export default function ReviewDetails() {
           
           <section>
             <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-indigo-600" />
+              <MessageSquare className="w-5 h-5 text-green-600" />
               Comments
             </h3>
             {comments.length === 0 ? (
