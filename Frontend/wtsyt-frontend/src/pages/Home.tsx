@@ -117,7 +117,7 @@ export default function Home() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 id="explore-heading" className="text-3xl font-bold mb-6 text-black flex items-center gap-2">
-        <Boxes className="w-7 h-7 text-blue-600" />
+        <Boxes className="w-7 h-7 text-indigo-500" />
         Explore Items
       </h1>
 
@@ -147,7 +147,7 @@ export default function Home() {
 
         <div className="min-w-[180px] flex-1 sm:flex-none">
           <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
-            <Folder className="w-4 h-4 text-gray-500" />
+            <Folder className="w-4 h-4 text-blue-500" />
             Category
           </label>
           <Select
@@ -222,7 +222,7 @@ export default function Home() {
 
         <div className="min-w-[200px] max-w-[600px] flex-1 sm:flex-none">
           <label htmlFor="tags" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
-            <Tags className="w-4 h-4 text-gray-500" />
+            <Tags className="w-4 h-4 text-green-500" />
             Tags
           </label>
           <Select

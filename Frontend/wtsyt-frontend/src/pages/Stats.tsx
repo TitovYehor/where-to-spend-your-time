@@ -5,7 +5,7 @@ import { handleApiError } from '../utils/handleApi';
 import ReviewCard from '../components/reviews/ReviewCard';
 import ItemStatCard from '../components/items/ItemStatCard';
 import UserProfileLink from '../components/users/UserProfileLinks';
-import { BarChart3, Star, MessageSquareText, Users, Clock } from "lucide-react";
+import { BarChart3, Star, Boxes, FileText, Users, Clock } from "lucide-react";
 
 export default function Stats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -38,6 +38,7 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Boxes className="w-6 h-6 text-indigo-500" />
           <Star className="w-6 h-6 text-yellow-500" />
           Top Rated Items
         </h2>
@@ -55,7 +56,8 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <MessageSquareText className="w-6 h-6 text-blue-500" />
+          <Boxes className="w-6 h-6 text-indigo-500" />
+          <FileText className="w-6 h-6 text-blue-500" />
           Most Reviewed Items
         </h2>
 
@@ -98,6 +100,7 @@ export default function Stats() {
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
           <Clock className="w-6 h-6 text-purple-600" />
+          <FileText className="w-6 h-6 text-blue-500" />
           Recent Reviews
         </h2>
         

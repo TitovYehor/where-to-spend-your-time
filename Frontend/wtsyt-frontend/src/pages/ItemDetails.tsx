@@ -9,7 +9,7 @@ import { getMyReviewForItem, addReview, updateReview, deleteReview, getPagedRevi
 import { handleApiError } from "../utils/handleApi";
 import { getMediaUrl } from "../services/mediaService";
 import ReviewCard from "../components/reviews/ReviewCard";
-import { Image as ImageIcon, Video, Tag as TagIcon, MessageSquare, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Image as ImageIcon, Video, Tag as TagIcon, FileText, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatRating } from "../utils/formatters";
 
 interface ItemDetailsProps {
@@ -227,7 +227,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
 
         <section className="mb-7">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-indigo-600" />
+            <FileText className="w-5 h-5 text-blue-500" />
             Reviews
           </h2>
 
