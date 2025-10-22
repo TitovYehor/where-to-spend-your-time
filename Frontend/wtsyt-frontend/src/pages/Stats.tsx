@@ -38,8 +38,8 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <Boxes className="w-6 h-6 text-indigo-500" />
           <Star className="w-6 h-6 text-yellow-500" />
+          <Boxes className="w-6 h-6 text-indigo-500" />
           Top Rated Items
         </h2>
 
@@ -56,8 +56,8 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <Boxes className="w-6 h-6 text-indigo-500" />
           <FileText className="w-6 h-6 text-blue-500" />
+          <Boxes className="w-6 h-6 text-indigo-500" />
           Most Reviewed Items
         </h2>
 

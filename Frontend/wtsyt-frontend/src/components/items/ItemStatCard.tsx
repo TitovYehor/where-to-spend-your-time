@@ -17,7 +17,7 @@ export default function ItemStatCard({ item }: ItemStatCardProps) {
 
       <div className="space-y-1 text-sm text-gray-600">
         <p className="flex items-center gap-2">
-          <Folder className="w-4 h-4 text-gray-400" />
+          <Folder className="w-4 h-4 text-blue-500" />
           {item.category}
         </p>
         <p className="flex items-center gap-2 text-yellow-600 font-medium">

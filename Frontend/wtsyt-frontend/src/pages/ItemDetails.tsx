@@ -162,7 +162,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
               to={`/?categoryId=${item.categoryId}`} 
               className="flex items-center gap-1 text-sm bg-gray-100 px-3 py-1 rounded-md"
             >
-              <FolderOpen className="w-4 h-4 text-gray-600" />
+              <FolderOpen className="w-4 h-4 text-blue-500" />
               {item.categoryName}
             </Link>
             <span className="flex items-center gap-1 text-yellow-600 font-semibold">
