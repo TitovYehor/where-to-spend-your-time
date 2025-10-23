@@ -15,8 +15,8 @@ export default function ItemCard({ item }: ItemCardProps) {
         hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-      <p className="flex items-center gap-1 text-sm text-gray-600">
-        <Folder className="w-4 h-4 text-blue-500" />
+      <p className="flex items-center gap-1 text-sm text-blue-500">
+        <Folder className="w-4 h-4" />
         {item.categoryName}
       </p>
       <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>

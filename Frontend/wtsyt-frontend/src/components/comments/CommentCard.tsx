@@ -13,12 +13,12 @@ export default function CommentCard({ comment }: CommentCardProps) {
       className="block border border-gray-200 rounded-xl p-4 hover:shadow-md transition bg-white"
     >
       <p className="text-gray-800 text-sm line-clamp-3 mb-2 break-words flex items-start gap-2">
-        <MessageSquare className="w-4 h-4 text-gray-400 mt-0.5" />
+        <MessageSquare className="w-4 h-4 text-green-600 mt-0.5" />
         {comment.content}
       </p>
       
-      <div className="flex items-center text-xs text-gray-500">
-        <Calendar className="w-3.5 h-3.5 text-gray-400 mr-1" />
+      <div className="flex items-center text-xs text-violet-600">
+        <Calendar className="w-3.5 h-3.5 mr-1" />
         {new Date(comment.createdAt).toLocaleDateString()}
       </div>
     </Link>

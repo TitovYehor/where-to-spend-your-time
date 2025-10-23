@@ -14,8 +14,8 @@ export default function ReviewCard({ review }: ReviewCardProps) {
     >
       <h3 className="text-lg font-semibold break-words">{review.title}</h3>
       
-      <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-        <User className="w-4 h-4 text-gray-400" />
+      <p className="text-sm text-violet-500 flex items-center gap-1 mt-1">
+        <User className="w-4 h-4" />
         {review.author}
       </p>
       
@@ -25,8 +25,8 @@ export default function ReviewCard({ review }: ReviewCardProps) {
             <Star className="w-4 h-4" />
             {review.rating}/5
           </span>
-          <span className="flex items-center gap-1">
-            <Calendar className="w-4 h-4 text-gray-400" />
+          <span className="flex items-center gap-1 text-violet-600">
+            <Calendar className="w-4 h-4" />
             {new Date(review.createdAt).toLocaleDateString()}
           </span>
         </p>
