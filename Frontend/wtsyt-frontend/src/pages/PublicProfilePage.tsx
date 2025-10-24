@@ -111,15 +111,15 @@ export default function PublicProfile() {
     <div className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
       <article className="mb-6">
         <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
-          <User className="w-7 h-7 text-blue-600" />
+          <User className="w-8 h-8 text-blue-600" />
           {user?.displayName}'s Profile
         </h1>
         <p className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-gray-500" />
+          <FileText className="w-4 h-4 text-blue-500" />
           <strong>Reviews count:</strong> {user?.reviews.length}
         </p>
         <p className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-gray-500" />
+          <MessageSquare className="w-4 h-4 text-green-500" />
           <strong>Comments count:</strong> {user?.comments.length}
         </p>
       </article>

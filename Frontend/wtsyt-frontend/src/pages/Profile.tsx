@@ -167,25 +167,25 @@ const Profile = () => {
           Your Profile
         </h1>
         <p className="flex items-center gap-2">
-          <User className="w-4 h-4 text-gray-500" />
+          <User className="w-4 h-4 text-violet-500" />
           <strong>Name:</strong> {user?.displayName}
         </p>
         <p className="flex items-center gap-2 break-words">
-          <Mail className="w-4 h-4 text-gray-500" />
+          <Mail className="w-4 h-4 text-violet-500" />
           <strong>Email:</strong> {user?.email ?? "Not available"}
         </p>
         <p className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-gray-500" />
+          <FileText className="w-4 h-4 text-blue-500" />
           <strong>Reviews count:</strong> {totalReviews}
         </p>
         <p className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-gray-500" />
+          <MessageSquare className="w-4 h-4 text-green-500" />
           <strong>Comments count:</strong> {totalComments}
         </p>
       </article>
 
-      <div className="mb-8 space-y-6">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+      <div className="mb-8 space-y-1">
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-1">
           <Settings className="w-5 h-5 text-blue-600" />
           Edit Profile
         </h2>
@@ -206,7 +206,7 @@ const Profile = () => {
         <div className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="displayName" className="block font-medium flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-gray-500" />
+              <Edit3 className="w-4 h-4 text-violet-600" />
               Display Name
             </label>
             <input
@@ -244,7 +244,7 @@ const Profile = () => {
         
           <div className="space-y-2">
             <label htmlFor="currentPassword" className="block font-medium flex items-center gap-2">
-              <Lock className="w-4 h-4 text-gray-500" />
+              <Lock className="w-4 h-4 text-violet-600" />
               Current Password
             </label>
             <input
@@ -260,7 +260,7 @@ const Profile = () => {
             />
 
             <label htmlFor="newPassword" className="block font-medium mt-3 flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-gray-500" />
+              <KeyRound className="w-4 h-4 text-violet-600" />
               New Password
             </label>
             <input
@@ -285,8 +285,8 @@ const Profile = () => {
 
             {isDemoAccount && (
               <p className="text-sm text-gray-600 mt-1">
-                Password changes are disabled for the demo account.  
-                Please register to try this feature.
+                Password changes are disabled for the demo account
+                Please register to try this feature
               </p>
             )}
           </div>
