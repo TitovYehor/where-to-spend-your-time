@@ -74,7 +74,7 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <Users className="w-6 h-6 text-green-600" />
+          <Users className="w-6 h-6 text-violet-600" />
           Top Reviewers
         </h2>
 
@@ -99,7 +99,7 @@ export default function Stats() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <Clock className="w-6 h-6 text-purple-600" />
+          <Clock className="w-6 h-6 text-violet-600" />
           <FileText className="w-6 h-6 text-blue-500" />
           Recent Reviews
         </h2>

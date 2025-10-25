@@ -128,7 +128,7 @@ export default function Home() {
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="search" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
-            <Search className="w-4 h-4 text-gray-500" />
+            <Search className="w-4 h-4 text-violet-600" />
             Search
           </label>
           <input
@@ -171,7 +171,7 @@ export default function Home() {
 
         <div className="min-w-[160px] flex-1 sm:flex-none">
           <label htmlFor="sort" className="block text-sm font-medium text-black mb-1 flex items-center gap-1">
-            <SortAsc className="w-4 h-4 text-gray-500" />
+            <SortAsc className="w-4 h-4 text-violet-600" />
             Sort by
           </label>
           <Select 
