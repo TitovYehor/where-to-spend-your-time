@@ -9,7 +9,7 @@ import { getTags } from "../../services/tagService";
 import Select from "react-select";
 import type { MediaType } from "../../types/media";
 import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaService";
-import { Boxes, ChevronLeft, ChevronRight, Pencil, PlusCircle, Search, Trash2 } from "lucide-react";
+import { Boxes, ChevronLeft, ChevronRight, Folder, Pencil, PlusCircle, Search, Trash2 } from "lucide-react";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -262,7 +262,7 @@ export default function AdminItems() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <Boxes className="w-6 h-6 text-blue-600" />
+        <Boxes className="w-6 h-6 text-indigo-500" />
         Manage Items
       </h1>
 
@@ -550,9 +550,9 @@ export default function AdminItems() {
                 <div className="flex-1 text-left">
                   <h3 className="font-semibold text-lg">{item.title}</h3>
                   <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-3xl line-clamp-3">{item.description}</p>
-                  <p className="text-sm text-gray-500">
-                    <span className="font-medium">Category:</span>{" "}
-                    {categories.find((c) => c.id === item.categoryId)?.name || "Unknown"}
+                  <p className="flex items-center gap-1 text-sm text-blue-500">
+                    <Folder className="w-4 h-4" />
+                    {item.categoryName}
                   </p>
 
                   {item.tags && item.tags.length > 0 && (
@@ -560,7 +560,7 @@ export default function AdminItems() {
                       {item.tags.map((tag) => (
                         <span
                           key={tag.id}
-                          className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full"
+                          className="bg-blue-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full"
                         >
                           {tag.name}
                         </span>

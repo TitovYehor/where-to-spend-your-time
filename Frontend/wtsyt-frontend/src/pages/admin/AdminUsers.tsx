@@ -132,7 +132,7 @@ export default function AdminUsers() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <UsersIcon className="w-6 h-6 text-blue-600" />
+        <UsersIcon className="w-6 h-6 text-violet-600" />
         Manage Users
       </h1>
 

@@ -122,7 +122,7 @@ export default function AdminTags() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <TagsIcon className="w-6 h-6 text-blue-600" />
+        <TagsIcon className="w-6 h-6 text-green-600" />
         Manage Tags
       </h1>
 
@@ -219,9 +219,9 @@ export default function AdminTags() {
                 key={tag.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
               >
-                <div className="flex-1 flex items-center gap-2">
-                  <TagIcon className="w-5 h-5 text-gray-500" />
-                  <span className="text-lg font-medium text-gray-900">{tag.name}</span>
+                <div className="flex-1 flex items-center text-green-700 gap-2">
+                  <TagIcon className="w-5 h-5" />
+                  <span className="text-lg font-medium">{tag.name}</span>
                 </div>
 
                 <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">

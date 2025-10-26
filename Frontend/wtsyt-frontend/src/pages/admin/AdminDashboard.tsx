@@ -18,7 +18,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <FolderCog className="w-8 h-8 text-blue-600 mb-2" />
+            <FolderCog className="w-8 h-8 text-blue-500 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Categories</h2>
             <p className="text-sm text-gray-600">Create, update, or delete categories</p>
           </div>
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <Boxes className="w-8 h-8 text-blue-600 mb-2" />
+            <Boxes className="w-8 h-8 text-indigo-500 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Items</h2>
             <p className="text-sm text-gray-600">Create, update, or delete items</p>
           </div>
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <Tags className="w-8 h-8 text-blue-600 mb-2" />
+            <Tags className="w-8 h-8 text-green-500 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Tags</h2>
             <p className="text-sm text-gray-600">Create, update, or delete tags</p>
           </div>
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
                      text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex flex-col items-center justify-center">
-            <Users className="w-8 h-8 text-blue-600 mb-2" />
+            <Users className="w-8 h-8 text-violet-500 mb-2" />
             <h2 className="text-xl font-semibold mb-1">Manage Users</h2>
             <p className="text-sm text-gray-600">Delete users, update user roles</p>
           </div>

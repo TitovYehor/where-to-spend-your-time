@@ -3,7 +3,7 @@ import { addCategory, updateCategory, deleteCategory, getPagedCategories } from 
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
 import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
-import { Layers, Folder, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Folder, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -122,7 +122,7 @@ export default function AdminCategories() {
       className="max-w-4xl mx-auto p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl"
     >
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <Layers className="w-6 h-6 text-blue-600" />
+        <Folders className="w-6 h-6 text-blue-600" />
         Manage Categories
       </h1>
 
@@ -218,9 +218,9 @@ export default function AdminCategories() {
                 key={cat.id}
                 className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
               >
-                <div className="flex-1 flex items-center gap-2">
-                  <Folder className="w-5 h-5 text-gray-500" />
-                  <span className="text-lg font-medium text-gray-900">{cat.name}</span>
+                <div className="flex-1 flex items-center text-blue-600 gap-2">
+                  <Folder className="w-5 h-5" />
+                  <span className="text-lg font-medium">{cat.name}</span>
                 </div>
                 
                 <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
