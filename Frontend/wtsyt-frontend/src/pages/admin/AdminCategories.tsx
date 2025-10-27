@@ -3,7 +3,8 @@ import { addCategory, updateCategory, deleteCategory, getPagedCategories } from 
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
 import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
-import { Folder, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
+import { Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
+import CategoryAdminCard from "../../components/categories/CategoryAdminCard";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -213,34 +214,16 @@ export default function AdminCategories() {
       ) : (
         <div ref={categoriesRef}>
           <ul className="space-y-6">
-            {categories.map((cat) => (
-              <li
-                key={cat.id}
-                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
-              >
-                <div className="flex-1 flex items-center text-blue-600 gap-2">
-                  <Folder className="w-5 h-5" />
-                  <span className="text-lg font-medium">{cat.name}</span>
-                </div>
-                
-                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                  <button
-                    onClick={() => handleEdit(cat)}
-                    className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat.id)}
-                    className="flex items-center gap-1 text-red-600 hover:underline font-medium"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
+            {categories.map((cat) => {
+              return (
+                <CategoryAdminCard
+                  key={cat.id}
+                  category={cat}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              );
+            })}
           </ul>
 
           <div className="flex justify-center items-center gap-3 mt-6">
