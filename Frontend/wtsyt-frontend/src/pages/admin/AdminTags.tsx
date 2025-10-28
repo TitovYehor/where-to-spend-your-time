@@ -3,7 +3,8 @@ import { addTag, updateTag, deleteTag, getPagedTags } from "../../services/tagSe
 import type { Tag } from "../../types/tag";
 import { handleApiError } from "../../utils/handleApi";
 import type { TagPagedResult } from "../../types/pagination/pagedResult.ts";
-import { Tags as TagsIcon, Tag as TagIcon, Pencil, Trash2, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tags as TagsIcon, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import TagAdminCard from "../../components/tags/TagAdminCard.tsx";
 
 export default function AdminTags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -214,34 +215,16 @@ export default function AdminTags() {
       ) : (
         <div ref={tagsRef}>
           <ul className="space-y-6">
-            {tags.map((tag) => (
-              <li
-                key={tag.id}
-                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
-              >
-                <div className="flex-1 flex items-center text-green-700 gap-2">
-                  <TagIcon className="w-5 h-5" />
-                  <span className="text-lg font-medium">{tag.name}</span>
-                </div>
-
-                <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                  <button
-                    onClick={() => handleEdit(tag)}
-                    className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tag.id)}
-                    className="flex items-center gap-1 text-red-600 hover:underline font-medium"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
+            {tags.map((tag) => {
+              return (
+                <TagAdminCard
+                  key={tag.id}
+                  tag={tag}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              );
+            })}
           </ul>
 
           <div className="flex justify-center items-center gap-3 mt-6">
