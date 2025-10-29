@@ -4,9 +4,9 @@ import type { AuthUser } from "../../types/authUser.ts";
 import { handleApiError } from "../../utils/handleApi";
 import Select from "react-select";
 import { useAuth } from "../../contexts/AuthContext.tsx";
-import UserProfileLink from "../../components/users/UserProfileLinks.tsx";
 import type { UserPagedResult } from "../../types/pagination/pagedResult.ts";
-import { Users as UsersIcon, Search, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users as UsersIcon, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import UserAdminCard from "../../components/users/UserAdminCard.tsx";
 
 export default function AdminUsers() {
   const { user } = useAuth();
@@ -183,9 +183,9 @@ export default function AdminUsers() {
                     (opt) => opt.value === (role ?? "")
                 ) || rolesOptions[0]
               }
-              onChange={(option) =>
-                setRole(option?.value ?? "")
-              }
+              onChange={(option) => {
+                setRole(option?.value ?? "");
+              }}
               classNamePrefix="react-select"
             />
           </div>
@@ -241,7 +241,10 @@ export default function AdminUsers() {
             id="roleFilter"
             options={rolesOptions}
             value={rolesOptions.find(opt => opt.value === roleFilter) || rolesOptions[0]}
-            onChange={(option) => setRoleFilter(option?.value ?? "")}
+            onChange={(option) => {
+              setRoleFilter(option?.value ?? "");
+              setPage(1);
+            }}
             classNamePrefix="react-select"
           />
         </div>
@@ -254,55 +257,17 @@ export default function AdminUsers() {
       ) : (
         <>
           <ul className="space-y-4">
-            {users.map((u) => (
-              <li
-                key={u.id}
-                className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm"
-              >
-                <div className="flex-1">
-                  <p className="text-lg font-semibold text-gray-900">
-                    <UserProfileLink
-                      userId={u.id}
-                      name={u.displayName}
-                      className="text-lg font-semibold"
-                    />
-                  </p>
-                </div>
-
-                <div className="mt-2 sm:mt-0">
-                  <span
-                    className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      u.role === "Admin"
-                        ? "bg-red-100 text-red-700"
-                        : u.role === "Moderator"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}
-                  >
-                    {u.role}
-                  </span>
-                </div>
-
-                {user?.id != u.id && (
-                  <div className="mt-3 sm:mt-0 sm:ml-6 flex gap-4">
-                    <button
-                      onClick={() => handleEdit(u)}
-                      className="text-blue-600 hover:underline font-medium"
-                      aria-label={`Edit ${u.displayName}`}
-                    >
-                      <Pencil className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(u.id)}
-                      className="text-red-600 hover:underline font-medium"
-                      aria-label={`Delete ${u.displayName}`}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
+            {users.map((u) => {
+              return (
+                <UserAdminCard
+                  key={u.id}
+                  user={user}
+                  displayUser={u}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              );  
+            })}
           </ul>
 
           <div className="flex justify-center items-center gap-3 mt-6">
