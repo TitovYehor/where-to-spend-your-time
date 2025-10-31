@@ -26,7 +26,8 @@ public class MappingProfile : Profile
                     .ThenBy(m => m.Id)))
             .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ItemTags.Select(it => it.Tag)));
         CreateMap<Review, ReviewDto>()
-            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName))
+            .ForMember(dest => dest.ItemTitle, opt => opt.MapFrom(src => src.Item!.Title));
         CreateMap<Comment, CommentDto>()
             .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
         CreateMap<ApplicationUser, ApplicationUserDto>();
