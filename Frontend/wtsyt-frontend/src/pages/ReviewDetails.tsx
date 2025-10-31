@@ -125,15 +125,15 @@ export default function ReviewDetails() {
           <header className="mb-4 flex flex-col gap-2">
             <Link
               to={`/items/${review.itemId}`}
-              className="inline-flex w-fit items-center gap-1.5 text-white 
-                        bg-gradient-to-r from-blue-500 to-indigo-600 
-                        px-4 py-1.5 rounded-full text-xs font-semibold shadow-md 
-                        hover:shadow-lg hover:scale-105 active:scale-95 
-                        transition-all duration-200"
+              className="relative inline-flex w-fit items-center gap-1.5 text-indigo-700 font-semibold text-sm 
+                        after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:w-full after:h-0.5 
+                        after:bg-gradient-to-r after:from-indigo-400 after:to-blue-500 
+                        after:rounded-full hover:after:h-[3px] transition-all duration-300"
             >
-              <Box className="w-3.5 h-3.5 text-white" />
-              <span>Reviewed Item</span>
+              <Box className="w-4 h-4 text-indigo-600" />
+              <span>Reviewed Item: {review.itemTitle}</span>
             </Link>
+
 
             <h2 className="text-3xl font-bold mb-1 break-words">{review.title}</h2>
             <p className="text-sm text-black flex items-center gap-1">
