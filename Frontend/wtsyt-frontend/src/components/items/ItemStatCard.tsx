@@ -13,7 +13,7 @@ export default function ItemStatCard({ item }: ItemStatCardProps) {
       to={`/items/${item.id}`}
       className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
     >
-      <h3 className="text-lg font-semibold">{item.title}</h3>
+      <h3 className="text-lg font-semibold break-words">{item.title}</h3>
 
       <div className="space-y-1 text-sm">
         <p className="flex items-center gap-2 text-blue-500">

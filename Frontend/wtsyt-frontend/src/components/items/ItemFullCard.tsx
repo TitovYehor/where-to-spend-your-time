@@ -14,12 +14,12 @@ export default function ItemCard({ item }: ItemCardProps) {
     className="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-transform 
         hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-      <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+      <h3 className="text-lg font-semibold text-gray-800 break-words">{item.title}</h3>
       <p className="flex items-center gap-1 text-sm text-blue-500">
         <Folder className="w-4 h-4" />
         {item.categoryName}
       </p>
-      <p className="text-gray-700 whitespace-pre-line">Description: {item.description}</p>
+      <p className="text-gray-700 whitespace-pre-line break-words line-clamp-3">Description: {item.description}</p>
       <p className="text-yellow-500 font-medium flex items-center gap-1">
         <Star className="w-5 h-5" />
         Rating: {formatRating(item.averageRating)}/5

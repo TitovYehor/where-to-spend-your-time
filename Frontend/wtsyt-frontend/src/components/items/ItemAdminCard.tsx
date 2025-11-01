@@ -10,8 +10,8 @@ interface ItemAdminProps {
 const ItemAdminCard: React.FC<ItemAdminProps> = ({ item, onEdit, onDelete }) => (
   <li className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 border rounded-xl p-4 shadow-sm">
     <div className="flex-1 text-left">
-      <h3 className="font-semibold text-lg">{item.title}</h3>
-      <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-3xl line-clamp-3">{item.description}</p>
+      <h3 className="font-semibold text-lg break-words whitespace-normal max-w-xl">{item.title}</h3>
+      <p className="text-sm text-gray-600 mt-1 mb-2 whitespace-pre-wrap max-w-xl line-clamp-3">Description: {item.description}</p>
       <p className="flex items-center gap-1 text-sm text-blue-500">
         <Folder className="w-4 h-4" />
         {item.categoryName}
