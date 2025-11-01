@@ -37,7 +37,11 @@ export default function AdminItems() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaType, setMediaType] = useState<MediaType>("Image");
   
-  const categoryOptions = categories.map((cat) => ({ value: cat.id, label: cat.name }));
+  const categoryOptions =  [
+    { value: "", label: "Choose category" },
+    ...categories.map(cat => ({ value: cat.id, label: cat.name }))
+  ];
+  
   const tagOptions = [
     { value: "", label: "Choose tag" },
     ...tags.map(tag => ({ value: tag.name, label: tag.name }))
@@ -301,8 +305,13 @@ export default function AdminItems() {
             placeholder="Title"
             className="w-full px-4 py-2 border rounded"
             value={form.title}
+            maxLength={100}
             onChange={handleChange}
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            {form.title?.length || 0}/100 characters
+          </p>
         </div>
         
         <div>
@@ -315,8 +324,13 @@ export default function AdminItems() {
             placeholder="Description"
             className="w-full px-4 py-2 border rounded"
             value={form.description}
+            maxLength={500}
             onChange={handleChange}
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            {form.description?.length || 0}/500 characters
+          </p>
         </div>
         
         <div>
