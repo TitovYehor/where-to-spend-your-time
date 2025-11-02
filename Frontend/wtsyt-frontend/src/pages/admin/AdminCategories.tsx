@@ -160,9 +160,15 @@ export default function AdminCategories() {
             placeholder="e.g., Books"
             className="w-full px-4 py-2 border rounded"
             value={name}
+            maxLength={40}
             onChange={(e) => setName(e.target.value)}
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            {name?.length || 0}/40 characters
+          </p>
         </div>
+
         <div className="flex items-center gap-4">
           <button
             type="submit"
