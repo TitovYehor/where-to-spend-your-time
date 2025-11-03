@@ -53,6 +53,9 @@ export default function AdminItems() {
   const formRef = useRef<HTMLFormElement>(null);
   const itemsRef = useRef<HTMLDivElement | null>(null);
 
+  const titleRef = useRef(null);
+  const descriptionRef = useRef(null);
+
   const [itemPageChanged, setItemPageChanged] = useState(false);
 
   const fetchItemsAndCategories = async () => {
@@ -78,17 +81,28 @@ export default function AdminItems() {
     }
   };
 
+  const autoResize = (el: any) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
   useEffect(() => {
     fetchItemsAndCategories();
   }, [search, page, pageSize]);
 
   useLayoutEffect(() => {
-      if (itemPageChanged && items.length > 0 && itemsRef.current) {
-        const y = itemsRef.current.getBoundingClientRect().top + window.scrollY - 160;
-        window.scrollTo({ top: y, behavior: "smooth" });
-        setItemPageChanged(false);
-      }
-    }, [items]);
+    if (itemPageChanged && items.length > 0 && itemsRef.current) {
+      const y = itemsRef.current.getBoundingClientRect().top + window.scrollY - 160;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setItemPageChanged(false);
+    }
+  }, [items]);
+
+  useEffect(() => {
+    autoResize(titleRef.current);
+    autoResize(descriptionRef.current);
+  }, [form.title, form.description]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -298,15 +312,18 @@ export default function AdminItems() {
           <label htmlFor="title" className="block text-sm font-medium text-black mb-1">
             Title
           </label>
-          <input
+          <textarea
+            ref={titleRef}
             id="title"
             name="title"
-            type="text"
             placeholder="Title"
             className="w-full px-4 py-2 border rounded"
             value={form.title}
             maxLength={100}
-            onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              autoResize(e.target);
+            }}
             required
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -319,13 +336,17 @@ export default function AdminItems() {
             Description
           </label>
           <textarea
+            ref={descriptionRef}
             id="description"
             name="description"
             placeholder="Description"
             className="w-full px-4 py-2 border rounded"
             value={form.description}
             maxLength={500}
-            onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              autoResize(e.target);
+            }}
             required
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -400,7 +421,7 @@ export default function AdminItems() {
               {items.find((i) => i.id === editingId)?.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="flex items-center bg-gray-200 text-sm px-3 py-1 rounded-full"
+                  className="flex items-center bg-blue-200 text-green-800 text-sm px-3 py-1 rounded-full"
                 >
                   {tag.name}
                   <button
@@ -459,7 +480,7 @@ export default function AdminItems() {
               <select
                 value={mediaType}
                 onChange={(e) => setMediaType(e.target.value as "Image" | "Video")}
-                className="border rounded px-3 py-2"
+                className="border rounded px-3 py-2 bg-blue-50"
               >
                 <option value="Image">Image</option>
                 <option value="Video">Video</option>
@@ -520,6 +541,7 @@ export default function AdminItems() {
                 onClick={() => {
                   setEditingId(null);
                   setForm({ title: "", description: "", categoryId: 0 });
+                  setMediaPreview(null);
                 }}
                 className="text-gray-500 text-sm underline hover:text-gray-700"
               >
