@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from 'react-router-dom';
@@ -34,6 +34,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
   const [error, setError] = useState("");
 
   const itemId = Number(id);
+
+  const reviewContentRef = useRef(null);
 
   const fetchItem = async () => {
     if (isNaN(itemId)) return;
@@ -72,6 +74,12 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
     }
   };
 
+  const autoResize = (el: any) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
   useEffect(() => {
     fetchItem();
     fetchReviews();
@@ -84,6 +92,10 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
     }
     return () => setDisableBackground?.(false);
   }, [item, setDisableBackground]);
+
+  useEffect(() => {
+    autoResize(reviewContentRef.current);
+  }, [content]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,11 +313,15 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
                   Content
                 </label>
                 <textarea
+                  ref={reviewContentRef}
                   id="review-content"
                   placeholder="Write your review..."
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(e) => {
+                    setContent(e.target.value)
+                    autoResize(e.target);
+                  }}
                   maxLength={1000}
                   required
                 />

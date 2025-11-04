@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
@@ -35,6 +35,8 @@ export default function ReviewDetails() {
 
   const id = Number(reviewId);
 
+  const newCommentRef = useRef(null);
+
   const fetchData = async () => {
     if (isNaN(id)) return;
 
@@ -51,9 +53,19 @@ export default function ReviewDetails() {
     }
   };
 
+  const autoResize = (el: any) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
   useEffect(() => {
     fetchData();
   }, [reviewId, user, page]);
+
+  useEffect(() => {
+    autoResize(newCommentRef.current);
+  }, [newComment]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -306,9 +318,13 @@ export default function ReviewDetails() {
                     New comment
                   </label>
                   <textarea
+                    ref={newCommentRef}
                     id="newComment"
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
+                    onChange={(e) => {
+                      setNewComment(e.target.value);
+                      autoResize(e.target);
+                    }}
                     className="w-full border px-4 py-2 rounded-md"
                     placeholder="Write a comment..."
                     maxLength={200}
