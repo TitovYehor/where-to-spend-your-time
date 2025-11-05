@@ -13,7 +13,7 @@ export default function CommentCard({ comment }: CommentCardProps) {
       className="block border border-gray-200 rounded-xl p-4 hover:shadow-md transition bg-white"
     >
       <p className="text-gray-800 text-sm line-clamp-3 mb-2 break-words flex items-start gap-2">
-        <MessageSquare className="w-4 h-4 text-green-600 mt-0.5" />
+        <MessageSquare className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
         {comment.content}
       </p>
       
