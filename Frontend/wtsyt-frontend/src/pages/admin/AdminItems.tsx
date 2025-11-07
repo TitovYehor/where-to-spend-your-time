@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useAutoResizeTextareas } from "../../hooks/useAutoResizeTextareas";
 import { getItems, addItem, updateItem, deleteItem, addTagForItem, removeTagFromItem, getItemById } from "../../services/itemService";
 import { getCategories } from "../../services/categoryService";
 import type { Item, ItemCreateRequest } from "../../types/item";
@@ -53,8 +54,8 @@ export default function AdminItems() {
   const formRef = useRef<HTMLFormElement>(null);
   const itemsRef = useRef<HTMLDivElement | null>(null);
 
-  const titleRef = useRef(null);
-  const descriptionRef = useRef(null);
+  const titleRef = useRef<HTMLTextAreaElement | null>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [itemPageChanged, setItemPageChanged] = useState(false);
 
@@ -80,12 +81,8 @@ export default function AdminItems() {
       setLoading(false);
     }
   };
-
-  const autoResize = (el: any) => {
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  };
+  
+  useAutoResizeTextareas([titleRef, descriptionRef], [form.title, form.description]);
 
   useEffect(() => {
     fetchItemsAndCategories();
@@ -98,11 +95,6 @@ export default function AdminItems() {
       setItemPageChanged(false);
     }
   }, [items]);
-
-  useEffect(() => {
-    autoResize(titleRef.current);
-    autoResize(descriptionRef.current);
-  }, [form.title, form.description]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -322,7 +314,6 @@ export default function AdminItems() {
             maxLength={100}
             onChange={(e) => {
               handleChange(e);
-              autoResize(e.target);
             }}
             required
           />
@@ -345,7 +336,6 @@ export default function AdminItems() {
             maxLength={500}
             onChange={(e) => {
               handleChange(e);
-              autoResize(e.target);
             }}
             required
           />
