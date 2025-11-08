@@ -7,6 +7,7 @@ import { useAuth } from "../../contexts/AuthContext.tsx";
 import type { UserPagedResult } from "../../types/pagination/pagedResult.ts";
 import { Users as UsersIcon, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import UserAdminCard from "../../components/users/UserAdminCard.tsx";
+import Alert from "../../components/common/Alerts.tsx";
 
 export default function AdminUsers() {
   const { user } = useAuth();
@@ -136,27 +137,8 @@ export default function AdminUsers() {
         Manage Users
       </h1>
 
-      {message && (
-        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{message}</span>
-          </div>
-          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
-            ✕
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{error}</span>
-          </div>
-          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
-            ✕
-          </button>
-        </div>
-      )}
+      <Alert type="success" message={message} onClose={() => setMessage("")} />
+      <Alert type="error" message={error} onClose={() => setError("")} />
       
       {editingId && (
         <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">

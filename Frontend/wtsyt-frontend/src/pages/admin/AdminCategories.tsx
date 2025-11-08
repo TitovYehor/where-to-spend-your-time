@@ -5,6 +5,7 @@ import { handleApiError } from "../../utils/handleApi";
 import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
 import { Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
 import CategoryAdminCard from "../../components/categories/CategoryAdminCard";
+import Alert from "../../components/common/Alerts";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -127,27 +128,8 @@ export default function AdminCategories() {
         Manage Categories
       </h1>
 
-      {message && (
-        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{message}</span>
-          </div>
-          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
-            ✕
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{error}</span>
-          </div>
-          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
-            ✕
-          </button>
-        </div>
-      )}
+      <Alert type="success" message={message} onClose={() => setMessage("")} />
+      <Alert type="error" message={error} onClose={() => setError("")} />
 
       <form ref={formRef} onSubmit={handleSubmit} className="mb-6 space-y-4">
         <div>

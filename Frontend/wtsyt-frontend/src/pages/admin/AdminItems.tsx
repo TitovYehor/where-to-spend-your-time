@@ -12,6 +12,7 @@ import type { MediaType } from "../../types/media";
 import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaService";
 import { Boxes, ChevronLeft, ChevronRight, PlusCircle, Search } from "lucide-react";
 import ItemAdminCard from "../../components/items/ItemAdminCard";
+import Alert from "../../components/common/Alerts";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -277,28 +278,9 @@ export default function AdminItems() {
         Manage Items
       </h1>
 
-      {message && (
-        <div className="flex items-center justify-between bg-green-50 border border-green-300 text-green-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{message}</span>
-          </div>
-          <button onClick={() => setMessage("")} className="text-green-600 hover:text-green-800">
-            ✕
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="flex items-center justify-between bg-red-50 border border-red-300 text-red-800 text-sm px-4 py-2 rounded-md shadow-sm mb-3">
-          <div>
-            <span>{error}</span>
-          </div>
-          <button onClick={() => setError("")} className="text-red-600 hover:text-red-800">
-            ✕
-          </button>
-        </div>
-      )}
-
+      <Alert type="success" message={message} onClose={() => setMessage("")} />
+      <Alert type="error" message={error} onClose={() => setError("")} />
+      
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-black mb-1">
