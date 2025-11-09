@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { register } from "../services/authService";
 import { handleApiError } from "../utils/handleApi";
 import { User, Mail, Lock, LogIn } from "lucide-react";
+import Alert from "../components/common/Alerts";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -73,16 +74,10 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
         
-        {errors.length > 0 && (
-          <ul className="mb-4 text-red-500 text-sm list-disc list-inside" role="alert">
-            {errors.map((msg, i) => (
-              <li key={i}>{msg}</li>
-            ))}
-          </ul>
-        )}
+        <Alert type="error" message={errors} onClose={() => setErrors([])} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

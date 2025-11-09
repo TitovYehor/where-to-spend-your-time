@@ -5,6 +5,7 @@ import { login } from "../services/authService";
 import { getMyProfile } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
 import { Mail, Lock, LogIn } from "lucide-react";
+import Alert from "../components/common/Alerts";
 
 const Login = () => {
   const { setUser } = useAuth();
@@ -16,7 +17,7 @@ const Login = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get("registered") === "true") {
+    if (params.get("register") === "true") {
       setSuccess("Registration successful! Please log in");
     }
   }, [location]);
@@ -33,11 +34,7 @@ const Login = () => {
       window.location.replace("/");
     } catch (err: any) {
       handleApiError(err);
-      setError(
-        err?.response?.data?.message ||
-        err?.message ||
-        "Login failed. Please try again."
-      );
+      setError("Login failed. Incorrect email or password");
     }
   };
 
@@ -48,8 +45,8 @@ const Login = () => {
           Login
         </h2>
         
-        {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <Alert type="success" message={success} onClose={() => setSuccess("")} />
+        <Alert type="error" message={error} onClose={() => setError("")} />
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
