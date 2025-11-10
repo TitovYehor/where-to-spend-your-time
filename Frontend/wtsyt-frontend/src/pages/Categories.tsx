@@ -4,6 +4,7 @@ import { getCategories } from '../services/categoryService';
 import { handleApiError } from '../utils/handleApi';
 import { Search, Folders } from "lucide-react";
 import CategoryCard from '../components/categories/CategoryCard';
+import Alert from '../components/common/Alerts';
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -22,7 +23,7 @@ export default function Categories() {
         setCategories(result);
       } catch (e) {
         handleApiError(e);
-        setError("Failed to load categories.");
+        setError("Failed to load categories");
       } finally {
         setLoading(false);
       }
@@ -48,7 +49,7 @@ export default function Categories() {
       {loading ? (
         <p className="text-center mt-10">Loading...</p>
       ) : error ? (
-        <p className="text-center text-red-500 mt-10">{error}</p>
+        <Alert type="error" message={error} onClose={() => setError("")} />
       ) : (
         <>
           <div>

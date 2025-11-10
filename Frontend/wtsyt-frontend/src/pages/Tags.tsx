@@ -4,6 +4,7 @@ import { getTags } from '../services/tagService';
 import { handleApiError } from '../utils/handleApi';
 import { Tags as TagsIcon, Search as SearchIcon } from "lucide-react";
 import TagCard from '../components/tags/TagCard';
+import Alert from '../components/common/Alerts';
 
 export default function Tags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -48,7 +49,7 @@ export default function Tags() {
       {loading ? (
         <p className="text-center mt-10">Loading...</p>
       ) : error ? (
-        <p className="text-center text-red-500 mt-10">{error}</p>
+        <Alert type="error" message={error} onClose={() => setError("")} />
       ) : (
         <>
           <div>

@@ -9,6 +9,7 @@ import CommentCard from "../components/comments/CommentCard";
 import { getPagedReviewsForUser } from "../services/reviewService";
 import { getPagedCommentsForUser } from "../services/commentService";
 import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import Alert from "../components/common/Alerts";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
@@ -190,18 +191,8 @@ const Profile = () => {
           Edit Profile
         </h2>
 
-        {successMessage && (
-          <p className="text-green-600">
-            {successMessage}
-          </p>
-        )}
-        {errorMessages.length > 0 && (
-          <ul className="mb-4 text-red-500 text-sm list-disc list-inside">
-            {errorMessages.map((msg, i) => (
-            <li key={i}>{msg}</li>
-            ))}
-          </ul>
-        )}
+        <Alert type="success" message={successMessage} onClose={() => setSuccessMessage("")} />
+        <Alert type="error" message={errorMessages} onClose={() => setErrorMessages([])} />
 
         <div className="space-y-6">
           <div className="space-y-2">
@@ -237,7 +228,7 @@ const Profile = () => {
             {isDemoAccount && (
               <p className="text-sm text-gray-600 mt-1">
                 Display name changes are disabled for the demo account.  
-                Please register to try this feature.
+                Please register to try this feature
               </p>
             )}
           </div>
