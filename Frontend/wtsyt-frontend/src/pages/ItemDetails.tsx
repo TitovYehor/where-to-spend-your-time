@@ -12,6 +12,7 @@ import { getMediaUrl } from "../services/mediaService";
 import ReviewCard from "../components/reviews/ReviewCard";
 import { Image as ImageIcon, Video, Tag as TagIcon, FileText, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatRating } from "../utils/formatters";
+import Alert from "../components/common/Alerts";
 
 interface ItemDetailsProps {
   setDisableBackground?: (disabled: boolean) => void;
@@ -33,6 +34,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const itemId = Number(id);
 
@@ -93,6 +95,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setMessage("");
 
     if (isNaN(itemId)) {
       setError("Invalid item ID");
@@ -102,13 +105,16 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
     try {
       if (myReview) {
         await updateReview(myReview.id, { title, content, rating });
+        setMessage("Review updated");
       } else {
         await addReview({ itemId, title, content, rating });
+        setMessage("Review created");
       }
 
       await fetchReviews();
       await fetchMyReview();
     } catch (e: any) {
+      setMessage("");
       setError(e?.response?.data?.message || "Failed to submit review");
     }
   };
@@ -122,6 +128,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       setTitle("");
       setContent("");
       setRating(0);
+      setMessage("Review deleted");
 
       await fetchReviews();
       await fetchMyReview();
@@ -277,7 +284,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
               {myReview ? "Edit your review" : "Write a review"}
             </h3>
 
-            {error && <p className="text-red-500 mb-2">{error}</p>}
+            <Alert type="success" message={message} onClose={() => setMessage("")} />
+            <Alert type="error" message={error} onClose={() => setError("")} />
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="hidden" value={item.id} readOnly />

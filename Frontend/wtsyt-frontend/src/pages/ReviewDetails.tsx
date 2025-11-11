@@ -10,6 +10,7 @@ import { handleApiError } from "../utils/handleApi";
 import UserProfileLink from "../components/users/UserProfileLinks";
 import { Star, Pencil, Trash2, MessageSquare, PlusCircle, ChevronLeft, ChevronRight, Box } from "lucide-react";
 import CommentManagementCard from "../components/comments/CommentManagementCard";
+import Alert from "../components/common/Alerts";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -19,6 +20,7 @@ export default function ReviewDetails() {
   const [review, setReview] = useState<Review | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const [totalComments, setTotalComments] = useState(0);
@@ -66,12 +68,14 @@ export default function ReviewDetails() {
 
     try {
       await addComment(id, { content: newComment });
+      setMessage("Comment created");
       setNewComment("");
       setPage(1);
       await fetchData();
     } catch (err: any) {
       handleApiError(err);
       setError(err.message || "Failed to add comment");
+      setMessage("");
     }
   };
 
@@ -98,10 +102,12 @@ export default function ReviewDetails() {
 
     try {
       await deleteComment(commentId);
+      setMessage("Comment deleted");
       await fetchData();
     } catch (err: any) {
       handleApiError(err);
       setError(err.message || "Failed to delete comment");
+      setMessage("");
     }
   };
 
@@ -252,6 +258,9 @@ export default function ReviewDetails() {
               </div>
             )
           )}
+
+          <Alert type="success" message={message} onClose={() => setMessage("")} />
+          <Alert type="error" message={error} onClose={() => setError("")} />
           
           <section>
             <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
@@ -335,7 +344,6 @@ export default function ReviewDetails() {
                     <PlusCircle className="w-4 h-4" />
                     Add Comment
                   </button>
-                  {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
               </form>
             )}
