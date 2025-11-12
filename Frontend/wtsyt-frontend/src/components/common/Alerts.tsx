@@ -1,15 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
 interface AlertProps {
   type?: "success" | "error";
   message: string | string[];
   onClose: () => void;
+  autoClose?: boolean;
+  duration?: number;
 }
 
-const Alert: React.FC<AlertProps> = ({ type = "success", message, onClose }) => {
-  if (!message || (Array.isArray(message) && message.length === 0)) return null;
 
+const Alert: React.FC<AlertProps> = ({ type = "success", message, onClose, autoClose = true, duration = 9000 }) => {
+  if (!message || (Array.isArray(message) && message.length === 0)) return null;
+  
+  useEffect(() => {
+    if (autoClose) {
+      const timer = setTimeout(onClose, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [message, autoClose, duration, onClose]);
+  
   const styles = {
     success: "bg-green-50 border-green-300 text-green-800",
     error: "bg-red-50 border-red-300 text-red-800",
