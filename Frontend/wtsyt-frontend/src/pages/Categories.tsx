@@ -22,8 +22,8 @@ export default function Categories() {
         const result = await getCategories();
         setCategories(result);
       } catch (e) {
-        handleApiError(e);
-        setError("Failed to load categories");
+        const message = handleApiError(e);
+        setError(message);
       } finally {
         setLoading(false);
       }

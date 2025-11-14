@@ -22,8 +22,8 @@ export default function Tags() {
         const result = await getTags();
         setTags(result);
       } catch (e) {
-        handleApiError(e);
-        setError("Failed to load tags");
+        const message = handleApiError(e);
+        setError(message);
       } finally {
         setLoading(false);
       }
