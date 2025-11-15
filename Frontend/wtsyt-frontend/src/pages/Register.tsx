@@ -63,9 +63,10 @@ const Register = () => {
       } else if (data?.message) {
         errorList = [data.message];
       } else {
-        errorList = ["Failed to register"];
+        const message = handleApiError(err);
+        errorList = [message];
       }
-      handleApiError(err);
+      
       setErrors(errorList);
     } finally {
       setLoading(false);

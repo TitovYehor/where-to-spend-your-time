@@ -33,8 +33,8 @@ const Login = () => {
 
       window.location.replace("/");
     } catch (err: any) {
-      handleApiError(err);
-      setError("Login failed. Incorrect email or password");
+      const message = handleApiError(err);
+      setError(message);
     }
   };
 
