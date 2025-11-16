@@ -50,7 +50,8 @@ const Profile = () => {
         setReviews(reviewsData.items);
         setTotalReviews(reviewsData.totalCount);
       } catch (err) {
-        handleApiError(err);
+        const message = handleApiError(err);
+        setErrorMessages([message]);
       } finally {
         setReviewsLoading(false);
       }
@@ -69,7 +70,8 @@ const Profile = () => {
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
       } catch (err) {
-        handleApiError(err);
+        const message = handleApiError(err);
+        setErrorMessages([message]);
       } finally {
         setCommentsLoading(false);
       }
@@ -118,10 +120,8 @@ const Profile = () => {
 
       setSuccessMessage("Profile updated successfully!");
     } catch (err: any) {
-      handleApiError(err);
-      setErrorMessages([
-        err?.response?.data?.message || "Failed to update profile.",
-      ]);
+      const message = handleApiError(err);
+      setErrorMessages([message]);
     }
   };
 
@@ -151,9 +151,10 @@ const Profile = () => {
         } else if (data?.message) {
           errorList = [data.message];
         } else {
-          errorList = ["Failed to change password"];
+          const message = handleApiError(err);
+          errorList = [message];
         }
-        handleApiError(err);
+
         setErrorMessages(errorList);
       }
   };
