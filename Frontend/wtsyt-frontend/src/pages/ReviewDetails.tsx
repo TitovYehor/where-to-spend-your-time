@@ -73,8 +73,8 @@ export default function ReviewDetails() {
       setPage(1);
       await fetchData();
     } catch (err: any) {
-      handleApiError(err);
-      setError(err.message || "Failed to add comment");
+      const message = handleApiError(err);
+      setError(message);
       setMessage("");
     }
   };
@@ -88,8 +88,8 @@ export default function ReviewDetails() {
 
       navigate(-1);
     } catch (err: any) {
-      handleApiError(err);
-      setError(err.message || "Failed to delete review");
+      const message = handleApiError(err);
+      setError(message);
     }
   };
 
@@ -105,8 +105,8 @@ export default function ReviewDetails() {
       setMessage("Comment deleted");
       await fetchData();
     } catch (err: any) {
-      handleApiError(err);
-      setError(err.message || "Failed to delete comment");
+      const message = handleApiError(err);
+      setError(message);
       setMessage("");
     }
   };
@@ -124,8 +124,8 @@ export default function ReviewDetails() {
       setIsEditing(false);
       fetchData();
     } catch (err: any) {
-      handleApiError(err);
-      setError(err.message || "Failed to update review");
+      const message = handleApiError(err);
+      setError(message);
     }
   };
 

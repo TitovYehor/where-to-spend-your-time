@@ -46,7 +46,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       const itemData = await getItemById(itemId);
       setItem(itemData);
     } catch (e) {
-      handleApiError(e);
+      const message = handleApiError(e);
+      setError(message);
     }
   };
 
@@ -57,7 +58,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       setReviews(reviewsData.items);
       setTotalReviews(reviewsData.totalCount);
     } catch (e) {
-      handleApiError(e);
+      const message = handleApiError(e);
+      setError(message);
     }
   };
 
@@ -69,11 +71,13 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       setTitle(myReviewData.title);
       setContent(myReviewData.content);
       setRating(myReviewData.rating);
-    } catch {
+    } catch (e) {
       setMyReview(null);
       setTitle("");
       setContent("");
       setRating(0);
+      const message = handleApiError(e);
+      setError(message);
     }
   };
 
@@ -115,7 +119,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       await fetchMyReview();
     } catch (e: any) {
       setMessage("");
-      setError(e?.response?.data?.message || "Failed to submit review");
+      const message = handleApiError(e);
+      setError(message);
     }
   };
 
@@ -133,7 +138,8 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       await fetchReviews();
       await fetchMyReview();
     } catch (e) {
-      handleApiError(e);
+      const message = handleApiError(e);
+      setError(message);
     }
   };
 
