@@ -97,10 +97,10 @@ public class CommentService : ICommentService
         return true;
     }
 
-    public async Task<bool> DeleteCommentAsync(int commentId, string userId, bool isAdmin)
+    public async Task<bool> DeleteCommentAsync(int commentId, string userId, bool isManager)
     {
         var comment = await _db.Comments.FindAsync(commentId);
-        if (comment == null || (comment.UserId != userId && !isAdmin))
+        if (comment == null || (comment.UserId != userId && !isManager))
         {
             return false;
         }

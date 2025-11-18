@@ -75,8 +75,9 @@ public class CommentsController : ControllerBase
     {
         var user = await _userManager.GetUserAsync(User);
         var isAdmin = await _userManager.IsInRoleAsync(user!, "Admin");
+        var isModerator = await _userManager.IsInRoleAsync(user!, "Moderator");
 
-        var success = await _commentService.DeleteCommentAsync(id, user!.Id, isAdmin);
+        var success = await _commentService.DeleteCommentAsync(id, user!.Id, isAdmin || isModerator);
 
         return success ? NoContent() : Forbid();
     }

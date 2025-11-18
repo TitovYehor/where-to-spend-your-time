@@ -15,5 +15,5 @@ public interface ICommentService
 
     Task<bool> UpdateCommentAsync(int commentId, string userId, string newContent);
 
-    Task<bool> DeleteCommentAsync(int commentId, string userId, bool isAdmin);
+    Task<bool> DeleteCommentAsync(int commentId, string userId, bool isManager);
 }
