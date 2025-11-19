@@ -133,10 +133,10 @@ public class ReviewService : IReviewService
         return true;
     }
 
-    public async Task<bool> DeleteReviewAsync(int reviewId, string userId, bool isAdmin)
+    public async Task<bool> DeleteReviewAsync(int reviewId, string userId, bool isManager)
     {
         var review = await _db.Reviews.FindAsync(reviewId);
-        if (review == null || (review.UserId != userId && !isAdmin))
+        if (review == null || (review.UserId != userId && !isManager))
         {
             return false;
         }
