@@ -94,7 +94,7 @@ export default function ReviewDetails() {
   };
 
   const handleDeleteComment = async (commentId: number, commentAuthor: string) => {
-    const canDelete = isAdmin || commentAuthor === user?.displayName;
+    const canDelete = isAdmin || isModerator || commentAuthor === user?.displayName;
     if (!canDelete) return;
 
     const confirmed = confirm("Are you sure you want to delete this comment?");
