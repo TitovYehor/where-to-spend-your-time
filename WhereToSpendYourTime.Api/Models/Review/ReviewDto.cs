@@ -12,6 +12,8 @@ public class ReviewDto
 
     public string UserId { get; set; } = string.Empty;
 
+    public string AuthorRole { get; set; } = string.Empty;
+
     public string ItemTitle { get; set; } = string.Empty;
 
     public int ItemId { get; set; }
