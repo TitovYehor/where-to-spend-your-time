@@ -6,6 +6,8 @@ public class ApplicationUser : IdentityUser
 {
     public string DisplayName { get; set; } = string.Empty;
 
+    public ICollection<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
+
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }
