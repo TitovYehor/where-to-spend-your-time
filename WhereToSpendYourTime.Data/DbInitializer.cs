@@ -8,12 +8,12 @@ namespace WhereToSpendYourTime.Data;
 public static class DbInitializer
 {
     public static async Task SeedAsync(IServiceProvider services)
-    { 
+    {
         using var scope = services.CreateScope();
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
         await db.Database.MigrateAsync();
 
@@ -29,7 +29,7 @@ public static class DbInitializer
         await db.SaveChangesAsync();
     }
 
-    private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+    private static async Task SeedRoles(RoleManager<ApplicationRole> roleManager)
     {
         string[] roles = { "Admin", "Moderator", "User" };
 
@@ -37,7 +37,7 @@ public static class DbInitializer
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                await roleManager.CreateAsync(new ApplicationRole(role));
             }
         }
     }
@@ -165,8 +165,9 @@ public static class DbInitializer
         var books = categories.First(c => c.Name == "Books");
 
         db.Items.AddRange(
-            new Item { 
-                Title = "The Witcher 3", 
+            new Item
+            {
+                Title = "The Witcher 3",
                 Description = "Open-world, action RPG where players control Geralt of Rivia," +
                     " a monster hunter, on a quest to find his adopted daughter, Ciri",
                 CategoryId = games.Id,
@@ -178,8 +179,9 @@ public static class DbInitializer
                     new ItemTag { Tag = detectiveTag }
                 }
             },
-            new Item {  
-                Title = "The Witcher 2", 
+            new Item
+            {
+                Title = "The Witcher 2",
                 Description = "Action RPG sequel to The Witcher, where players control Geralt of Rivia, a monster hunter, " +
                     "as he navigates a world of political intrigue and conspiracy following an attempt on King Foltest's life",
                 CategoryId = games.Id,
@@ -190,10 +192,11 @@ public static class DbInitializer
                     new ItemTag { Tag = fantasyTag }
                 }
             },
-            new Item {
-                Title = "Factorio", 
+            new Item
+            {
+                Title = "Factorio",
                 Description = "A construction and management simulation game where players build and automate" +
-                    " factories to produce increasingly complex items, ultimately launching a rocket into space", 
+                    " factories to produce increasingly complex items, ultimately launching a rocket into space",
                 CategoryId = games.Id,
                 ItemTags = new List<ItemTag>
                 {
@@ -202,10 +205,11 @@ public static class DbInitializer
                 }
             },
 
-            new Item { 
-                Title = "Avatar", 
+            new Item
+            {
+                Title = "Avatar",
                 Description = "Science-fiction film, which tells the story of Jake Sully, a paraplegic Marine, " +
-                    "who is sent to the alien world of Pandora", 
+                    "who is sent to the alien world of Pandora",
                 CategoryId = movies.Id,
                 ItemTags = new List<ItemTag>
                 {

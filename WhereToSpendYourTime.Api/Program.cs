@@ -1,5 +1,4 @@
 using Azure.Storage.Blobs;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using WhereToSpendYourTime.Api.Handlers;
@@ -30,7 +29,7 @@ if (!string.IsNullOrWhiteSpace(connStr) && connStr.StartsWith("postgresql://"))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddScoped(provider =>
