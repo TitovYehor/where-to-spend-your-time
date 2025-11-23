@@ -77,6 +77,8 @@ public class ReviewService : IReviewService
     {
         var review = await _db.Reviews
             .Include(r => r.User)
+                .ThenInclude(u => u!.UserRoles)
+                    .ThenInclude(ur => ur.Role)
             .Include(r => r.Item)
             .Include(r => r.Comments)
                 .ThenInclude(c => c.User)
