@@ -6,6 +6,7 @@ export type Review = {
   createdAt: string;
   author: string;
   userId: string;
+  authorRole: "User" | "Moderator" | "Admin";
   itemTitle: string;
   itemId: number;
 };

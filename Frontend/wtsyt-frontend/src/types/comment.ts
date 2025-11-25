@@ -4,6 +4,7 @@ export type Comment = {
   createdAt: string;
   author: string;
   userId: string;
+  authorRole: "User" | "Moderator" | "Admin";
   reviewId: number;
 };
 
