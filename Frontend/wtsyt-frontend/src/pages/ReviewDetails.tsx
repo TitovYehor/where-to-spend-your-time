@@ -32,9 +32,12 @@ export default function ReviewDetails() {
   const [editContent, setEditContent] = useState("");
   const [editRating, setEditRating] = useState(5);
 
+  const authorRole = review?.authorRole;
+  const currentRole = user?.role;
+
   const isAuthor = user && review?.author === user.displayName;
-  const isModerator = user?.role == "Moderator";
-  const isAdmin = user?.role == "Admin";
+  const isModerator = currentRole == "Moderator";
+  const isAdmin = currentRole == "Admin";
 
   const id = Number(reviewId);
 
@@ -93,9 +96,12 @@ export default function ReviewDetails() {
     }
   };
 
-  const handleDeleteComment = async (commentId: number, commentAuthor: string) => {
-    const canDelete = isAdmin || isModerator || commentAuthor === user?.displayName;
-    if (!canDelete) return;
+  const handleDeleteComment = async (commentId: number) => {
+    const canDelete =
+      isAdmin ||
+      (isModerator && authorRole !== "Admin" && authorRole !== "Moderator") ||
+      isAuthor;
+    if (!canDelete) return; 
 
     const confirmed = confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
@@ -232,7 +238,7 @@ export default function ReviewDetails() {
               </div>
             </form>
           ) : ( 
-            (isAuthor || isAdmin || isModerator) && (
+            (isAuthor || isAdmin || ((authorRole != "Admin" && authorRole != "Moderator") && isModerator)) && (
               <div className="flex gap-2 mb-6">
                 {isAuthor && (
                   <button
@@ -274,7 +280,7 @@ export default function ReviewDetails() {
                 <ul className="space-y-4 mb-4">
                   {comments.map((c) => {
                     const canManage =
-                      isAdmin || isModerator || c.author === user?.displayName;
+                      isAuthor || isAdmin || ((authorRole != "Admin" && authorRole != "Moderator") && isModerator);
 
                     return (
                       <CommentManagementCard
