@@ -4,7 +4,7 @@ import UserProfileLink from "../users/UserProfileLinks";
 interface CommentItemProps {
   comment: Comment;
   canManage: boolean;
-  onDelete: (commentId: number, commentAuthor: string) => void;
+  onDelete: (commentId: number) => void;
 }
 
 const CommentManagementCard: React.FC<CommentItemProps> = ({ comment, canManage, onDelete }) => (
@@ -16,7 +16,7 @@ const CommentManagementCard: React.FC<CommentItemProps> = ({ comment, canManage,
       </p>
       {canManage && (
         <button
-          onClick={() => onDelete(comment.id, comment.author)}
+          onClick={() => onDelete(comment.id)}
           className="text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md"
         >
           Delete
