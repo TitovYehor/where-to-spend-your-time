@@ -36,6 +36,8 @@ public class CommentService : ICommentService
             .AsNoTracking()
             .AsQueryable()
             .Include(r => r.User)
+                .ThenInclude(u => u!.UserRoles)
+                    .ThenInclude(ur => ur.Role)
             .Include(r => r.Review)
             .Where(r => r.ReviewId == reviewId);
 

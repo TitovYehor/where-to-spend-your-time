@@ -34,7 +34,12 @@ public class MappingProfile : Profile
                         .FirstOrDefault() ?? "User"))
             .ForMember(dest => dest.ItemTitle, opt => opt.MapFrom(src => src.Item!.Title));
         CreateMap<Comment, CommentDto>()
-            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName))
+            .ForMember(dest => dest.AuthorRole,
+                opt => opt.MapFrom(src =>
+                    src.User!.UserRoles
+                        .Select(ur => ur.Role.Name)
+                        .FirstOrDefault() ?? "User"));
         CreateMap<ApplicationUser, ApplicationUserDto>();
         CreateMap<Media, MediaDto>();
     }
