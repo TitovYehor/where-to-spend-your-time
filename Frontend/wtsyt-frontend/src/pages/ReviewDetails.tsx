@@ -32,7 +32,7 @@ export default function ReviewDetails() {
   const [editContent, setEditContent] = useState("");
   const [editRating, setEditRating] = useState(5);
 
-  const authorRole = review?.authorRole;
+  const authorReviewRole = review?.authorRole;
   const currentRole = user?.role;
 
   const isAuthor = user && review?.author === user.displayName;
@@ -99,7 +99,7 @@ export default function ReviewDetails() {
   const handleDeleteComment = async (commentId: number) => {
     const canDelete =
       isAdmin ||
-      (isModerator && authorRole !== "Admin" && authorRole !== "Moderator") ||
+      (isModerator && authorReviewRole !== "Admin" && authorReviewRole !== "Moderator") ||
       isAuthor;
     if (!canDelete) return; 
 
@@ -238,7 +238,7 @@ export default function ReviewDetails() {
               </div>
             </form>
           ) : ( 
-            (isAuthor || isAdmin || ((authorRole != "Admin" && authorRole != "Moderator") && isModerator)) && (
+            (isAuthor || isAdmin || ((authorReviewRole != "Admin" && authorReviewRole != "Moderator") && isModerator)) && (
               <div className="flex gap-2 mb-6">
                 {isAuthor && (
                   <button
@@ -279,8 +279,9 @@ export default function ReviewDetails() {
               <>
                 <ul className="space-y-4 mb-4">
                   {comments.map((c) => {
+                    const authorCommentRole = c.authorRole;
                     const canManage =
-                      isAuthor || isAdmin || ((authorRole != "Admin" && authorRole != "Moderator") && isModerator);
+                      isAuthor || isAdmin || ((authorCommentRole != "Admin" && authorCommentRole != "Moderator") && isModerator);
 
                     return (
                       <CommentManagementCard
