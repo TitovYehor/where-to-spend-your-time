@@ -8,7 +8,7 @@ import ReviewCard from "../components/reviews/ReviewCard";
 import CommentCard from "../components/comments/CommentCard";
 import { getPagedReviewsForUser } from "../services/reviewService";
 import { getPagedCommentsForUser } from "../services/commentService";
-import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import Alert from "../components/common/Alerts";
 
 const Profile = () => {
@@ -168,6 +168,26 @@ const Profile = () => {
           <User className="w-8 h-8 text-blue-600" />
           Your Profile
         </h1>
+
+        <p className="flex items-center gap-2">
+          <Shield className={`w-4 h-4 ${
+            user.role === "Admin" ? "text-red-600" :
+            user.role === "Moderator" ? "text-yellow-600" :
+            "text-gray-600"
+          }`} />
+
+          <strong>Role:</strong>
+          <span
+            className={`px-2 py-1 rounded-md text-sm font-semibold ${
+              user.role === "Admin" ? "bg-red-100 text-red-600" :
+              user.role === "Moderator" ? "bg-yellow-100 text-yellow-700" :
+              "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {user.role ?? "User"}
+          </span>
+        </p>
+
         <p className="flex items-center gap-2">
           <User className="w-4 h-4 text-violet-500" />
           <strong>Name:</strong> {user?.displayName}
