@@ -112,7 +112,6 @@ public class UserService : IUserService
         if (!isSelf)
         {
             dto.Email = null;
-            dto.Role = null;
         }
 
         return dto;
