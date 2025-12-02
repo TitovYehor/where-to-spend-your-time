@@ -7,4 +7,6 @@ public class UserStatDto
     public string DisplayName { get; set; } = string.Empty;
     
     public int ReviewCount { get; set; }
+
+    public string? Role { get; set; }
 }

@@ -51,7 +51,10 @@ public class StatsService : IStatsService
             {
                 UserId = u.Id,
                 DisplayName = u.DisplayName,
-                ReviewCount = u.Reviews.Count
+                ReviewCount = u.Reviews.Count,
+                Role = u.UserRoles
+                   .Select(r => r.Role.Name)
+                   .FirstOrDefault() ?? "User"
             }).ToListAsync();
 
         var recentReviews = await _db.Reviews
