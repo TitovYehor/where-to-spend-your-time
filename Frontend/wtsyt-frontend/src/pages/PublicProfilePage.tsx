@@ -9,7 +9,7 @@ import type { Review } from "../types/review";
 import type { Comment } from "../types/comment";
 import { getPagedCommentsForUser } from "../services/commentService";
 import { getPagedReviewsForUser } from "../services/reviewService";
-import { ChevronLeft, ChevronRight, FileText, MessageSquare, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, MessageSquare, Shield, User } from "lucide-react";
 
 export default function PublicProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -114,6 +114,26 @@ export default function PublicProfile() {
           <User className="w-8 h-8 text-blue-600" />
           {user?.displayName}'s Profile
         </h1>
+
+        <p className="flex items-center gap-2">
+          <Shield className={`w-4 h-4 ${
+            user.role === "Admin" ? "text-red-600" :
+            user.role === "Moderator" ? "text-yellow-600" :
+            "text-gray-600"
+          }`} />
+
+          <strong>Role:</strong>
+          <span
+            className={`px-2 py-1 rounded-md text-sm font-semibold ${
+              user.role === "Admin" ? "bg-red-100 text-red-600" :
+              user.role === "Moderator" ? "bg-yellow-100 text-yellow-700" :
+              "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {user.role ?? "User"}
+          </span>
+        </p>
+
         <p className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-blue-500" />
           <strong>Reviews count:</strong> {user?.reviews.length}
