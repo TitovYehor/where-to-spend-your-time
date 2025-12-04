@@ -12,6 +12,7 @@ type UserStat = {
   userId: string;
   displayName: string;
   reviewCount: number;
+  role: "User" | "Moderator" | "Admin";
 };
 
 export type Stats = {
