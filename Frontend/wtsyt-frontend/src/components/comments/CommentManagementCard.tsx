@@ -11,7 +11,7 @@ const CommentManagementCard: React.FC<CommentItemProps> = ({ comment, canManage,
   <li className="border rounded-lg p-3 bg-gray-50 shadow-sm">
     <div className="flex justify-between items-center mb-1">
       <p className="text-sm text-gray-600 flex items-center gap-1">
-        <UserProfileLink userId={comment.userId} name={comment.author} />
+        <UserProfileLink userId={comment.userId} name={comment.author} role={comment.authorRole} />
         <span>• {new Date(comment.createdAt).toLocaleString()}</span>
       </p>
       {canManage && (
