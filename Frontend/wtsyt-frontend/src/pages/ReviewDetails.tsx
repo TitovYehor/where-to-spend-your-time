@@ -154,8 +154,8 @@ export default function ReviewDetails() {
 
             <h2 className="text-3xl font-bold mb-1 break-words">{review.title}</h2>
             <p className="text-sm text-black flex items-center gap-1">
-              <span>By</span> 
-              <UserProfileLink userId={review.userId} name={review.author} />
+              <span>By</span>
+              <UserProfileLink userId={review.userId} name={review.author} role={review.authorRole} />
             </p>
             <p className="text-yellow-600 font-medium flex items-center gap-1">
               <Star className="w-4 h-4" />
