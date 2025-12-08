@@ -88,7 +88,7 @@ export default function Stats() {
                 className="block border border-gray-100 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
               >
                 <h3 className="text-lg font-semibold">
-                  <UserProfileLink userId={reviewer.userId} name={reviewer.displayName} />
+                  <UserProfileLink userId={reviewer.userId} name={reviewer.displayName} role={reviewer.role} />
                 </h3>
                 <p className="text-sm text-gray-500">{reviewer.reviewCount} reviews</p>
               </div>
