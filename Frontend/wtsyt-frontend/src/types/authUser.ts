@@ -5,7 +5,7 @@ export type AuthUser = {
   id: string;
   displayName: string;
   email: string | null;
-  role: string | null;
+  role: "User" | "Moderator" | "Admin";
 
   reviews: Review[];
   comments: Comment[];
