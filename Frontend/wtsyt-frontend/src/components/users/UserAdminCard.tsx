@@ -16,6 +16,7 @@ const UserAdminCard: React.FC<UserAdminProps> = ({ user, displayUser, onEdit, on
         <UserProfileLink
           userId={displayUser.id}
           name={displayUser.displayName}
+          role={displayUser.role}
           className="text-lg font-semibold"
         />
       </p>
