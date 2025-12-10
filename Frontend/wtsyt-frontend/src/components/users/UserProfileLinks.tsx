@@ -28,7 +28,7 @@ export default function UserProfileLink({ userId, name, role, className = "" }: 
       <User className="w-4 h-4 text-violet-500" />
       <Shield className={`w-4 h-4 ${roleColor}`} />
       <span className={`py-0.5 rounded-md text-xs font-semibold ${roleColor}`}>
-        ({role})
+        {role} |
       </span>
       <span>
         {name} {isCurrentUser && <span className="text-xs text-gray-500">(You)</span>}
