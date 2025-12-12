@@ -1,10 +1,12 @@
+import type { UserRole } from "./userRole";
+
 export type Comment = {
   id: number;
   content: string;
   createdAt: string;
   author: string;
   userId: string;
-  authorRole: "User" | "Moderator" | "Admin";
+  authorRole: UserRole;
   reviewId: number;
 };
 

@@ -1,4 +1,5 @@
 import type { Review } from "./review";
+import type { UserRole } from "./userRole";
 
 export type ItemStat = {
   id: number;
@@ -12,7 +13,7 @@ type UserStat = {
   userId: string;
   displayName: string;
   reviewCount: number;
-  role: "User" | "Moderator" | "Admin";
+  role: UserRole;
 };
 
 export type Stats = {
