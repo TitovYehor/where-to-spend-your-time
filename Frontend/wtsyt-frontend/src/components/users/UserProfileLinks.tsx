@@ -25,11 +25,11 @@ export default function UserProfileLink({ userId, name, role, className = "" }: 
       to={target} 
       className={`inline-flex items-center gap-1 text-violet-600 hover:underline ${className}`}
     >
-      <User className="w-4 h-4 text-violet-500" />
       <Shield className={`w-4 h-4 ${roleColor}`} />
       <span className={`py-0.5 rounded-md text-xs font-semibold ${roleColor}`}>
         {role} |
       </span>
+      <User className="w-4 h-4 text-violet-500" />
       <span>
         {name} {isCurrentUser && <span className="text-xs text-gray-500">(You)</span>}
       </span>
