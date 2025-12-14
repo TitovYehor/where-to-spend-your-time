@@ -1,3 +1,5 @@
+import type { UserRole } from "./userRole";
+
 export type Review = {
   id: number;
   title: string;
@@ -6,7 +8,7 @@ export type Review = {
   createdAt: string;
   author: string;
   userId: string;
-  authorRole: "User" | "Moderator" | "Admin";
+  authorRole: UserRole;
   itemTitle: string;
   itemId: number;
 };
