@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Shield, User } from "lucide-react";
+import type { UserRole } from "../../types/userRole";
 
 interface UserProfileLinkProps {
   userId: string;
   name: string;
-  role: "User" | "Moderator" | "Admin";
+  role: UserRole;
   className?: string;
 }
 
