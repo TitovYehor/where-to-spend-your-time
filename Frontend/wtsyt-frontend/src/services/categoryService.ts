@@ -18,8 +18,8 @@ export const buildCategoryQuery = (params: {
   return query.toString();
 };
 
-export const getCategories = async (): Promise<Category[]> => {
-  const res = await api.get<Category[]>(`${API_BASES.categories}`);
+export const getCategories = async (signal?: AbortSignal): Promise<Category[]> => {
+  const res = await api.get<Category[]>(`${API_BASES.categories}`, { signal });
   return res.data;
 };
 
@@ -27,9 +27,9 @@ export const getPagedCategories = async (params: {
   search?: string;
   page?: number;
   pageSize?: number;
-}): Promise<CategoryPagedResult> => {
+}, signal?: AbortSignal): Promise<CategoryPagedResult> => {
   const query = buildCategoryQuery(params);
-  const res = await api.get<CategoryPagedResult>(`${API_BASES.categories}/paged?${query}`);
+  const res = await api.get<CategoryPagedResult>(`${API_BASES.categories}/paged?${query}`, { signal });
   return res.data;
 };
 
