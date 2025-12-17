@@ -14,22 +14,29 @@ export default function Categories() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      setError("");
+    const controller = new AbortController();
 
+    const fetchCategories = async () => {
       try {
-        const result = await getCategories();
+        setLoading(true);
+        setError("");
+
+        const result = await getCategories(controller.signal);
         setCategories(result);
       } catch (e) {
-        const message = handleApiError(e);
-        setError(message);
+        if (!controller.signal.aborted) {
+          setError(handleApiError(e));
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchCategories();
+
+    return () => controller.abort();
   }, []);
 
   const filteredCategories = categories.filter(cat =>
