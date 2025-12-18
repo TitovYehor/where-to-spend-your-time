@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addCategory, updateCategory, deleteCategory, getPagedCategories } from "../../services/categoryService";
 import type { Category } from "../../types/category";
 import { handleApiError } from "../../utils/handleApi";
-import type { CategoryPagedResult } from "../../types/pagination/pagedResult";
 import { Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
 import CategoryAdminCard from "../../components/categories/CategoryAdminCard";
 import Alert from "../../components/common/Alerts";
@@ -29,26 +28,33 @@ export default function AdminCategories() {
 
   const [categoryPageChanged, setCategoryPageChanged] = useState(false);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data: CategoryPagedResult = await getPagedCategories({
-        search,
-        page,
-        pageSize
-      });
+      const data = await getPagedCategories(
+        { search, page, pageSize },
+        signal
+      );
       setCategories(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
-      handleApiError(err);
-      setError("Failed to load categories");
+      if (!signal?.aborted) {
+        handleApiError(err);
+        setError("Failed to load categories");
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    const controller = new AbortController();
+
+    fetchCategories(controller.signal);
+
+    return () => controller.abort();
   }, [search, page, pageSize]);
 
   useLayoutEffect(() => {
@@ -71,12 +77,10 @@ export default function AdminCategories() {
     try {
       if (editingId !== null) {
         await updateCategory(editingId, { name });
-        fetchCategories()
         setEditingId(null);
         setMessage("Category updated");
       } else {
         await addCategory({ name });
-        fetchCategories()
         setMessage("Category added");
       }
       setName("");
