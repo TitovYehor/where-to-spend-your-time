@@ -17,8 +17,8 @@ export const buildTagQuery = (params: {
   return query.toString();
 };
 
-export const getTags = async (): Promise<Tag[]> => {
-  const res = await api.get<Tag[]>(`${API_BASES.tags}`);
+export const getTags = async (signal?: AbortSignal): Promise<Tag[]> => {
+  const res = await api.get<Tag[]>(`${API_BASES.tags}`, { signal });
   return res.data;
 };
 
@@ -26,9 +26,9 @@ export const getPagedTags = async (params: {
   search?: string;
   page?: number;
   pageSize?: number;
-}): Promise<TagPagedResult> => {
+}, signal?: AbortSignal): Promise<TagPagedResult> => {
   const query = buildTagQuery(params);
-  const res = await api.get<TagPagedResult>(`${API_BASES.tags}/paged?${query}`);
+  const res = await api.get<TagPagedResult>(`${API_BASES.tags}/paged?${query}`, { signal });
   return res.data;
 };
 
