@@ -14,22 +14,29 @@ export default function Tags() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchTags = async () => {
       setLoading(true);
       setError("");
 
       try {
-        const result = await getTags();
+        const result = await getTags(controller.signal);
         setTags(result);
       } catch (e) {
-        const message = handleApiError(e);
-        setError(message);
+        if (!controller.signal.aborted) {
+          setError(handleApiError(e));
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchTags();
+
+    return () => controller.abort();
   }, []);
 
   const filteredTags = tags.filter(t =>
