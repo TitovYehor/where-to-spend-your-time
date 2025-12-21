@@ -29,26 +29,33 @@ export default function AdminTags() {
 
   const [tagPageChanged, setTagPageChanged] = useState(false);
 
-  const fetchTags = async () => {
+  const fetchTags = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data: TagPagedResult = await getPagedTags({
-        search,
-        page,
-        pageSize
-      });
+      const data: TagPagedResult = await getPagedTags(
+        { search, page, pageSize },
+        signal
+      );
       setTags(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
-      handleApiError(err);
-      setError("Failed to load tags");
+      if (!signal?.aborted) {
+        handleApiError(err);
+        setError("Failed to load tags");
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchTags();
+    const controller = new AbortController();
+
+    fetchTags(controller.signal);
+
+    return () => controller.abort();
   }, [search, page, pageSize]);
 
   useLayoutEffect(() => {
