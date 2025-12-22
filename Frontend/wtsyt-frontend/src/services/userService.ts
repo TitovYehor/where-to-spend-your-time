@@ -20,8 +20,8 @@ export const buildUserQuery = (params: {
   return query.toString();
 };
 
-export const getAllUsers = async (): Promise<AuthUser[]> => {
-  const res = await api.get<AuthUser[]>(`${API_BASES.users}`);
+export const getAllUsers = async (signal?: AbortSignal): Promise<AuthUser[]> => {
+  const res = await api.get<AuthUser[]>(`${API_BASES.users}`, { signal });
   return res.data;
 };
 
@@ -30,9 +30,9 @@ export const getPagedUsers = async (params: {
   role?: string;
   page?: number;
   pageSize?: number;
-}): Promise<UserPagedResult> => {
+}, signal?: AbortSignal): Promise<UserPagedResult> => {
   const query = buildUserQuery(params);
-  const res = await api.get<UserPagedResult>(`${API_BASES.users}/paged?${query}`);
+  const res = await api.get<UserPagedResult>(`${API_BASES.users}/paged?${query}`, { signal });
   return res.data;
 };
 
