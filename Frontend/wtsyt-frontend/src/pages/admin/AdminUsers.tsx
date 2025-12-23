@@ -36,7 +36,7 @@ export default function AdminUsers() {
     ...roles.map((role) => ({ value: role, label: role })),
   ];
 
-  const fetchData = async () => {
+  const fetchData = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const data: UserPagedResult = await getPagedUsers({
@@ -44,19 +44,27 @@ export default function AdminUsers() {
         role: roleFilter || undefined,
         page,
         pageSize
-      });
+      }, signal);
       setUsers(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
-      handleApiError(err);
-      setError("Failed to load data");
+      if (!signal?.aborted) {
+        handleApiError(err);
+        setError("Failed to load data");
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+
+    fetchData(controller.signal);
+
+    return () => controller.abort();
   }, [search, page, pageSize, roleFilter]);
 
   useEffect(() => {
