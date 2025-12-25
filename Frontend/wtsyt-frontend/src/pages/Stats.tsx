@@ -12,18 +12,26 @@ export default function Stats() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
-        const data = await getStats();
+        const data = await getStats(controller.signal);
         setStats(data);
       } catch (e) {
-        handleApiError(e);
+        if (!controller.signal.aborted) {
+          handleApiError(e);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => controller.abort();
   }, []);
 
   if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
