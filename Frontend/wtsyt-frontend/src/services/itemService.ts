@@ -36,14 +36,14 @@ export const getItems = async (params: {
   descending?: boolean;
   page?: number;
   pageSize?: number;
-}): Promise<ItemPagedResult> => {
+}, signal?: AbortSignal): Promise<ItemPagedResult> => {
   const query = buildItemQuery(params);
-  const res = await api.get<ItemPagedResult>(`${API_BASES.items}?${query}`);
+  const res = await api.get<ItemPagedResult>(`${API_BASES.items}?${query}`, { signal });
   return res.data;
 };
 
-export const getItemById = async (id: number): Promise<Item> => {
-  const res = await api.get<Item>(`${API_BASES.items}/${id}`);
+export const getItemById = async (id: number, signal?: AbortSignal): Promise<Item> => {
+  const res = await api.get<Item>(`${API_BASES.items}/${id}`, { signal });
   return res.data;
 };
 
