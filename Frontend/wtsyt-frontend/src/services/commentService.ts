@@ -18,17 +18,17 @@ export const buildCommentQuery = (params: {
   return query.toString();
 };
 
-export const getCommentsForReview = async (reviewId: number): Promise<Comment[]> => {
-  const res = await api.get<Comment[]>(reviewComments(reviewId));
+export const getCommentsForReview = async (reviewId: number, signal?: AbortSignal): Promise<Comment[]> => {
+  const res = await api.get<Comment[]>(reviewComments(reviewId), { signal });
   return res.data;
 };
 
 export const getPagedCommentsForReview = async (reviewId: number, params: {
   page?: number;
   pageSize?: number;
-}): Promise<CommentPagedResult> => {
+}, signal?: AbortSignal): Promise<CommentPagedResult> => {
   const query = buildCommentQuery(params);
-  const res = await api.get<CommentPagedResult>(`${reviewComments(reviewId)}/paged?${query}`);
+  const res = await api.get<CommentPagedResult>(`${reviewComments(reviewId)}/paged?${query}`, { signal });
   return res.data;
 };
 

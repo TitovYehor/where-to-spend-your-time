@@ -18,17 +18,17 @@ export const buildReviewQuery = (params: {
   return query.toString();
 };
 
-export const getReviewsForItem = async (itemId: number): Promise<Review[]> => {
-  const res = await api.get<Review[]>(itemReviews(itemId));
+export const getReviewsForItem = async (itemId: number, signal?: AbortSignal): Promise<Review[]> => {
+  const res = await api.get<Review[]>(itemReviews(itemId), { signal });
   return res.data;
 };
 
 export const getPagedReviewsForItem = async (itemId: number, params: {
   page?: number;
   pageSize?: number;
-}): Promise<ReviewPagedResult> => {
+}, signal?: AbortSignal): Promise<ReviewPagedResult> => {
   const query = buildReviewQuery(params);
-  const res = await api.get<ReviewPagedResult>(`${itemReviews(itemId)}/paged?${query}`);
+  const res = await api.get<ReviewPagedResult>(`${itemReviews(itemId)}/paged?${query}`, { signal });
   return res.data;
 };
 
@@ -41,13 +41,13 @@ export const getPagedReviewsForUser = async (userId: string, params: {
   return res.data;
 };
 
-export const getMyReviewForItem = async (itemId: number): Promise<Review> => {
-  const res = await api.get<Review>(`${itemReviews(itemId)}/my`);
+export const getMyReviewForItem = async (itemId: number, signal?: AbortSignal): Promise<Review> => {
+  const res = await api.get<Review>(`${itemReviews(itemId)}/my`, { signal });
   return res.data;
 };
 
-export const getReviewById = async (reviewId: number): Promise<Review> => {
-  const res = await api.get<Review>(`${API_BASES.reviews}/${reviewId}`);
+export const getReviewById = async (reviewId: number, signal?: AbortSignal): Promise<Review> => {
+  const res = await api.get<Review>(`${API_BASES.reviews}/${reviewId}`, { signal });
   return res.data;
 };
 
