@@ -60,33 +60,41 @@ export default function AdminItems() {
 
   const [itemPageChanged, setItemPageChanged] = useState(false);
 
-  const fetchItemsAndCategories = async () => {
+  const fetchItemsAndMeta = async (signal?: AbortSignal) => {
     try {
       const [itemList, categoryList, tagList] = await Promise.all([
         getItems({
           search: search,
           page: page,
           pageSize: pageSize
-        }),
-        getCategories(),
-        getTags(),
+        }, signal),
+        getCategories(signal),
+        getTags(signal),
       ]);
       setItems(itemList.items);
       setTotalCount(itemList.totalCount);
       setCategories(categoryList);
       setTags(tagList);
     } catch (err) {
-      handleApiError(err);
-      setError("Failed to fetch data");
+      if (!signal?.aborted) {
+        handleApiError(err);
+        setError("Failed to fetch data");
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
   
   useAutoResizeTextareas([titleRef, descriptionRef], [form.title, form.description]);
 
   useEffect(() => {
-    fetchItemsAndCategories();
+    const controller = new AbortController();
+
+    fetchItemsAndMeta(controller.signal);
+
+    return () => controller.abort();
   }, [search, page, pageSize]);
 
   useLayoutEffect(() => {
@@ -166,7 +174,7 @@ export default function AdminItems() {
       setForm({ title: "", description: "", categoryId: 0 });
       setError("");
       setMessage("Item deleted");
-      fetchItemsAndCategories();
+      fetchItemsAndMeta();
     } catch {
       setError("Failed to delete item");
       setMessage("");
