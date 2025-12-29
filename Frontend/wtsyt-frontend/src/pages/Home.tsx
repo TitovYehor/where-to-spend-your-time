@@ -62,33 +62,45 @@ export default function Home() {
   }, [searchParams]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
-        const result = await getItems({ ...filters, pageSize });
+        const result = await getItems({ ...filters, pageSize }, controller.signal);
         setItems(result.items);
         totalCountRef.current = result.totalCount;
       } catch (e) {
-        handleApiError(e);
+        if (!controller.signal.aborted) {
+          handleApiError(e);
+        }
       }
     };
 
     fetchData();
+
+    return () => controller.abort();
   }, [filters]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchMeta = async () => {
       try {
-        const cats = await getCategories();
+        const cats = await getCategories(controller.signal);
         setCategories(cats);
 
-        const tags = await getTags();
+        const tags = await getTags(controller.signal);
         setTags(tags);
       } catch (e) {
-        handleApiError(e);
+        if (!controller.signal.aborted) {
+          handleApiError(e);
+        }
       }
     };
     
     fetchMeta();
+
+    return () => controller.abort();
   }, []);
 
   useLayoutEffect(() => {
