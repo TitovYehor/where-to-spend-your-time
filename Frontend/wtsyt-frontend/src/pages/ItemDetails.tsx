@@ -40,53 +40,60 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
 
   const reviewContentRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const fetchItem = async () => {
+  const fetchItem = async (signal?: AbortSignal) => {
     if (isNaN(itemId)) return;
     try {
-      const itemData = await getItemById(itemId);
+      const itemData = await getItemById(itemId, signal);
       setItem(itemData);
     } catch (e) {
-      const message = handleApiError(e);
-      setError(message);
+      if (!signal?.aborted) {
+        setError(handleApiError(e));
+      }
     }
   };
 
-  const fetchReviews = async () => {
+  const fetchReviews = async (signal?: AbortSignal) => {
     if (isNaN(itemId)) return;
     try {
-      const reviewsData = await getPagedReviewsForItem(itemId, { page, pageSize });
+      const reviewsData = await getPagedReviewsForItem(itemId, { page, pageSize }, signal);
       setReviews(reviewsData.items);
       setTotalReviews(reviewsData.totalCount);
     } catch (e) {
-      const message = handleApiError(e);
-      setError(message);
+      if (!signal?.aborted) {
+        setError(handleApiError(e));
+      }
     }
   };
 
-  const fetchMyReview = async () => {
+  const fetchMyReview = async (signal?: AbortSignal) => {
     if (!user || isNaN(itemId)) return;
     try {
-      const myReviewData = await getMyReviewForItem(itemId);
+      const myReviewData = await getMyReviewForItem(itemId, signal);
       setMyReview(myReviewData);
       setTitle(myReviewData.title);
       setContent(myReviewData.content);
       setRating(myReviewData.rating);
     } catch (e) {
-      setMyReview(null);
-      setTitle("");
-      setContent("");
-      setRating(0);
-      const message = handleApiError(e);
-      setError(message);
+      if (!signal?.aborted) {
+        setMyReview(null);
+        setTitle("");
+        setContent("");
+        setRating(0);
+        setError(handleApiError(e));
+      }
     }
   };
 
   useAutoResizeTextareas([reviewContentRef], [content]);
 
   useEffect(() => {
-    fetchItem();
-    fetchReviews();
-    fetchMyReview();
+    const controller = new AbortController();
+
+    fetchItem(controller.signal);
+    fetchReviews(controller.signal);
+    fetchMyReview(controller.signal);
+    
+    return () => controller.abort();
   }, [id, user, page]);
 
   useEffect(() => {
