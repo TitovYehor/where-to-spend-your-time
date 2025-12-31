@@ -36,18 +36,18 @@ export const getPagedUsers = async (params: {
   return res.data;
 };
 
-export const getMyProfile = async (): Promise<AuthUser> => {
-  const res = await api.get<AuthUser>(`${API_BASES.users}/me`);
+export const getMyProfile = async (signal?: AbortSignal): Promise<AuthUser> => {
+  const res = await api.get<AuthUser>(`${API_BASES.users}/me`, { signal });
   return res.data;
 };
 
-export const getProfileById = async (id: string): Promise<AuthUser> => {
-  const res = await api.get<AuthUser>(`${API_BASES.users}/${id}`);
+export const getProfileById = async (id: string, signal?: AbortSignal): Promise<AuthUser> => {
+  const res = await api.get<AuthUser>(`${API_BASES.users}/${id}`, { signal });
   return res.data;
 };
 
-export const getRoles = async (): Promise<string[]> => {
-  const res = await api.get<string[]>(`${API_BASES.users}/roles`);
+export const getRoles = async (signal?: AbortSignal): Promise<string[]> => {
+  const res = await api.get<string[]>(`${API_BASES.users}/roles`, { signal });
   return res.data;
 };
 
