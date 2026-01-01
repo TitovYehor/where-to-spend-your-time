@@ -35,9 +35,9 @@ export const getPagedReviewsForItem = async (itemId: number, params: {
 export const getPagedReviewsForUser = async (userId: string, params: {
   page?: number;
   pageSize?: number;
-}): Promise<ReviewPagedResult> => {
+}, signal?: AbortSignal): Promise<ReviewPagedResult> => {
   const query = buildReviewQuery(params);
-  const res = await api.get<ReviewPagedResult>(`${userReviews(userId)}/paged?${query}`);
+  const res = await api.get<ReviewPagedResult>(`${userReviews(userId)}/paged?${query}`, { signal });
   return res.data;
 };
 

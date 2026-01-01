@@ -35,9 +35,9 @@ export const getPagedCommentsForReview = async (reviewId: number, params: {
 export const getPagedCommentsForUser = async (userId: string, params: {
   page?: number;
   pageSize?: number;
-}): Promise<CommentPagedResult> => {
+}, signal?: AbortSignal): Promise<CommentPagedResult> => {
   const query = buildCommentQuery(params);
-  const res = await api.get<CommentPagedResult>(`${userComments(userId)}/paged?${query}`);
+  const res = await api.get<CommentPagedResult>(`${userComments(userId)}/paged?${query}`, { signal });
   return res.data;
 };
 
