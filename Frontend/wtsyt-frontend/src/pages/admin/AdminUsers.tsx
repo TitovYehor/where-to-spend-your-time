@@ -68,17 +68,23 @@ export default function AdminUsers() {
   }, [search, page, pageSize, roleFilter]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchRoles = async () => {
       try
       {
-        const roles = await getRoles();
+        const roles = await getRoles(controller.signal);
         setRoles(roles);
       } catch (e) {
-        handleApiError(e);
+        if (!controller.signal.aborted) {
+          handleApiError(e);
+        }
       }
     };
     
     fetchRoles();
+
+    return () => controller.abort();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
