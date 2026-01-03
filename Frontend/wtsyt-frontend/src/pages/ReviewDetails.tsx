@@ -43,26 +43,32 @@ export default function ReviewDetails() {
 
   const newCommentRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (signal?: AbortSignal) => {
     if (isNaN(id)) return;
 
     try {
       const [reviewData, commentPagedData] = await Promise.all([
-        getReviewById(id),
-        getPagedCommentsForReview(id, { page, pageSize }),
+        getReviewById(id, signal),
+        getPagedCommentsForReview(id, { page, pageSize }, signal),
       ]);
       setReview(reviewData);
       setComments(commentPagedData.items);
       setTotalComments(commentPagedData.totalCount);
     } catch (e) {
-      handleApiError(e);
+      if (!signal?.aborted) {
+        handleApiError(e);
+      }
     }
   };
 
   useAutoResizeTextareas([newCommentRef], [newComment]);
 
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+
+    fetchData(controller.signal);
+
+    return () => controller.abort();
   }, [reviewId, user, page]);
 
   const handleAddComment = async (e: React.FormEvent) => {
