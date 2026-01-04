@@ -36,16 +36,22 @@ export default function PublicProfile() {
   useEffect(() => {
     if (!userId) return;
 
+    const controller = new AbortController();
+
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const profile = await getProfileById(userId);
+        const profile = await getProfileById(userId, controller.signal);
         setUser(profile);
       } catch (err) {
-        handleApiError(err);
+        if (!controller.signal.aborted) {
+          handleApiError(err);
+        }
       }
       finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
