@@ -43,41 +43,55 @@ const Profile = () => {
   useEffect(() => {
     if (!user) return;
 
+    const controller = new AbortController();
+
     const fetchReviews = async () => {
       setReviewsLoading(true);
       try {
-        const reviewsData = await getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize });
+        const reviewsData = await getPagedReviewsForUser(user.id, { page: reviewPage, pageSize: reviewPageSize }, controller.signal);
         setReviews(reviewsData.items);
         setTotalReviews(reviewsData.totalCount);
       } catch (err) {
-        const message = handleApiError(err);
-        setErrorMessages([message]);
+        if (!controller.signal.aborted) {
+          setErrorMessages([handleApiError(err)]);
+        }
       } finally {
-        setReviewsLoading(false);
+        if (!controller.signal.aborted) {
+          setReviewsLoading(false);
+        }
       }
     };
 
     fetchReviews();
+
+    return () => controller.abort();
   }, [user, reviewPage]);
 
   useEffect(() => {
     if (!user) return;
 
+    const controller = new AbortController();
+
     const fetchComments = async () => {
       setCommentsLoading(true);
       try {
-        const commentsData = await getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize });
+        const commentsData = await getPagedCommentsForUser(user.id, { page: commentPage, pageSize: commentPageSize }, controller.signal);
         setComments(commentsData.items);
         setTotalComments(commentsData.totalCount);
       } catch (err) {
-        const message = handleApiError(err);
-        setErrorMessages([message]);
+        if (!controller.signal.aborted) {
+          setErrorMessages([handleApiError(err)]);
+        }
       } finally {
-        setCommentsLoading(false);
+        if (!controller.signal.aborted) {
+          setCommentsLoading(false);
+        }
       }
     };
 
     fetchComments();
+
+    return () => controller.abort();
   }, [user, commentPage]);
 
   useLayoutEffect(() => {
