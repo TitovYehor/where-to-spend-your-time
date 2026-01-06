@@ -69,6 +69,28 @@ public class CommentServiceTests
         Assert.Equal("Second", result[0].Content);
     }
 
+    [Fact]
+    public async Task GetPagedCommentsByReviewIdAsync_Coverage()
+    {
+        var result = await _service.GetPagedCommentsByReviewIdAsync(
+            reviewId: 0,
+            new CommentFilterRequest { Page = 1, PageSize = 10 }
+        );
+
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetPagedCommentsByUserIdAsync_Coverage()
+    {
+        var result = await _service.GetPagedCommentsByUserIdAsync(
+            userId: "any",
+            new CommentFilterRequest { Page = 1, PageSize = 10 }
+        );
+
+        Assert.NotNull(result);
+    }
+
     [Theory]
     [MemberData(nameof(GetCommentQueryMethods))]
     public async Task GetPagedCommentsAsync_ReturnsPagedResults(string label, CommentQueryDelegate queryMethod)
@@ -171,7 +193,7 @@ public class CommentServiceTests
         var result = await _service.UpdateCommentAsync(comment.Id, "intruder", "Hacked");
 
         Assert.False(result);
-        Assert.Equal("Protected", ( await _db.Comments.FirstAsync()).Content);
+        Assert.Equal("Protected", (await _db.Comments.FirstAsync()).Content);
     }
 
     [Fact]
