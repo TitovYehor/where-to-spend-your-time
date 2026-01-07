@@ -67,13 +67,51 @@ public class UserServiceTests
     [Fact]
     public async Task GetPagedUsersAsync_ReturnsPagedResults()
     {
-        var users = new[]
+        var role1 = new ApplicationRole { Id = "1", Name = "User" };
+        var role2 = new ApplicationRole { Id = "2", Name = "Admin" };
+        _db.Roles.AddRange(role1, role2);
+
+        var user1 = new ApplicationUser
         {
-        new ApplicationUser { Id = "1", DisplayName = "Alice", Email = "alice@test.com" },
-        new ApplicationUser { Id = "2", DisplayName = "Bob", Email = "bob@test.com" },
-        new ApplicationUser { Id = "3", DisplayName = "Charlie", Email = "charlie@test.com" }
-    };
-        _db.Users.AddRange(users);
+            Id = "1",
+            DisplayName = "Alice",
+            Email = "alice@test.com",
+        };
+        var user2 = new ApplicationUser
+        {
+            Id = "2",
+            DisplayName = "Bob",
+            Email = "bob@test.com",
+        };
+        var user3 = new ApplicationUser
+        {
+            Id = "3",
+            DisplayName = "Charlie",
+            Email = "charlie@test.com",
+        };
+
+        user1.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user1,
+            Role = role1,
+            UserId = user1.Id,
+            RoleId = role1.Id
+        });
+        user2.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user2,
+            Role = role1,
+            UserId = user2.Id,
+            RoleId = role1.Id
+        });
+        user3.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user3,
+            Role = role2,
+            UserId = user3.Id,
+            RoleId = role2.Id
+        });
+        _db.Users.AddRange(user1, user2, user3);
         await _db.SaveChangesAsync();
 
         var filter = new UserFilterRequest { Page = 1, PageSize = 2 };
@@ -83,16 +121,43 @@ public class UserServiceTests
         Assert.NotNull(result);
         Assert.Equal(2, result.Items.Count);
         Assert.Equal(3, result.TotalCount);
-        Assert.Equal("Alice", result.Items[0].DisplayName);
+        Assert.Equal("Charlie", result.Items[0].DisplayName);
     }
 
     [Fact]
     public async Task GetPagedUsersAsync_AppliesSearchFilter()
     {
-        _db.Users.AddRange(
-            new ApplicationUser { Id = "1", DisplayName = "Alpha", Email = "a@test.com" },
-            new ApplicationUser { Id = "2", DisplayName = "Beta", Email = "b@test.com" }
-        );
+        var role1 = new ApplicationRole { Id = "1", Name = "User" };
+        _db.Roles.Add(role1);
+
+        var user1 = new ApplicationUser
+        {
+            Id = "1",
+            DisplayName = "Alpha",
+            Email = "a@test.com",
+        };
+        var user2 = new ApplicationUser
+        {
+            Id = "2",
+            DisplayName = "Beta",
+            Email = "b@test.com",
+        };
+
+        user1.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user1,
+            Role = role1,
+            UserId = user1.Id,
+            RoleId = role1.Id
+        });
+        user2.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user2,
+            Role = role1,
+            UserId = user2.Id,
+            RoleId = role1.Id
+        });
+        _db.Users.AddRange(user1, user2);
         await _db.SaveChangesAsync();
 
         var filter = new UserFilterRequest { Page = 1, PageSize = 10, Search = "be" };
@@ -204,8 +269,8 @@ public class UserServiceTests
     public async Task GetRolesAsync_ReturnsAllRolesOrdered()
     {
         _db.Roles.AddRange(
-            new IdentityRole { Id = "1", Name = "User" },
-            new IdentityRole { Id = "2", Name = "Admin" }
+            new ApplicationRole { Id = "1", Name = "User" },
+            new ApplicationRole { Id = "2", Name = "Admin" }
         );
         await _db.SaveChangesAsync();
 
