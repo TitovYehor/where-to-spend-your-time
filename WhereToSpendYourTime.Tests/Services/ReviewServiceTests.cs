@@ -70,6 +70,28 @@ public class ReviewServiceTests
         Assert.Equal("New", result[0].Title);
     }
 
+    [Fact]
+    public async Task GetPagedReviewsForItemAsync_Coverage()
+    {
+        var result = await _service.GetPagedReviewsForItemAsync(
+            itemId: 0,
+            new ReviewFilterRequest { Page = 1, PageSize = 2 }
+        );
+
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetPagedReviewsForUserAsync_Coverage()
+    {
+        var result = await _service.GetPagedReviewsForUserAsync(
+            userId: "any",
+            new ReviewFilterRequest { Page = 1, PageSize = 2 }
+        );
+
+        Assert.NotNull(result);
+    }
+
     [Theory]
     [MemberData(nameof(GetReviewQueryMethods))]
     public async Task GetPagedReviewsAsync_ReturnsPagedResults(string label, ReviewQueryDelegate queryMethod)
@@ -172,12 +194,14 @@ public class ReviewServiceTests
     public async Task GetByIdAsync_ReturnsReview_WhenExists()
     {
         var user = new ApplicationUser { Id = "user1", Email = "test@example.com" };
+        var item = new Item { Title = "Item1" };
         var review = new Review
         {
             Title = "Review Title",
             Content = "Some content",
             Rating = 4,
             User = user,
+            Item = item,
             Comments = new List<Comment>
             {
                 new Comment { Content = "Nice", User = user }
@@ -185,6 +209,7 @@ public class ReviewServiceTests
         };
 
         _db.Users.Add(user);
+        _db.Items.Add(item);
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
@@ -304,7 +329,7 @@ public class ReviewServiceTests
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "owner", isAdmin: false);
+        var result = await _service.DeleteReviewAsync(review.Id, "owner", isManager: false);
 
         Assert.True(result);
         Assert.Empty(_db.Reviews);
@@ -317,7 +342,7 @@ public class ReviewServiceTests
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "anotherUser", isAdmin: true);
+        var result = await _service.DeleteReviewAsync(review.Id, "anotherUser", isManager: true);
 
         Assert.True(result);
         Assert.Empty(_db.Reviews);
@@ -330,7 +355,7 @@ public class ReviewServiceTests
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "intruder", isAdmin: false);
+        var result = await _service.DeleteReviewAsync(review.Id, "intruder", isManager: false);
 
         Assert.False(result);
         Assert.Single(_db.Reviews);
