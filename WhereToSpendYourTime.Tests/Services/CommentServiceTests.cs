@@ -152,14 +152,29 @@ public class CommentServiceTests
     [Fact]
     public async Task AddCommentAsync_AddsComment_WhenReviewExists()
     {
-        var review = new Review { Title = "R", Content = "C", Rating = 4 };
+        var user = new ApplicationUser
+        {
+            Id = "user1",
+            UserName = "user1",
+            DisplayName = "Test User"
+        };
+
+        var review = new Review
+        {
+            Title = "R",
+            Content = "C",
+            Rating = 4
+        };
+
+        _db.Users.Add(user);
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.AddCommentAsync(review.Id, "user1", "Nice review");
+        var result = await _service.AddCommentAsync(review.Id, user.Id, "Nice review");
 
         Assert.NotNull(result);
         Assert.Equal("Nice review", result!.Content);
+        Assert.Equal("Test User", result.Author);
         Assert.Single(_db.Comments);
     }
 

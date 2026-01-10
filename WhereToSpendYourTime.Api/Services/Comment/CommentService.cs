@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Comment;
@@ -20,61 +21,52 @@ public class CommentService : ICommentService
 
     public async Task<List<CommentDto>> GetCommentsByReviewIdAsync(int reviewId)
     {
-        var comments = await _db.Comments
-            .Include(c => c.User)
-            .Include(c => c.Review)
+        return await _db.Comments
+            .AsNoTracking()
             .Where(c => c.ReviewId == reviewId)
             .OrderByDescending(c => c.CreatedAt)
+            .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        return _mapper.Map<List<CommentDto>>(comments);
     }
 
     public async Task<PagedResult<CommentDto>> GetPagedCommentsByReviewIdAsync(int reviewId, CommentFilterRequest filter)
     {
         var query = _db.Comments
             .AsNoTracking()
-            .AsQueryable()
-            .Include(r => r.User)
-                .ThenInclude(u => u!.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-            .Include(r => r.Review)
-            .Where(r => r.ReviewId == reviewId);
+            .Where(c => c.ReviewId == reviewId)
+            .OrderByDescending(c => c.CreatedAt)
+            .ProjectTo<CommentDto>(_mapper.ConfigurationProvider);
 
-        query = query.OrderByDescending(r => r.CreatedAt);
-
-        var pagedResult = await query
-            .Select(r => _mapper.Map<CommentDto>(r))
-            .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
+        return await query.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<PagedResult<CommentDto>> GetPagedCommentsByUserIdAsync(string userId, CommentFilterRequest filter)
     {
         var query = _db.Comments
-            .AsNoTracking()
-            .AsQueryable()
-            .Include(r => r.User)
-            .Where(r => r.UserId == userId);
+           .AsNoTracking()
+           .Where(c => c.UserId == userId)
+           .OrderByDescending(c => c.CreatedAt)
+           .ProjectTo<CommentDto>(_mapper.ConfigurationProvider);
 
-        query = query.OrderByDescending(r => r.CreatedAt);
-
-        var pagedResult = await query
-            .Select(r => _mapper.Map<CommentDto>(r))
-            .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
+        return await query.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content)
     {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return null;
+        }
+
         var reviewExists = await _db.Reviews.AnyAsync(r => r.Id == reviewId);
-        if (!reviewExists) return null;
+        if (!reviewExists)
+        {
+            return null;
+        }
 
         var comment = new Data.Entities.Comment
         {
-            Content = content,
+            Content = content.Trim(),
             CreatedAt = DateTime.UtcNow,
             ReviewId = reviewId,
             UserId = userId
@@ -83,12 +75,18 @@ public class CommentService : ICommentService
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        return _mapper.Map<CommentDto>(comment);
+        return await _db.Comments
+            .AsNoTracking()
+            .Where(c => c.Id == comment.Id)
+            .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
+            .FirstAsync();
     }
 
     public async Task<bool> UpdateCommentAsync(int commentId, string userId, string newContent)
     {
-        var comment = await _db.Comments.FindAsync(commentId);
+        var comment = await _db.Comments
+            .SingleOrDefaultAsync(c => c.Id == commentId);
+
         if (comment == null || comment.UserId != userId)
         {
             return false;
@@ -102,6 +100,7 @@ public class CommentService : ICommentService
     public async Task<bool> DeleteCommentAsync(int commentId, string userId, bool isManager)
     {
         var comment = await _db.Comments.FindAsync(commentId);
+
         if (comment == null || (comment.UserId != userId && !isManager))
         {
             return false;
