@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
+using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -28,6 +29,7 @@ public class CategoryServiceTests
         {
             cfg.CreateMap<Category, CategoryDto>();
             cfg.CreateMap<Item, ItemDto>();
+            cfg.CreateMap<Media, MediaDto>();
         });
         _mapper = config.CreateMapper();
 

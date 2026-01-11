@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Category;
@@ -21,58 +22,46 @@ public class CategoryService : ICategoryService
 
     public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
     {
-        var categories = await _db.Categories
+        return await _db.Categories
             .AsNoTracking()
             .OrderBy(c => c.Name)
-            .Select(cat => _mapper.Map<CategoryDto>(cat))
+            .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-        
-        return categories;
     }
 
     public async Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(CategoryFilterRequest filter)
-    { 
-        var query = _db.Categories.AsNoTracking().AsQueryable();
+    {
+        var query = _db.Categories.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            query = query.Where(c => c.Name.ToLower().Contains(filter.Search.ToLower()));
+            var search = filter.Search.Trim();
+            query = query.Where(c => EF.Functions.Like(c.Name, $"%{search}%"));
         }
 
         query = query.OrderBy(c => c.Name);
 
-        var pagedResult = await query
-            .Select(c => _mapper.Map<CategoryDto>(c))
+        return await query
+            .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
             .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id)
     {
-        var category = await _db.Categories
+        return await _db.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(i => i.Id == id);
-
-        return category == null ? null : _mapper.Map<CategoryDto>(category);
+            .Where(c => c.Id == id)
+            .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId)
     {
-        var items = await _db.Items
+        return await _db.Items
             .AsNoTracking()
-            .Include(i => i.Category)
-            .Include(i => i.Reviews)
             .Where(i => i.CategoryId == categoryId)
+            .ProjectTo<ItemDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        return items.Select(i =>
-        {
-            var dto = _mapper.Map<ItemDto>(i);
-            dto.CategoryName = i.Category?.Name ?? "Unknown";
-            dto.AverageRating = i.Reviews.Count != 0 ? i.Reviews.Average(r => r.Rating) : 0;
-            return dto;
-        });
     }
 
     public async Task<CategoryDto?> CreateCategoryAsync(CategoryCreateRequest request)
@@ -82,17 +71,23 @@ public class CategoryService : ICategoryService
             return null;
         }
 
-        var existing = await _db.Categories.AnyAsync(cat => cat.Name.ToLower() == request.Name.ToLower());
-        if (existing)
+        var name = request.Name.Trim();
+
+        var exists = await _db.Categories.AnyAsync(c => c.Name == name);
+        if (exists)
         {
             return null;
         }
 
-        var category = new Data.Entities.Category { Name = request.Name };
+        var category = new Data.Entities.Category { Name = name };
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
 
-        return _mapper.Map<CategoryDto>(category);
+        return await _db.Categories
+            .AsNoTracking()
+            .Where(c => c.Id == category.Id)
+            .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
+            .FirstAsync();
     }
 
     public async Task<bool> UpdateCategoryAsync(int id, CategoryUpdateRequest request)
@@ -108,7 +103,7 @@ public class CategoryService : ICategoryService
             return false;
         }
 
-        category.Name = request.Name;
+        category.Name = request.Name.Trim();
 
         await _db.SaveChangesAsync();
         return true;
@@ -117,7 +112,6 @@ public class CategoryService : ICategoryService
     public async Task<bool> DeleteCategoryAsync(int id)
     {
         var category = await _db.Categories.FindAsync(id);
-
         if (category == null)
         {
             return false;
