@@ -85,7 +85,13 @@ public class MappingProfile : Profile
 
     private void ConfigureUserMappings()
     {
-        CreateMap<ApplicationUser, ApplicationUserDto>();
+        CreateMap<ApplicationUser, ApplicationUserDto>()
+            .ForMember(dest => dest.Role,
+                opt => opt.MapFrom(src =>
+                    src.UserRoles
+                       .Select(ur => ur.Role.Name)
+                       .OrderBy(r => r)
+                       .FirstOrDefault() ?? DefaultUserRole));
     }
 
     private void ConfigureMediaMappings()
