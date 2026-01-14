@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.Stats;
@@ -20,63 +21,90 @@ public class StatsService : IStatsService
     public async Task<StatsDto> GetStatsAsync()
     {
         var topRatedItems = await _db.Items
-            .Where(i => i.Reviews.Count >= 3)
-            .OrderByDescending(i => i.Reviews.Average(r => r.Rating))
+            .AsNoTracking()
+            .Select(i => new
+            {
+                i.Id,
+                i.Title,
+                CategoryName = i.Category != null ? i.Category.Name : "Unknown",
+                ReviewCount = i.Reviews.Count,
+                AverageRating = i.Reviews.Any()
+                    ? i.Reviews.Average(r => r.Rating)
+                    : 0
+            })
+            .Where(i => i.ReviewCount >= 3)
+            .OrderByDescending(i => i.AverageRating)
             .Take(5)
             .Select(i => new ItemStatDto
             {
                 Id = i.Id,
                 Title = i.Title,
-                Category = i.Category!.Name,
-                AverageRating = i.Reviews.Average(r => r.Rating),
-                ReviewCount = i.Reviews.Count
-            }).ToListAsync();
+                Category = i.CategoryName,
+                AverageRating = i.AverageRating,
+                ReviewCount = i.ReviewCount
+            })
+            .ToListAsync();
 
         var mostReviewedItems = await _db.Items
-            .OrderByDescending(i => i.Reviews.Count)
+            .AsNoTracking()
+            .Select(i => new
+            {
+                i.Id,
+                i.Title,
+                CategoryName = i.Category != null ? i.Category.Name : "Unknown",
+                ReviewCount = i.Reviews.Count,
+                AverageRating = i.Reviews.Any()
+                    ? i.Reviews.Average(r => r.Rating)
+                    : 0
+            })
+            .OrderByDescending(i => i.ReviewCount)
             .Take(5)
             .Select(i => new ItemStatDto
             {
                 Id = i.Id,
                 Title = i.Title,
-                Category = i.Category!.Name,
-                AverageRating = i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0,
-                ReviewCount = i.Reviews.Count
-            }).ToListAsync();
+                Category = i.CategoryName,
+                AverageRating = i.AverageRating,
+                ReviewCount = i.ReviewCount
+            })
+            .ToListAsync();
 
         var topUsers = await _db.Users
-            .OrderByDescending(u => u.Reviews.Count)
+            .AsNoTracking()
+            .Select(u => new
+            {
+                u.Id,
+                u.DisplayName,
+                ReviewCount = u.Reviews.Count,
+                Role = u.UserRoles
+                    .Select(ur => ur.Role.Name)
+                    .OrderBy(r => r)
+                    .FirstOrDefault() ?? "User"
+            })
+            .OrderByDescending(u => u.ReviewCount)
             .Take(5)
             .Select(u => new UserStatDto
             {
                 UserId = u.Id,
                 DisplayName = u.DisplayName,
-                ReviewCount = u.Reviews.Count,
-                Role = u.UserRoles
-                   .Select(r => r.Role.Name)
-                   .FirstOrDefault() ?? "User"
-            }).ToListAsync();
-
-        var recentReviews = await _db.Reviews
-            .Include(r => r.User)
-            .Include(r => r.Item)
-            .OrderByDescending(r => r.CreatedAt)
-            .Take(5)
+                ReviewCount = u.ReviewCount,
+                Role = u.Role
+            })
             .ToListAsync();
 
-        var stats = new StatsDto
+        var recentReviews = await _db.Reviews
+            .AsNoTracking()
+            .OrderByDescending(r => r.CreatedAt)
+            .Take(5)
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        return new StatsDto
         {
             TopRatedItems = topRatedItems,
             MostReviewedItems = mostReviewedItems,
             TopReviewers = topUsers,
-            RecentReviews = recentReviews.Select(r =>
-            {
-                var dto = _mapper.Map<ReviewDto>(r);
-                dto.Author = r.User!.DisplayName;
-                return dto;
-            }).ToList()
+            RecentReviews = recentReviews
         };
-
-        return stats;
     }
 }

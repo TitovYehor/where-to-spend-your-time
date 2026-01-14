@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using WhereToSpendYourTime.Api.Models.Review;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Services.Stats;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -22,7 +22,7 @@ public class StatsServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Review, ReviewDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
