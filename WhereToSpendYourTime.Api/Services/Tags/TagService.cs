@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Pagination;
@@ -21,40 +22,37 @@ public class TagService : ITagService
 
     public async Task<IEnumerable<TagDto>> GetTagsAsync()
     {
-        var tags = await _db.Tags
+        return await _db.Tags
             .AsNoTracking()
-            .OrderBy(t => t.Name)
-            .Select(tag => _mapper.Map<TagDto>(tag))
+            .OrderBy(c => c.Name)
+            .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        return tags;
     }
 
     public async Task<PagedResult<TagDto>> GetPagedTagsAsync(TagFilterRequest filter)
     {
-        var query = _db.Tags.AsNoTracking().AsQueryable();
+        var query = _db.Tags.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            query = query.Where(c => c.Name.ToLower().Contains(filter.Search.ToLower()));
+            var search = filter.Search.Trim();
+            query = query.Where(t => EF.Functions.Like(t.Name, $"%{search}%"));
         }
 
-        query = query.OrderBy(c => c.Name);
+        query = query.OrderBy(t => t.Name);
 
-        var pagedResult = await query
-            .Select(c => _mapper.Map<TagDto>(c))
+        return await query
+            .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
     }
 
     public async Task<TagDto?> GetTagByIdAsync(int id)
     {
-        var tag = await _db.Tags
+        return await _db.Tags
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id == id);
-
-        return tag == null ? null : _mapper.Map<TagDto>(tag);
+            .Where(t => t.Id == id)
+            .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<TagDto?> CreateTagAsync(TagCreateRequest request)
@@ -64,18 +62,23 @@ public class TagService : ITagService
             return null;
         }
 
-        var existing = await _db.Tags.AnyAsync(t => t.Name.ToLower() == request.Name.ToLower());
-        if (existing)
+        var name = request.Name.Trim();
+
+        var exists = await _db.Tags.AnyAsync(t => t.Name == name);
+        if (exists)
         {
             return null;
         }
 
-        var tag = new Tag { Name = request.Name };
+        var tag = new Tag { Name = name };
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var dto = _mapper.Map<TagDto>(tag);
-        return dto;
+        return await _db.Tags
+            .AsNoTracking()
+            .Where(t => t.Id == tag.Id)
+            .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
+            .FirstAsync();
     }
 
     public async Task<bool> UpdateTagAsync(int id, TagUpdateRequest request)
@@ -91,7 +94,7 @@ public class TagService : ITagService
             return false;
         }
 
-        tag.Name = request.Name;
+        tag.Name = request.Name.Trim();
 
         await _db.SaveChangesAsync();
         return true;

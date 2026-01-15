@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Tags;
 using WhereToSpendYourTime.Data;
@@ -22,7 +23,7 @@ public class TagServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Tag, TagDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
