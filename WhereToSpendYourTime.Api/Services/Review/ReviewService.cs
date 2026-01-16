@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Pagination;
@@ -20,87 +21,68 @@ public class ReviewService : IReviewService
 
     public async Task<IEnumerable<ReviewDto>> GetReviewsForItemAsync(int itemId)
     {
-        var reviews = await _db.Reviews
-            .Include(r => r.User)
+        return await _db.Reviews
+            .AsNoTracking()
             .Where(r => r.ItemId == itemId)
             .OrderByDescending(r => r.CreatedAt)
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
     public async Task<PagedResult<ReviewDto>> GetPagedReviewsForItemAsync(int itemId, ReviewFilterRequest filter)
     {
         var query = _db.Reviews
             .AsNoTracking()
-            .AsQueryable()
-            .Include(r => r.User)
-            .Where(r => r.ItemId == itemId);
+            .Where(r => r.ItemId == itemId)
+            .OrderByDescending(r => r.CreatedAt);
 
-        query = query.OrderByDescending(r => r.CreatedAt);
-
-        var pagedResult = await query
-            .Select(r => _mapper.Map<ReviewDto>(r))
+        return await query
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
             .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
     }
 
     public async Task<PagedResult<ReviewDto>> GetPagedReviewsForUserAsync(string userId, ReviewFilterRequest filter)
     {
         var query = _db.Reviews
             .AsNoTracking()
-            .AsQueryable()
-            .Include(r => r.User)
-            .Where(r => r.UserId == userId);
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt);
 
-        query = query.OrderByDescending(r => r.CreatedAt);
-
-        var pagedResult = await query
-            .Select(r => _mapper.Map<ReviewDto>(r))
+        return await query
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
             .ToPagedResultAsync(filter.Page, filter.PageSize);
-
-        return pagedResult;
     }
 
-    public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
+    public async Task<ReviewDto?> GetMyReviewForItemAsync(string userId, int itemId)
     {
         var review = await _db.Reviews
-            .Include(r => r.User)
-            .Include(r => r.Item)
-            .FirstOrDefaultAsync(r => r.ItemId == itemId && r.UserId == userId);
+            .AsNoTracking()
+            .Where(r => r.ItemId == itemId && r.UserId == userId)
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
 
-        return _mapper.Map<ReviewDto>(review);
+        return review;
     }
 
     public async Task<ReviewDto?> GetByIdAsync(int id)
     {
         var review = await _db.Reviews
-            .Include(r => r.User)
-                .ThenInclude(u => u!.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-            .Include(r => r.Item)
-            .Include(r => r.Comments)
-                .ThenInclude(c => c.User)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .AsNoTracking()
+            .Where(r => r.Id == id)
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
 
-        if (review == null)
-        {
-            return null;
-        }
-
-        var dto = _mapper.Map<ReviewDto>(review);
-        return dto;
+        return review;
     }
 
     public async Task<(bool Success, ReviewDto? Review, string? Error)> CreateReviewAsync(string userId, ReviewCreateRequest request)
     {
-        bool hasReviewed = await _db.Reviews
+        var hasReviewed = await _db.Reviews
             .AnyAsync(r => r.ItemId == request.ItemId && r.UserId == userId);
 
         if (hasReviewed)
         {
-            return (false, null, "User already reviewed this item.");
+            return (false, null, "User already reviewed this item");
         }
 
         var review = new Data.Entities.Review
