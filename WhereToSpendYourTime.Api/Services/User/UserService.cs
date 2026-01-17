@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WhereToSpendYourTime.Api.Extensions;
-using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Pagination;
-using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -25,117 +24,83 @@ public class UserService : IUserService
     }
 
     public async Task<IEnumerable<ApplicationUserDto>> GetAllUsersAsync()
-    { 
-        var usersDto = await _db.Users
+    {
+        var users = await _db.Users
             .AsNoTracking()
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
             .OrderBy(u => u.DisplayName)
-            .Select(u => _mapper.Map<ApplicationUserDto>(u))
+            .ProjectTo<ApplicationUserDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        foreach (var userDto in usersDto)
-        {
-            var user = await _userManager.FindByIdAsync(userDto.Id);
-            var userRole = await _userManager.GetRolesAsync(user!);
-            userDto.Role = userRole?.FirstOrDefault();
-        }
-
-        return usersDto.OrderBy(u => u.Role);
+        return users.OrderBy(u => u.Role);
     }
 
     public async Task<PagedResult<ApplicationUserDto>> GetPagedUsersAsync(UserFilterRequest filter)
     {
-        var queryDto = from u in _db.Users.AsNoTracking()
-                       join ur in _db.UserRoles on u.Id equals ur.UserId
-                       join r in _db.Roles on ur.RoleId equals r.Id
-                       select new ApplicationUserDto
-                       {
-                           Id = u.Id,
-                           DisplayName = u.DisplayName,
-                           Email = u.Email,
-                           Role = r.Name
-                       };
-        
-        if (!string.IsNullOrEmpty(filter.Role))
+        var query = _db.Users
+            .AsNoTracking()
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Role))
         {
-            queryDto = queryDto.Where(u => u.Role!.ToLower() == filter.Role.ToLower());
+            var role = filter.Role.Trim();
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == role));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
-            queryDto = queryDto.Where(u => u.DisplayName.ToLower().Contains(filter.Search.ToLower()));
+            var search = filter.Search.Trim().ToLower();
+            query = query.Where(u => u.DisplayName.ToLower().Contains(search));
         }
 
-        queryDto = queryDto.OrderBy(u => u.Role).ThenBy(u => u.DisplayName);
+        query = query.OrderBy(u => u.UserRoles.Select(ur => ur.Role.Name).FirstOrDefault())
+                     .ThenBy(u => u.DisplayName);
 
-        return await queryDto.ToPagedResultAsync(filter.Page, filter.PageSize);
+        var pagedResult = await query
+            .ProjectTo<ApplicationUserDto>(_mapper.ConfigurationProvider)
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
+
+        return pagedResult;
     }
 
     public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)
     {
-        var user = await _db.Users
+        var userDto = await _db.Users
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
             .Include(u => u.Reviews)
                 .ThenInclude(r => r.Item)
             .Include(u => u.Comments)
                 .ThenInclude(c => c.Review)
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .ProjectTo<ApplicationUserDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
 
-        if (user == null)
-            return null;
-
-        var dto = _mapper.Map<ApplicationUserDto>(user);
-        var userRoles = await _userManager.GetRolesAsync(user);
-        dto.Role = userRoles?.FirstOrDefault();
-
-        dto.Reviews = user.Reviews
-            .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReviewDto
-            {
-                Id = r.Id,
-                Title = r.Title,
-                Content = r.Content,
-                Rating = r.Rating,
-                CreatedAt = r.CreatedAt,
-                Author = user.DisplayName
-            }).ToList();
-
-        dto.Comments = user.Comments
-            .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CommentDto
-            {
-                Id = c.Id,
-                Content = c.Content,
-                Author = user.DisplayName,
-                CreatedAt = c.CreatedAt,
-                ReviewId = c.ReviewId
-            }).ToList();
-
-        if (!isSelf)
+        if (userDto != null && !isSelf)
         {
-            dto.Email = null;
+            userDto.Email = null;
         }
 
-        return dto;
+        return userDto;
     }
 
     public async Task<IEnumerable<string?>> GetRolesAsync()
     {
-        var roles = await _db.Roles
+        return await _db.Roles
             .AsNoTracking()
             .OrderBy(r => r.Name)
             .Select(r => r.Name)
             .ToListAsync();
-        return roles;
     }
 
     public async Task<bool> UpdateProfileAsync(string userId, string displayName)
     {
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            return false;
-        }
-
-        if (user.Email == "demo@example.com")
+        if (user == null || user.Email == "demo@example.com")
         {
             return false;
         }
@@ -155,7 +120,7 @@ public class UserService : IUserService
 
         if (user.Email == "demo@example.com")
         {
-            return (false, new[] { new IdentityError { Description = "Password change is disabled for the demo account." } });
+            return (false, new[] { new IdentityError { Description = "Password change is disabled for the demo account" } });
         }
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
@@ -164,20 +129,14 @@ public class UserService : IUserService
 
     public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
     {
-        if (string.IsNullOrEmpty(newRole))
+        if (string.IsNullOrWhiteSpace(newRole))
         {
             return false;
         }
 
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (user == null || await _userManager.IsInRoleAsync(user, "Admin"))
         {
-            return false;
-        }
-
-        var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-        if (isAdmin)
-        { 
             return false;
         }
 
@@ -191,20 +150,14 @@ public class UserService : IUserService
             }
         }
 
-        var result = await _userManager.AddToRoleAsync(user, newRole);
-        return result.Succeeded;
+        var addResult = await _userManager.AddToRoleAsync(user, newRole);
+        return addResult.Succeeded;
     }
 
     public async Task<bool> DeleteUserAsync(string userId)
-    { 
+    {
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            return false;
-        }
-
-        var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-        if (isAdmin)
+        if (user == null || await _userManager.IsInRoleAsync(user, "Admin"))
         {
             return false;
         }
