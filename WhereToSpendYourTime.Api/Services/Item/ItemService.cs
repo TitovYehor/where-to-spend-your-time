@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Api.Models.Pagination;
@@ -13,6 +12,9 @@ namespace WhereToSpendYourTime.Api.Services.Item;
 
 public class ItemService : IItemService
 {
+    private const double RatingWeight = 2.0;
+    private const double ReviewWeight = 0.5;
+
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
 
@@ -24,12 +26,7 @@ public class ItemService : IItemService
 
     public async Task<PagedResult<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter)
     {
-        const double ratingWeight = 2.0;
-        const double reviewWeight = 0.5;
-
-        var query = _db.Items
-            .AsNoTracking()
-            .AsQueryable();
+        var query = _db.Items.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
@@ -44,86 +41,78 @@ public class ItemService : IItemService
 
         if (filter.TagsIds?.Any() == true)
         {
-            query = query.Where(i => filter.TagsIds.All(tagId => i.ItemTags.Any(it => it.TagId == tagId)));
+            query = query.Where(i =>
+                filter.TagsIds.All(tagId =>
+                    i.ItemTags.Any(it => it.TagId == tagId)));
         }
-
-        Expression<Func<Data.Entities.Item, double>> avgRatingExpr = i =>
-            i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0;
 
         query = filter.SortBy?.ToLower() switch
         {
-            "title" => filter.Descending ? query.OrderByDescending(i => i.Title) : query.OrderBy(i => i.Title),
+            "title" => filter.Descending
+                ? query.OrderByDescending(i => i.Title)
+                : query.OrderBy(i => i.Title),
 
             "rating" => filter.Descending
-                ? query.OrderByDescending(avgRatingExpr).ThenByDescending(i => i.Reviews.Count)
-                : query.OrderBy(avgRatingExpr).ThenBy(i => i.Reviews.Count),
+                ? query.OrderByDescending(i =>
+                    i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0)
+                    .ThenByDescending(i => i.Reviews.Count)
+                : query.OrderBy(i =>
+                    i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0)
+                    .ThenBy(i => i.Reviews.Count),
 
             "popularity" => filter.Descending
                 ? query.OrderByDescending(i =>
-                    (i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * ratingWeight
-                    + i.Reviews.Count * reviewWeight)
+                    ((i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * RatingWeight)
+                    + i.Reviews.Count * ReviewWeight)
                 : query.OrderBy(i =>
-                    (i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * ratingWeight
-                    + i.Reviews.Count * reviewWeight),
+                    ((i.Reviews.Select(r => (double?)r.Rating).Average() ?? 0) * RatingWeight)
+                    + i.Reviews.Count * ReviewWeight),
 
             _ => query.OrderByDescending(i => i.Id)
         };
 
-        var dtoQuery = query.ProjectTo<ItemDto>(_mapper.ConfigurationProvider);
-
-        return await dtoQuery.ToPagedResultAsync(filter.Page, filter.PageSize);
+        return await query
+            .ProjectTo<ItemDto>(_mapper.ConfigurationProvider)
+            .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<ItemDto?> GetByIdAsync(int id)
     {
-        var item = await _db.Items
-            .Include(i => i.Category)
-            .Include(i => i.Reviews)
-            .Include(i => i.ItemTags)
-                .ThenInclude(it => it.Tag)
-            .Include(i => i.Media)
-            .FirstOrDefaultAsync(i => i.Id == id);
-
-        if (item == null)
-        {
-            return null;
-        }
-
-        var dto = _mapper.Map<ItemDto>(item);
-        dto.CategoryName = item.Category?.Name ?? "Unknown";
-        dto.AverageRating = item.Reviews.Count != 0 ? item.Reviews.Average(r => r.Rating) : 0;
-        dto.Media = dto.Media.OrderByDescending(m => m.Type).ThenBy(m => m.Id).ToList();
-        return dto;
+        return await _db.Items
+            .AsNoTracking()
+            .Where(i => i.Id == id)
+            .ProjectTo<ItemDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<TagDto?> AddTagForItemAsync(int id, string tagName)
     {
-        var item = await _db.Items
-            .Include(i => i.ItemTags)
-            .ThenInclude(it => it.Tag)
-            .FirstOrDefaultAsync(i => i.Id == id);
-
-        if (item == null)
-        {
-            return null;
-        }
-
         tagName = tagName.Trim();
         if (string.IsNullOrWhiteSpace(tagName))
         {
             return null;
         }
 
-        var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
+        var item = await _db.Items
+            .Include(i => i.ItemTags)
+            .FirstOrDefaultAsync(i => i.Id == id);
+
+        if (item == null)
+        {
+            return null;
+        }
+
+        var tag = await _db.Tags
+            .FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
+
         if (tag == null)
         {
             tag = new Tag { Name = tagName };
-            await _db.Tags.AddAsync(tag);
+            _db.Tags.Add(tag);
             await _db.SaveChangesAsync();
         }
 
-        bool alreadyTagged = item.ItemTags.Any(it => it.TagId == tag.Id);
-        if (alreadyTagged)
+        if (item.ItemTags.Any(it => it.TagId == tag.Id))
         {
             return null;
         }
@@ -135,13 +124,17 @@ public class ItemService : IItemService
         });
 
         await _db.SaveChangesAsync();
-
-        var tagDto = _mapper.Map<TagDto>(tag);
-        return tagDto;
+        return _mapper.Map<TagDto>(tag);
     }
 
     public async Task<bool> RemoveTagFromItemAsync(int id, string tagName)
     {
+        tagName = tagName.Trim();
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return false;
+        }
+
         var item = await _db.Items
             .Include(i => i.ItemTags)
                 .ThenInclude(it => it.Tag)
@@ -152,33 +145,24 @@ public class ItemService : IItemService
             return false;
         }
 
-        tagName = tagName.Trim();
-        if (string.IsNullOrWhiteSpace(tagName))
-        {
-            return false;
-        }
+        var itemTag = item.ItemTags
+            .FirstOrDefault(it => it.Tag.Name.ToLower() == tagName.ToLower());
 
-        var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
-        if (tag == null)
-        {
-            return false;
-        }
-
-        var itemTag = item.ItemTags.FirstOrDefault(it => it.TagId == tag.Id);
         if (itemTag == null)
         {
             return false;
         }
 
         item.ItemTags.Remove(itemTag);
-
         await _db.SaveChangesAsync();
         return true;
     }
 
     public async Task<ItemDto?> CreateAsync(ItemCreateRequest request)
     {
-        var categoryExists = await _db.Categories.AnyAsync(c => c.Id == request.CategoryId);
+        var categoryExists = await _db.Categories
+            .AnyAsync(c => c.Id == request.CategoryId);
+
         if (!categoryExists)
         {
             return null;
@@ -194,10 +178,7 @@ public class ItemService : IItemService
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var dto = _mapper.Map<ItemDto>(item);
-        dto.CategoryName = (await _db.Categories.FindAsync(item.CategoryId))?.Name ?? "Unknown";
-        dto.AverageRating = 0;
-        return dto;
+        return _mapper.Map<ItemDto>(item);
     }
 
     public async Task<bool> UpdateAsync(int id, ItemUpdateRequest request)
@@ -208,7 +189,9 @@ public class ItemService : IItemService
             return false;
         }
 
-        var categoryExists = await _db.Categories.AnyAsync(c => c.Id == request.CategoryId);
+        var categoryExists = await _db.Categories
+            .AnyAsync(c => c.Id == request.CategoryId);
+
         if (!categoryExists)
         {
             return false;
