@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using WhereToSpendYourTime.Api.Models.Comment;
-using WhereToSpendYourTime.Api.Models.Review;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Api.Services.User;
 using WhereToSpendYourTime.Data;
@@ -31,11 +30,7 @@ public class UserServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<ApplicationUser, ApplicationUserDto>();
-            cfg.CreateMap<Review, ReviewDto>()
-                .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User != null ? src.User.DisplayName : null));
-            cfg.CreateMap<Comment, CommentDto>()
-                .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User!.DisplayName));
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
@@ -45,15 +40,28 @@ public class UserServiceTests
     [Fact]
     public async Task GetAllUsersAsync_ReturnsUsersWithRoles()
     {
+        var role1 = new ApplicationRole { Id = "1", Name = "User" };
+        var role2 = new ApplicationRole { Id = "2", Name = "Admin" };
+        _db.Roles.AddRange(role1, role2);
+
         var user1 = new ApplicationUser { Id = "1", DisplayName = "Alice", Email = "a@test.com" };
         var user2 = new ApplicationUser { Id = "2", DisplayName = "Bob", Email = "b@test.com" };
+        user1.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user1,
+            Role = role1,
+            UserId = user1.Id,
+            RoleId = role1.Id
+        });
+        user2.UserRoles.Add(new ApplicationUserRole
+        {
+            User = user2,
+            Role = role2,
+            UserId = user2.Id,
+            RoleId = role2.Id
+        });
         _db.Users.AddRange(user1, user2);
         await _db.SaveChangesAsync();
-
-        _userManagerMock.Setup(m => m.FindByIdAsync("1")).ReturnsAsync(user1);
-        _userManagerMock.Setup(m => m.FindByIdAsync("2")).ReturnsAsync(user2);
-        _userManagerMock.Setup(m => m.GetRolesAsync(user1)).ReturnsAsync(new List<string> { "User" });
-        _userManagerMock.Setup(m => m.GetRolesAsync(user2)).ReturnsAsync(new List<string> { "Admin" });
 
         var result = (await _service.GetAllUsersAsync()).ToList();
 

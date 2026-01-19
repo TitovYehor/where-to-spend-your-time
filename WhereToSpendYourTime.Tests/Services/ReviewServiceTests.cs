@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Api.Services.Review;
@@ -23,7 +24,7 @@ public class ReviewServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Review, ReviewDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
@@ -273,7 +274,7 @@ public class ReviewServiceTests
 
         Assert.False(result.Success);
         Assert.Null(result.Review);
-        Assert.Equal("User already reviewed this item.", result.Error);
+        Assert.Equal("User already reviewed this item", result.Error);
     }
 
     [Fact]
