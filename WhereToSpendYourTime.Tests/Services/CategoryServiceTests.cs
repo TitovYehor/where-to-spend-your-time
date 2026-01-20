@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Category;
-using WhereToSpendYourTime.Api.Models.Item;
-using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -27,9 +26,7 @@ public class CategoryServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Category, CategoryDto>();
-            cfg.CreateMap<Item, ItemDto>();
-            cfg.CreateMap<Media, MediaDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
@@ -146,7 +143,7 @@ public class CategoryServiceTests
 
     [Fact]
     public async Task GetItemsByCategoryIdAsync_ReturnsItems_WhenCategoryHasItems()
-    { 
+    {
         var category = new Category { Name = "Cartoons" };
         var item = new Item { Title = "Murphy Law", Category = category };
         _db.Items.Add(item);
@@ -187,7 +184,7 @@ public class CategoryServiceTests
     public async Task UpdateCategoryAsync_ReturnsFalse_WhenNotFound()
     {
         var result = await _service.UpdateCategoryAsync(123, new CategoryUpdateRequest { Name = "NewName" });
-         
+
         Assert.False(result);
     }
 

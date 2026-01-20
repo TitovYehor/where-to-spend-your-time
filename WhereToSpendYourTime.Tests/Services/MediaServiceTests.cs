@@ -5,6 +5,7 @@ using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Media;
 using WhereToSpendYourTime.Api.Services.Media;
 using WhereToSpendYourTime.Data;
@@ -29,7 +30,7 @@ public class MediaServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Data.Entities.Media, MediaDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 

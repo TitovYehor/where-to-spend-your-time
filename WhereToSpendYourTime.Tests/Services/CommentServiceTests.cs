@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Services.Comment;
@@ -23,8 +24,7 @@ public class CommentServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Comment, CommentDto>()
-                .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User != null ? src.User.DisplayName : null));
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 

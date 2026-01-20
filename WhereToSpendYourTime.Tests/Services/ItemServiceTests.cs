@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Item;
-using WhereToSpendYourTime.Api.Models.Media;
-using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Item;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
@@ -24,9 +23,7 @@ public class ItemServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Item, ItemDto>();
-            cfg.CreateMap<Tag, TagDto>();
-            cfg.CreateMap<Media, MediaDto>();
+            cfg.AddProfile<MappingProfile>();
         });
         _mapper = config.CreateMapper();
 
