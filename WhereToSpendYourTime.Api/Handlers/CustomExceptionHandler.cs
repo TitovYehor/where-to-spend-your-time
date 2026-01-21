@@ -1,39 +1,52 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WhereToSpendYourTime.Api.Handlers;
 
 public class CustomExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<CustomExceptionHandler> _logger;
+    private readonly IProblemDetailsService _problemDetailsService;
 
-    public CustomExceptionHandler(ILogger<CustomExceptionHandler> logger)
+    public CustomExceptionHandler(
+        ILogger<CustomExceptionHandler> logger,
+        IProblemDetailsService problemDetailsService)
     {
-        this._logger = logger;
+        _logger = logger;
+        _problemDetailsService = problemDetailsService;
     }
 
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Unhandled exception occurred at {Time}", DateTime.UtcNow);
+        _logger.LogError(exception, "Unhandled exception occurred");
 
-        httpContext.Response.StatusCode = exception switch
+        var (statusCode, title) = exception switch
         {
-            KeyNotFoundException => StatusCodes.Status404NotFound,
-            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
-            _ => StatusCodes.Status500InternalServerError
+            KeyNotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
+            _ => (StatusCodes.Status500InternalServerError, "Internal server error")
         };
 
-        httpContext.Response.ContentType = "application/json";
-
-        var response = new
+        var problemDetails = new ProblemDetails
         {
-            error = exception.Message,
-            type = exception.GetType().Name
+            Status = statusCode,
+            Title = title,
+            Detail = exception.Message,
+            Instance = httpContext.Request.Path
         };
 
-        var json = JsonSerializer.Serialize(response);
-        await httpContext.Response.WriteAsync(json, cancellationToken);
+        httpContext.Response.StatusCode = statusCode;
 
-        return true;
+        return await _problemDetailsService.TryWriteAsync(
+            new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                ProblemDetails = problemDetails,
+                Exception = exception
+            });
     }
 }
