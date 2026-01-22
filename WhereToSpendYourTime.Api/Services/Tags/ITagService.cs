@@ -9,11 +9,11 @@ public interface ITagService
 
     Task<PagedResult<TagDto>> GetPagedTagsAsync(TagFilterRequest filter);
 
-    Task<TagDto?> GetTagByIdAsync(int id);
+    Task<TagDto> GetTagByIdAsync(int id);
 
-    Task<TagDto?> CreateTagAsync(TagCreateRequest request);
+    Task<TagDto> CreateTagAsync(TagCreateRequest request);
 
-    Task<bool> UpdateTagAsync(int id, TagUpdateRequest request);
+    Task UpdateTagAsync(int id, TagUpdateRequest request);
 
-    Task<bool> DeleteTagAsync(int id);
+    Task DeleteTagAsync(int id);
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Tags;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Tags;
@@ -46,28 +47,28 @@ public class TagService : ITagService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
-    public async Task<TagDto?> GetTagByIdAsync(int id)
+    public async Task<TagDto> GetTagByIdAsync(int id)
     {
         return await _db.Tags
             .AsNoTracking()
             .Where(t => t.Id == id)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new TagNotFoundException(id);
     }
 
-    public async Task<TagDto?> CreateTagAsync(TagCreateRequest request)
+    public async Task<TagDto> CreateTagAsync(TagCreateRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
-            return null;
+            throw new InvalidTagException("Tag name cannot be empty");
         }
 
         var name = request.Name.Trim();
 
-        var exists = await _db.Tags.AnyAsync(t => t.Name == name);
-        if (exists)
+        if (await _db.Tags.AnyAsync(t => t.Name == name))
         {
-            return null;
+            throw new TagAlreadyExistsException(name);
         }
 
         var tag = new Tag { Name = name };
@@ -81,36 +82,29 @@ public class TagService : ITagService
             .FirstAsync();
     }
 
-    public async Task<bool> UpdateTagAsync(int id, TagUpdateRequest request)
+    public async Task UpdateTagAsync(int id, TagUpdateRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
-            return false;
+            throw new InvalidTagException("Tag name cannot be empty");
         }
 
         var tag = await _db.Tags.FindAsync(id);
         if (tag == null)
         {
-            return false;
+            throw new TagNotFoundException(id);
         }
 
         tag.Name = request.Name.Trim();
 
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> DeleteTagAsync(int id)
+    public async Task DeleteTagAsync(int id)
     {
-        var tag = await _db.Tags.FindAsync(id);
-
-        if (tag == null)
-        {
-            return false;
-        }
+        var tag = await _db.Tags.FindAsync(id) ?? throw new TagNotFoundException(id);
 
         _db.Tags.Remove(tag);
         await _db.SaveChangesAsync();
-        return true;
     }
 }
