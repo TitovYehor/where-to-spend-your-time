@@ -13,31 +13,28 @@ public class TagsController : ControllerBase
 
     public TagsController(ITagService tagService)
     {
-        this._tagService = tagService;        
+        this._tagService = tagService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTags()
-    { 
+    public async Task<ActionResult<IEnumerable<TagDto>>> GetTags()
+    {
         var tags = await _tagService.GetTagsAsync();
-
         return Ok(tags);
     }
 
     [HttpGet("paged")]
-    public async Task<IActionResult> GetPagedTags([FromQuery] TagFilterRequest filter)
+    public async Task<ActionResult<Models.Pagination.PagedResult<TagDto>>> GetPagedTags([FromQuery] TagFilterRequest filter)
     {
         var tags = await _tagService.GetPagedTagsAsync(filter);
-
         return Ok(tags);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTagById(int id)
+    public async Task<ActionResult<TagDto>> GetTagById(int id)
     {
         var tag = await _tagService.GetTagByIdAsync(id);
-        
-        return tag == null ? NotFound() : Ok(tag);
+        return Ok(tag);
     }
 
     [Authorize(Roles = "Admin")]
@@ -45,24 +42,22 @@ public class TagsController : ControllerBase
     public async Task<IActionResult> CreateTag([FromBody] TagCreateRequest request)
     {
         var tag = await _tagService.CreateTagAsync(request);
-        return tag == null
-            ? BadRequest("Invalid tag data or tag already exists")
-            : CreatedAtAction(nameof(GetTagById), new { id = tag.Id }, tag);
+        return CreatedAtAction(nameof(GetTagById), new { id = tag.Id }, tag);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTag(int id, TagUpdateRequest request)
+    public async Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request)
     {
-        var result = await _tagService.UpdateTagAsync(id, request);
-        return result ? NoContent() : BadRequest("Invalid id or tag data");
+        await _tagService.UpdateTagAsync(id, request);
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTag(int id)
     {
-        var result = await _tagService.DeleteTagAsync(id);
-        return result ? NoContent() : NotFound();
+        await _tagService.DeleteTagAsync(id);
+        return NoContent();
     }
 }

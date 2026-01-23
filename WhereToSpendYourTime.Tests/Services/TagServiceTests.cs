@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Tags;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Tags;
 using WhereToSpendYourTime.Api.Services.Tags;
@@ -131,36 +132,38 @@ public class TagServiceTests
 
         var result = await _service.GetTagByIdAsync(tag.Id);
 
-        Assert.NotNull(result);
-        Assert.Equal("Test", result!.Name);
+        Assert.Equal("Test", result.Name);
     }
 
     [Fact]
-    public async Task GetTagByIdAsync_ReturnsNull_WhenNotExists()
+    public async Task GetTagByIdAsync_ThrowsTagNotFoundException_WhenNotExists()
     {
-        var result = await _service.GetTagByIdAsync(999);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<TagNotFoundException>(() =>
+            _service.GetTagByIdAsync(999)
+        );
     }
 
     [Fact]
-    public async Task CreateTagAsync_ReturnsNull_WhenNameIsEmpty()
+    public async Task CreateTagAsync_ThrowsInvalidTagException_WhenNameIsEmpty()
     {
         var request = new TagCreateRequest { Name = "" };
-        var result = await _service.CreateTagAsync(request);
 
-        Assert.Null(result);
+        await Assert.ThrowsAsync<InvalidTagException>(() =>
+            _service.CreateTagAsync(request)
+        );
     }
 
     [Fact]
-    public async Task CreateTagAsync_ReturnsNull_WhenDuplicateExists()
+    public async Task CreateTagAsync_ThrowsTagAlreadyExistsException_WhenDuplicateExists()
     {
         _db.Tags.Add(new Tag { Name = "Duplicate" });
         await _db.SaveChangesAsync();
 
         var request = new TagCreateRequest { Name = "Duplicate" };
-        var result = await _service.CreateTagAsync(request);
 
-        Assert.Null(result);
+        await Assert.ThrowsAsync<TagAlreadyExistsException>(() =>
+            _service.CreateTagAsync(request)
+        );
     }
 
     [Fact]
@@ -170,23 +173,24 @@ public class TagServiceTests
 
         var result = await _service.CreateTagAsync(request);
 
-        Assert.NotNull(result);
-        Assert.Equal("NewTag", result!.Name);
+        Assert.Equal("NewTag", result.Name);
         Assert.True(await _db.Tags.AnyAsync(t => t.Name == "NewTag"));
     }
 
     [Fact]
-    public async Task UpdateTagAsync_ReturnsFalse_WhenNameEmpty()
+    public async Task UpdateTagAsync_ThrowsInvalidTagException_WhenNameEmpty()
     {
-        var result = await _service.UpdateTagAsync(1, new TagUpdateRequest { Name = "" });
-        Assert.False(result);
+        await Assert.ThrowsAsync<InvalidTagException>(() =>
+            _service.UpdateTagAsync(1, new TagUpdateRequest { Name = "" })
+        );
     }
 
     [Fact]
-    public async Task UpdateTagAsync_ReturnsFalse_WhenNotFound()
+    public async Task UpdateTagAsync_ThrowsTagNotFoundException_WhenNotFound()
     {
-        var result = await _service.UpdateTagAsync(999, new TagUpdateRequest { Name = "New" });
-        Assert.False(result);
+        await Assert.ThrowsAsync<TagNotFoundException>(() =>
+            _service.UpdateTagAsync(999, new TagUpdateRequest { Name = "New" })
+        );
     }
 
     [Fact]
@@ -196,30 +200,29 @@ public class TagServiceTests
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var result = await _service.UpdateTagAsync(tag.Id, new TagUpdateRequest { Name = "Updated" });
+        await _service.UpdateTagAsync(tag.Id, new TagUpdateRequest { Name = "Updated" });
 
-        Assert.True(result);
         var updated = await _db.Tags.FindAsync(tag.Id);
         Assert.Equal("Updated", updated!.Name);
     }
 
     [Fact]
-    public async Task DeleteTagAsync_ReturnsFalse_WhenNotFound()
+    public async Task DeleteTagAsync_ThrowsTagNotFoundException_WhenNotFound()
     {
-        var result = await _service.DeleteTagAsync(123);
-        Assert.False(result);
+        await Assert.ThrowsAsync<TagNotFoundException>(() =>
+            _service.DeleteTagAsync(123)
+        );
     }
 
     [Fact]
-    public async Task DeleteTagAsync_Deletes_WhenFound()
+    public async Task DeleteTagAsync_Deletes_WhenExists()
     {
         var tag = new Tag { Name = "DeleteMe" };
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteTagAsync(tag.Id);
+        await _service.DeleteTagAsync(tag.Id);
 
-        Assert.True(result);
         Assert.False(await _db.Tags.AnyAsync(t => t.Id == tag.Id));
     }
 }
