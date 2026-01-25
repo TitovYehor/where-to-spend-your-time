@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Categories;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Services.Category;
@@ -130,15 +131,15 @@ public class CategoryServiceTests
 
         var categoryDto = await _service.GetByIdAsync(category.Id);
 
-        Assert.NotNull(categoryDto);
         Assert.Equal(category.Name, categoryDto?.Name);
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    public async Task GetByIdAsync_ThrowsCategoryNotFoundException_WhenNotExists()
     {
-        var result = await _service.GetByIdAsync(999);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<CategoryNotFoundException>(() =>
+            _service.GetByIdAsync(999)
+        );
     }
 
     [Fact]
@@ -162,30 +163,68 @@ public class CategoryServiceTests
 
         var result = await _service.CreateCategoryAsync(request);
 
-        Assert.NotNull(result);
         Assert.Equal(request.Name, result.Name);
         Assert.True(await _db.Categories.AnyAsync(c => c.Name == request.Name));
     }
 
     [Fact]
-    public async Task UpdateCategoryAsync_Updates_WhenExists()
+    public async Task CreateCategoryAsync_ThrowsInvalidCategoryException_WhenNameIsEmpty()
+    {
+        var request = new CategoryCreateRequest { Name = "" };
+
+        await Assert.ThrowsAsync<InvalidCategoryException>(() =>
+            _service.CreateCategoryAsync(request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateCategoryAsync_ThrowsCategoryAlreadyExistsException_WhenDuplicateExists()
+    {
+        _db.Categories.Add(new Category { Name = "Duplicate" });
+        await _db.SaveChangesAsync();
+
+        var request = new CategoryCreateRequest { Name = "Duplicate" };
+
+        await Assert.ThrowsAsync<CategoryAlreadyExistsException>(() =>
+            _service.CreateCategoryAsync(request)
+        );
+    }
+
+    [Fact]
+    public async Task UpdateCategoryAsync_Updates_WhenValid()
     {
         var category = new Category { Name = "Old" };
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
 
-        var updated = await _service.UpdateCategoryAsync(category.Id, new CategoryUpdateRequest { Name = "New" });
+        await _service.UpdateCategoryAsync(category.Id, new CategoryUpdateRequest { Name = "New" });
 
-        Assert.True(updated);
-        Assert.True(await _db.Categories.AnyAsync(c => c.Name == "New"));
+        var updated = await _db.Categories.FindAsync(category.Id);
+        Assert.Equal("New", updated!.Name);
     }
 
     [Fact]
-    public async Task UpdateCategoryAsync_ReturnsFalse_WhenNotFound()
+    public async Task UpdateCategoryAsync_ThrowsInvalidCategoryException_WhenNameEmpty()
     {
-        var result = await _service.UpdateCategoryAsync(123, new CategoryUpdateRequest { Name = "NewName" });
+        await Assert.ThrowsAsync<InvalidCategoryException>(() =>
+            _service.UpdateCategoryAsync(1, new CategoryUpdateRequest { Name = "" })
+        );
+    }
 
-        Assert.False(result);
+    [Fact]
+    public async Task UpdateCategoryAsync_ThrowsCategoryNotFoundException_WhenNotFound()
+    {
+        await Assert.ThrowsAsync<CategoryNotFoundException>(() =>
+            _service.UpdateCategoryAsync(999, new CategoryUpdateRequest { Name = "New" })
+        );
+    }
+
+    [Fact]
+    public async Task DeleteCategoryAsync_ThrowsCategoryNotFoundException_WhenNotFound()
+    {
+        await Assert.ThrowsAsync<CategoryNotFoundException>(() =>
+            _service.DeleteCategoryAsync(123)
+        );
     }
 
     [Fact]
@@ -195,16 +234,8 @@ public class CategoryServiceTests
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteCategoryAsync(category.Id);
+        await _service.DeleteCategoryAsync(category.Id);
 
-        Assert.True(result);
         Assert.False(await _db.Categories.AnyAsync(c => c.Name == "DeleteMe"));
-    }
-
-    [Fact]
-    public async Task DeleteCategoryAsync_ReturnsFalse_WhenNotFound()
-    {
-        var result = await _service.DeleteCategoryAsync(999);
-        Assert.False(result);
     }
 }

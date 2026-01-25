@@ -10,13 +10,13 @@ public interface ICategoryService
 
     Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(CategoryFilterRequest filter);
 
-    Task<CategoryDto?> GetByIdAsync(int id);
+    Task<CategoryDto> GetByIdAsync(int id);
 
     Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId);
-    
-    Task<CategoryDto?> CreateCategoryAsync(CategoryCreateRequest request);
-    
-    Task<bool> UpdateCategoryAsync(int id, CategoryUpdateRequest request);
-    
-    Task<bool> DeleteCategoryAsync(int id);
+
+    Task<CategoryDto> CreateCategoryAsync(CategoryCreateRequest request);
+
+    Task UpdateCategoryAsync(int id, CategoryUpdateRequest request);
+
+    Task DeleteCategoryAsync(int id);
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Categories;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Category;
 using WhereToSpendYourTime.Api.Models.Item;
@@ -46,13 +47,14 @@ public class CategoryService : ICategoryService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
-    public async Task<CategoryDto?> GetByIdAsync(int id)
+    public async Task<CategoryDto> GetByIdAsync(int id)
     {
         return await _db.Categories
             .AsNoTracking()
             .Where(c => c.Id == id)
             .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new CategoryNotFoundException(id);
     }
 
     public async Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId)
@@ -64,19 +66,15 @@ public class CategoryService : ICategoryService
             .ToListAsync();
     }
 
-    public async Task<CategoryDto?> CreateCategoryAsync(CategoryCreateRequest request)
+    public async Task<CategoryDto> CreateCategoryAsync(CategoryCreateRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return null;
-        }
+        ValidateCategory(request.Name);
 
         var name = request.Name.Trim();
 
-        var exists = await _db.Categories.AnyAsync(c => c.Name == name);
-        if (exists)
+        if (await _db.Categories.AnyAsync(c => c.Name == name))
         {
-            return null;
+            throw new CategoryAlreadyExistsException(name);
         }
 
         var category = new Data.Entities.Category { Name = name };
@@ -90,35 +88,34 @@ public class CategoryService : ICategoryService
             .FirstAsync();
     }
 
-    public async Task<bool> UpdateCategoryAsync(int id, CategoryUpdateRequest request)
+    public async Task UpdateCategoryAsync(int id, CategoryUpdateRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return false;
-        }
+        ValidateCategory(request.Name);
 
         var category = await _db.Categories.FindAsync(id);
         if (category == null)
         {
-            return false;
+            throw new CategoryNotFoundException(id);
         }
 
         category.Name = request.Name.Trim();
 
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> DeleteCategoryAsync(int id)
+    public async Task DeleteCategoryAsync(int id)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category == null)
-        {
-            return false;
-        }
+        var category = await _db.Categories.FindAsync(id) ?? throw new CategoryNotFoundException(id);
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync();
-        return true;
+    }
+
+    private static void ValidateCategory(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidCategoryException("Category name cannot be empty");
+        }
     }
 }
