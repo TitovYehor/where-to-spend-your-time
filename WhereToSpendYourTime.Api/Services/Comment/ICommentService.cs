@@ -1,5 +1,6 @@
 ﻿using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Pagination;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Comment;
 
@@ -11,9 +12,9 @@ public interface ICommentService
 
     Task<PagedResult<CommentDto>> GetPagedCommentsByUserIdAsync(string userId, CommentFilterRequest filter);
 
-    Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content);
+    Task<CommentDto> AddCommentAsync(int reviewId, string userId, string content);
 
-    Task<bool> UpdateCommentAsync(int commentId, string userId, string newContent);
+    Task UpdateCommentAsync(int commentId, string userId, string newContent);
 
-    Task<bool> DeleteCommentAsync(int commentId, string userId, bool isManager);
+    Task DeleteCommentAsync(int commentId, ApplicationUser user);
 }

@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Comments;
+using WhereToSpendYourTime.Api.Exceptions.Reviews;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Data;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Comment;
 
@@ -51,17 +54,17 @@ public class CommentService : ICommentService
         return await query.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
-    public async Task<CommentDto?> AddCommentAsync(int reviewId, string userId, string content)
+    public async Task<CommentDto> AddCommentAsync(int reviewId, string userId, string content)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
-            return null;
+            throw new InvalidCommentException("Comment content cannot be empty");
         }
 
         var reviewExists = await _db.Reviews.AnyAsync(r => r.Id == reviewId);
         if (!reviewExists)
         {
-            return null;
+            throw new ReviewNotFoundException(reviewId);
         }
 
         var comment = new Data.Entities.Comment
@@ -82,32 +85,44 @@ public class CommentService : ICommentService
             .FirstAsync();
     }
 
-    public async Task<bool> UpdateCommentAsync(int commentId, string userId, string newContent)
+    public async Task UpdateCommentAsync(int commentId, string userId, string newContent)
     {
-        var comment = await _db.Comments
-            .SingleOrDefaultAsync(c => c.Id == commentId);
-
-        if (comment == null || comment.UserId != userId)
+        if (string.IsNullOrWhiteSpace(newContent))
         {
-            return false;
+            throw new InvalidCommentException("Comment content cannot be empty");
+        }
+
+        var comment = await _db.Comments.SingleOrDefaultAsync(c => c.Id == commentId);
+
+        if (comment == null)
+        {
+            throw new CommentNotFoundException(commentId);
+        }
+        if (comment.UserId != userId)
+        {
+            throw new CommentForbiddenException();
         }
 
         comment.Content = newContent;
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> DeleteCommentAsync(int commentId, string userId, bool isManager)
+    public async Task DeleteCommentAsync(int commentId, ApplicationUser user)
     {
-        var comment = await _db.Comments.FindAsync(commentId);
+        var comment = await _db.Comments.FindAsync(commentId) ?? throw new CommentNotFoundException(commentId);
 
-        if (comment == null || (comment.UserId != userId && !isManager))
+        var isAdmin = await _db.UserRoles
+            .AnyAsync(r => r.UserId == user.Id && r.Role.Name == "Admin");
+
+        var isModerator = await _db.UserRoles
+            .AnyAsync(r => r.UserId == user.Id && r.Role.Name == "Moderator");
+
+        if (comment.UserId != user.Id && !isAdmin && !isModerator)
         {
-            return false;
+            throw new CommentForbiddenException();
         }
 
         _db.Comments.Remove(comment);
         await _db.SaveChangesAsync();
-        return true;
     }
 }
