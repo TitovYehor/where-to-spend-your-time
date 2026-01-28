@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Comments;
+using WhereToSpendYourTime.Api.Exceptions.Reviews;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Comment;
 using WhereToSpendYourTime.Api.Models.Pagination;
@@ -172,17 +174,17 @@ public class CommentServiceTests
 
         var result = await _service.AddCommentAsync(review.Id, user.Id, "Nice review");
 
-        Assert.NotNull(result);
-        Assert.Equal("Nice review", result!.Content);
+        Assert.Equal("Nice review", result.Content);
         Assert.Equal("Test User", result.Author);
         Assert.Single(_db.Comments);
     }
 
     [Fact]
-    public async Task AddCommentAsync_ReturnsNull_WhenReviewNotFound()
+    public async Task AddCommentAsync_ThrowsReviewNotFoundException_WhenReviewNotFound()
     {
-        var result = await _service.AddCommentAsync(123, "u", "bad");
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ReviewNotFoundException>(() =>
+            _service.AddCommentAsync(123, "u", "bad")
+        );
     }
 
     [Fact]
@@ -192,61 +194,111 @@ public class CommentServiceTests
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        var result = await _service.UpdateCommentAsync(comment.Id, "u123", "New");
+        await _service.UpdateCommentAsync(comment.Id, "u123", "New");
 
-        Assert.True(result);
-        Assert.Equal("New", (await _db.Comments.FirstAsync()).Content);
+        var updated = await _db.Comments.FirstAsync();
+        Assert.Equal("New", updated.Content);
     }
 
     [Fact]
-    public async Task UpdateCommentAsync_ReturnsFalse_WhenUserIsNotOwner()
+    public async Task UpdateCommentAsync_ThrowsCommentForbiddenException_WhenUserIsNotOwner()
     {
         var comment = new Comment { Content = "Protected", UserId = "owner" };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        var result = await _service.UpdateCommentAsync(comment.Id, "intruder", "Hacked");
+        await Assert.ThrowsAsync<CommentForbiddenException>(() =>
+            _service.UpdateCommentAsync(comment.Id, "intruder", "Hacked")
+        );
 
-        Assert.False(result);
-        Assert.Equal("Protected", (await _db.Comments.FirstAsync()).Content);
+        var unchanged = await _db.Comments.FirstAsync();
+        Assert.Equal("Protected", unchanged.Content);
     }
 
     [Fact]
     public async Task DeleteCommentAsync_DeletesComment_WhenOwner()
     {
-        var comment = new Comment { Content = "Delete me", UserId = "user" };
+        var user = await CreateUserAsync("user1");
+
+        var comment = new Comment { Content = "Delete me", UserId = user.Id };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteCommentAsync(comment.Id, "user", false);
+        await _service.DeleteCommentAsync(comment.Id, user);
 
-        Assert.True(result);
         Assert.Empty(_db.Comments);
     }
 
     [Fact]
     public async Task DeleteCommentAsync_DeletesComment_WhenAdmin()
     {
-        var comment = new Comment { Content = "Admin delete", UserId = "user" };
+        await AddRoleAsync("Admin");
+
+        var owner = await CreateUserAsync("owner");
+        var admin = await CreateUserAsync("admin");
+
+        await AssignRoleAsync(admin, "Admin");
+
+        var comment = new Comment { Content = "Admin delete", UserId = owner.Id };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteCommentAsync(comment.Id, "notOwner", true);
+        await _service.DeleteCommentAsync(comment.Id, admin);
 
-        Assert.True(result);
         Assert.Empty(_db.Comments);
     }
 
     [Fact]
-    public async Task DeleteCommentAsync_ReturnsFalse_WhenNotOwnerAndNotAdmin()
+    public async Task DeleteCommentAsync_DeletesComment_WhenModerator()
     {
-        var comment = new Comment { Content = "Blocked", UserId = "trueOwner" };
+        await AddRoleAsync("Moderator");
+
+        var owner = await CreateUserAsync("owner");
+        var moderator = await CreateUserAsync("mod");
+
+        await AssignRoleAsync(moderator, "Moderator");
+
+
+        var comment = new Comment { Content = "Blocked", UserId = owner.Id };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteCommentAsync(comment.Id, "intruder", false);
+        await _service.DeleteCommentAsync(comment.Id, moderator);
 
-        Assert.False(result);
-        Assert.Single(_db.Comments);
+        Assert.Empty(_db.Comments);
+    }
+
+    private async Task<ApplicationUser> CreateUserAsync(string id)
+    {
+        var user = new ApplicationUser { Id = id, UserName = id };
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+        return user;
+    }
+
+    private async Task AddRoleAsync(string roleName)
+    {
+        if (!await _db.Roles.AnyAsync(r => r.Name == roleName))
+        {
+            _db.Roles.Add(new ApplicationRole
+            {
+                Name = roleName,
+                NormalizedName = roleName.ToUpper()
+            });
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    private async Task AssignRoleAsync(ApplicationUser user, string roleName)
+    {
+        var role = await _db.Roles.FirstAsync(r => r.Name == roleName);
+
+        _db.UserRoles.Add(new ApplicationUserRole
+        {
+            UserId = user.Id,
+            RoleId = role.Id
+        });
+
+        await _db.SaveChangesAsync();
     }
 }
