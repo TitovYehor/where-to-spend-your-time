@@ -21,70 +21,58 @@ public class ReviewsController : ControllerBase
     }
 
     [HttpGet("items/{itemId}/reviews")]
-    public async Task<IActionResult> GetReviewsForItem(int itemId)
+    public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForItem(int itemId)
     {
         var reviews = await _reviewService.GetReviewsForItemAsync(itemId);
-
         return Ok(reviews);
     }
 
     [HttpGet("items/{itemId}/reviews/paged")]
-    public async Task<IActionResult> GetPagedReviewsForItem(int itemId, [FromQuery] ReviewFilterRequest filter)
+    public async Task<ActionResult<Models.Pagination.PagedResult<ReviewDto>>> GetPagedReviewsForItem(int itemId, [FromQuery] ReviewFilterRequest filter)
     {
         var pagedReviews = await _reviewService.GetPagedReviewsForItemAsync(itemId, filter);
-
         return Ok(pagedReviews);
     }
 
     [HttpGet("users/{userId}/reviews/paged")]
-    public async Task<IActionResult> GetPagedReviewsForUser(string userId, [FromQuery] ReviewFilterRequest filter)
+    public async Task<ActionResult<Models.Pagination.PagedResult<ReviewDto>>> GetPagedReviewsForUser(string userId, [FromQuery] ReviewFilterRequest filter)
     {
         var pagedReviews = await _reviewService.GetPagedReviewsForUserAsync(userId, filter);
-
         return Ok(pagedReviews);
     }
 
     [Authorize]
     [HttpGet("items/{itemId}/reviews/my")]
-    public async Task<IActionResult> GetMyReviewForItem(int itemId)
+    public async Task<ActionResult<ReviewDto>> GetMyReviewForItem(int itemId)
     {
         var user = await _userManager.GetUserAsync(User);
-
         var review = await _reviewService.GetMyReviewForItemAsync(user!.Id, itemId);
-
         return Ok(review);
     }
 
     [HttpGet("reviews/{id}")]
-    public async Task<IActionResult> GetReviewById(int id)
+    public async Task<ActionResult<ReviewDto>> GetReviewById(int id)
     {
         var review = await _reviewService.GetByIdAsync(id);
-        return review == null ? NotFound() : Ok(review);
+        return Ok(review);
     }
 
     [Authorize]
     [HttpPost("reviews")]
-    public async Task<IActionResult> CreateReview(ReviewCreateRequest request)
+    public async Task<IActionResult> CreateReview([FromBody] ReviewCreateRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
-
-        var (success, reviewDto, error) = await _reviewService.CreateReviewAsync(user!.Id, request);
-        if (!success)
-        {
-            return BadRequest(error);
-        }
-
-        return Ok(reviewDto);
+        var review = await _reviewService.CreateReviewAsync(user!.Id, request);
+        return CreatedAtAction(nameof(GetReviewById), new { id = review.Id }, review);
     }
 
     [Authorize]
     [HttpPut("reviews/{id}")]
-    public async Task<IActionResult> UpdateReview(int id, ReviewUpdateRequest request)
+    public async Task<IActionResult> UpdateReview(int id, [FromBody] ReviewUpdateRequest request)
     {
         var user = await _userManager.GetUserAsync(User);
-        var success = await _reviewService.UpdateReviewAsync(id, user!.Id, request);
-
-        return success ? NoContent() : Forbid();
+        await _reviewService.UpdateReviewAsync(id, user!.Id, request);
+        return NoContent();
     }
 
     [Authorize]
@@ -92,10 +80,7 @@ public class ReviewsController : ControllerBase
     public async Task<IActionResult> DeleteReview(int id)
     {
         var user = await _userManager.GetUserAsync(User);
-        var isAdmin = await _userManager.IsInRoleAsync(user!, "Admin");
-        var isModerator = await _userManager.IsInRoleAsync(user!, "Moderator");
-
-        var success = await _reviewService.DeleteReviewAsync(id, user!.Id, isAdmin || isModerator);
-        return success ? NoContent() : Forbid();
+        await _reviewService.DeleteReviewAsync(id, user!);
+        return NoContent();
     }
 }
