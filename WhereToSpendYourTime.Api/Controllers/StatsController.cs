@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WhereToSpendYourTime.Api.Models.Stats;
 using WhereToSpendYourTime.Api.Services.Stats;
 
 namespace WhereToSpendYourTime.Api.Controllers;
@@ -15,10 +16,9 @@ public class StatsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStats()
+    public async Task<ActionResult<StatsDto>> GetStats()
     {
         var stats = await _statsService.GetStatsAsync();
-
         return Ok(stats);
     }
 }
