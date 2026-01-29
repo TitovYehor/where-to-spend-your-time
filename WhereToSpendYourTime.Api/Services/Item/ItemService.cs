@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Categories;
+using WhereToSpendYourTime.Api.Exceptions.Items;
+using WhereToSpendYourTime.Api.Exceptions.Tags;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Api.Models.Pagination;
@@ -76,21 +79,22 @@ public class ItemService : IItemService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
-    public async Task<ItemDto?> GetByIdAsync(int id)
+    public async Task<ItemDto> GetByIdAsync(int id)
     {
         return await _db.Items
             .AsNoTracking()
             .Where(i => i.Id == id)
             .ProjectTo<ItemDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new ItemNotFoundException(id);
     }
 
-    public async Task<TagDto?> AddTagForItemAsync(int id, string tagName)
+    public async Task<TagDto> AddTagForItemAsync(int id, string tagName)
     {
         tagName = tagName.Trim();
         if (string.IsNullOrWhiteSpace(tagName))
         {
-            return null;
+            throw new InvalidTagException("Tag name cannot be empty");
         }
 
         var item = await _db.Items
@@ -99,7 +103,7 @@ public class ItemService : IItemService
 
         if (item == null)
         {
-            return null;
+            throw new ItemNotFoundException(id);
         }
 
         var tag = await _db.Tags
@@ -114,7 +118,7 @@ public class ItemService : IItemService
 
         if (item.ItemTags.Any(it => it.TagId == tag.Id))
         {
-            return null;
+            throw new ItemTagAlreadyExistsException(item.Id, tagName);
         }
 
         item.ItemTags.Add(new ItemTag
@@ -127,12 +131,12 @@ public class ItemService : IItemService
         return _mapper.Map<TagDto>(tag);
     }
 
-    public async Task<bool> RemoveTagFromItemAsync(int id, string tagName)
+    public async Task RemoveTagFromItemAsync(int id, string tagName)
     {
         tagName = tagName.Trim();
         if (string.IsNullOrWhiteSpace(tagName))
         {
-            return false;
+            throw new InvalidTagException("Tag name cannot be empty");
         }
 
         var item = await _db.Items
@@ -142,7 +146,7 @@ public class ItemService : IItemService
 
         if (item == null)
         {
-            return false;
+            throw new ItemNotFoundException(id);
         }
 
         var itemTag = item.ItemTags
@@ -150,22 +154,23 @@ public class ItemService : IItemService
 
         if (itemTag == null)
         {
-            return false;
+            throw new ItemTagNotFoundException(item.Id, tagName);
         }
 
         item.ItemTags.Remove(itemTag);
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<ItemDto?> CreateAsync(ItemCreateRequest request)
+    public async Task<ItemDto> CreateAsync(ItemCreateRequest request)
     {
+        ValidateItem(request.Title, request.Description);
+
         var categoryExists = await _db.Categories
             .AnyAsync(c => c.Id == request.CategoryId);
 
         if (!categoryExists)
         {
-            return null;
+            throw new CategoryNotFoundException(request.CategoryId);
         }
 
         var item = new Data.Entities.Item
@@ -181,12 +186,14 @@ public class ItemService : IItemService
         return _mapper.Map<ItemDto>(item);
     }
 
-    public async Task<bool> UpdateAsync(int id, ItemUpdateRequest request)
+    public async Task UpdateAsync(int id, ItemUpdateRequest request)
     {
+        ValidateItem(request.Title, request.Description);
+
         var item = await _db.Items.FindAsync(id);
         if (item == null)
         {
-            return false;
+            throw new ItemNotFoundException(id);
         }
 
         var categoryExists = await _db.Categories
@@ -194,7 +201,7 @@ public class ItemService : IItemService
 
         if (!categoryExists)
         {
-            return false;
+            throw new CategoryNotFoundException(request.CategoryId);
         }
 
         item.Title = request.Title;
@@ -202,19 +209,26 @@ public class ItemService : IItemService
         item.CategoryId = request.CategoryId;
 
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        var item = await _db.Items.FindAsync(id);
-        if (item == null)
-        {
-            return false;
-        }
+        var item = await _db.Items.FindAsync(id) ?? throw new ItemNotFoundException(id);
 
         _db.Items.Remove(item);
         await _db.SaveChangesAsync();
-        return true;
+    }
+
+    private static void ValidateItem(string title, string description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new InvalidItemException("Item title cannot be empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            throw new InvalidItemException("Item description cannot be empty");
+        }
     }
 }

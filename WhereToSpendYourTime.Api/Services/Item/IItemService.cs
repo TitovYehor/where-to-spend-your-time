@@ -8,15 +8,15 @@ public interface IItemService
 {
     Task<PagedResult<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter);
 
-    Task<ItemDto?> GetByIdAsync(int id);
+    Task<ItemDto> GetByIdAsync(int id);
 
-    Task<TagDto?> AddTagForItemAsync(int id, string tagName);
+    Task<TagDto> AddTagForItemAsync(int id, string tagName);
 
-    Task<bool> RemoveTagFromItemAsync(int id, string tagName);
+    Task RemoveTagFromItemAsync(int id, string tagName);
 
-    Task<ItemDto?> CreateAsync(ItemCreateRequest request);
-    
-    Task<bool> UpdateAsync(int id, ItemUpdateRequest request);
-    
-    Task<bool> DeleteAsync(int id);
+    Task<ItemDto> CreateAsync(ItemCreateRequest request);
+
+    Task UpdateAsync(int id, ItemUpdateRequest request);
+
+    Task DeleteAsync(int id);
 }
