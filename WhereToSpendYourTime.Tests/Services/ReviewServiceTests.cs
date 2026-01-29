@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Reviews;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
@@ -172,23 +173,22 @@ public class ReviewServiceTests
 
         var result = await _service.GetMyReviewForItemAsync(user.Id, item.Id);
 
-        Assert.NotNull(result);
         Assert.Equal("My Review", result.Title);
         Assert.Equal(5, result.Rating);
     }
 
     [Fact]
-    public async Task GetMyReviewForItemAsync_ReturnsNull_WhenNotFound()
+    public async Task GetMyReviewForItemAsync_ThrowsUserItemReviewNotFoundException_WhenNotFound()
     {
         var user = new ApplicationUser { Id = "user1" };
         var item = new Item { Title = "Item1" };
+
         _db.Users.Add(user);
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var result = await _service.GetMyReviewForItemAsync(user.Id, item.Id);
-
-        Assert.Null(result);
+        await Assert.ThrowsAsync<UserItemReviewNotFoundException>(() =>
+            _service.GetMyReviewForItemAsync(user.Id, item.Id));
     }
 
     [Fact]
@@ -216,23 +216,23 @@ public class ReviewServiceTests
 
         var result = await _service.GetByIdAsync(review.Id);
 
-        Assert.NotNull(result);
         Assert.Equal("Review Title", result.Title);
         Assert.Equal(4, result.Rating);
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    public async Task GetByIdAsync_ThrowsReviewNotFoundException_WhenNotFound()
     {
-        var result = await _service.GetByIdAsync(999);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ReviewNotFoundException>(() =>
+            _service.GetByIdAsync(999));
     }
 
     [Fact]
-    public async Task CreateReviewAsync_Success_WhenNoExistingReview()
+    public async Task CreateReviewAsync_Succeeds_WhenValid()
     {
-        var userId = "user1";
+        var user = new ApplicationUser { Id = "owner" };
         var item = new Item { Title = "Item1" };
+        _db.Users.Add(user);
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
@@ -244,22 +244,19 @@ public class ReviewServiceTests
             Rating = 5
         };
 
-        var result = await _service.CreateReviewAsync(userId, request);
+        var result = await _service.CreateReviewAsync(user.Id, request);
 
-        Assert.True(result.Success);
-        Assert.NotNull(result.Review);
-        Assert.Null(result.Error);
+        Assert.Equal("Great", result.Title);
         Assert.Single(_db.Reviews);
     }
 
     [Fact]
-    public async Task CreateReviewAsync_Fails_WhenUserAlreadyReviewed()
+    public async Task CreateReviewAsync_ThrowsReviewAlreadyExistsException_WhenDuplicate()
     {
         var userId = "user1";
         var item = new Item { Title = "Item1" };
-        var review = new Review { Item = item, UserId = userId };
         _db.Items.Add(item);
-        _db.Reviews.Add(review);
+        _db.Reviews.Add(new Review { Item = item, UserId = userId });
         await _db.SaveChangesAsync();
 
         var request = new ReviewCreateRequest
@@ -270,15 +267,12 @@ public class ReviewServiceTests
             Rating = 2
         };
 
-        var result = await _service.CreateReviewAsync(userId, request);
-
-        Assert.False(result.Success);
-        Assert.Null(result.Review);
-        Assert.Equal("User already reviewed this item", result.Error);
+        await Assert.ThrowsAsync<ReviewAlreadyExistsException>(() =>
+            _service.CreateReviewAsync(userId, request));
     }
 
     [Fact]
-    public async Task UpdateReviewAsync_Succeeds_WhenUserOwnsReview()
+    public async Task UpdateReviewAsync_Succeeds_WhenOwner()
     {
         var review = new Review
         {
@@ -298,16 +292,14 @@ public class ReviewServiceTests
             Rating = 5
         };
 
-        var success = await _service.UpdateReviewAsync(review.Id, "user1", request);
+        await _service.UpdateReviewAsync(review.Id, "user1", request);
 
-        Assert.True(success);
         var updated = await _db.Reviews.FindAsync(review.Id);
         Assert.Equal("Updated", updated!.Title);
-        Assert.Equal(5, updated.Rating);
     }
 
     [Fact]
-    public async Task UpdateReviewAsync_Fails_WhenNotOwner()
+    public async Task UpdateReviewAsync_ThrowsReviewForbiddenException_WhenNotOwner()
     {
         var review = new Review
         {
@@ -317,48 +309,66 @@ public class ReviewServiceTests
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var request = new ReviewUpdateRequest { Title = "Hack", Content = "Hack", Rating = 1 };
-        var result = await _service.UpdateReviewAsync(review.Id, "notOwner", request);
+        var request = new ReviewUpdateRequest
+        {
+            Title = "Hack",
+            Content = "Hack",
+            Rating = 1
+        };
 
-        Assert.False(result);
+        await Assert.ThrowsAsync<ReviewForbiddenException>(() =>
+            _service.UpdateReviewAsync(review.Id, "notOwner", request));
     }
 
     [Fact]
-    public async Task DeleteReviewAsync_Succeeds_WhenUserIsOwner()
+    public async Task DeleteReviewAsync_Succeeds_WhenOwner()
     {
-        var review = new Review { UserId = "owner" };
+        var user = new ApplicationUser { Id = "owner" };
+        var review = new Review { UserId = user.Id };
+
+        _db.Users.Add(user);
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "owner", isManager: false);
+        await _service.DeleteReviewAsync(review.Id, user);
 
-        Assert.True(result);
         Assert.Empty(_db.Reviews);
     }
 
     [Fact]
-    public async Task DeleteReviewAsync_Succeeds_WhenUserIsAdmin()
+    public async Task DeleteReviewAsync_Succeeds_WhenAdmin()
     {
-        var review = new Review { UserId = "user123" };
+        var user = new ApplicationUser { Id = "admin" };
+        var role = new ApplicationRole { Name = "Admin" };
+
+        _db.Users.Add(user);
+        _db.Roles.Add(role);
+        _db.UserRoles.Add(new ApplicationUserRole
+        {
+            UserId = user.Id,
+            RoleId = role.Id
+        });
+
+        var review = new Review { UserId = "someoneElse" };
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "anotherUser", isManager: true);
+        await _service.DeleteReviewAsync(review.Id, user);
 
-        Assert.True(result);
         Assert.Empty(_db.Reviews);
     }
 
     [Fact]
-    public async Task DeleteReviewAsync_Fails_WhenNotOwnerAndNotAdmin()
+    public async Task DeleteReviewAsync_ThrowsReviewForbiddenException_WhenForbidden()
     {
+        var user = new ApplicationUser { Id = "notOwner" };
         var review = new Review { UserId = "owner" };
+
+        _db.Users.Add(user);
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteReviewAsync(review.Id, "intruder", isManager: false);
-
-        Assert.False(result);
-        Assert.Single(_db.Reviews);
+        await Assert.ThrowsAsync<ReviewForbiddenException>(() =>
+            _service.DeleteReviewAsync(review.Id, user));
     }
 }
