@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using WhereToSpendYourTime.Api.Exceptions.Auth;
 using WhereToSpendYourTime.Api.Models.Auth;
 using WhereToSpendYourTime.Data.Entities;
 
@@ -18,11 +19,23 @@ public class AuthService : IAuthService
         _signInManager = signInManager;
     }
 
-    public async Task<(bool Succeeded, IEnumerable<IdentityError> Errors)> RegisterAsync(RegisterRequest request)
+    public async Task RegisterAsync(RegisterRequest request)
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new InvalidRegisterRequestException("Register request cannot be null");
+        }
+        if (string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Password) ||
+            string.IsNullOrWhiteSpace(request.DisplayName))
+        {
+            throw new InvalidRegisterRequestException("Email, password and display name are required");
+        }
+
+        var existingUser = await _userManager.FindByEmailAsync(request.Email);
+        if (existingUser != null)
+        {
+            throw new UserAlreadyExistsException(request.Email);
         }
 
         var user = new ApplicationUser
@@ -35,27 +48,39 @@ public class AuthService : IAuthService
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            return (false, result.Errors);
+            throw new RegisterFailedException(result.Errors);
         }
 
-        await _userManager.AddToRoleAsync(user, DefaultRole);
-
-        return (true, Array.Empty<IdentityError>());
+        var roleResult = await _userManager.AddToRoleAsync(user, DefaultRole);
+        if (!roleResult.Succeeded)
+        {
+            throw new UserRoleAssignmentFailedException(user.Id, DefaultRole, roleResult.Errors);
+        }
     }
 
-    public async Task<bool> LoginAsync(LoginRequest request)
+    public async Task LoginAsync(LoginRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        if (request == null)
+        {
+            throw new InvalidLoginRequestException("Login request cannot be null");
+        }
+        if (string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Password))
+        {
+            throw new InvalidLoginRequestException("Email and password are required");
+        }
 
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            return false;
+            throw new InvalidCredentialsException();
         }
 
         var result = await _signInManager.PasswordSignInAsync(user, request.Password, isPersistent: true, lockoutOnFailure: false);
-
-        return result.Succeeded;
+        if (!result.Succeeded)
+        {
+            throw new InvalidCredentialsException();
+        }
     }
 
     public async Task LogoutAsync()
