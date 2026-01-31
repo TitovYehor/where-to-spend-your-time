@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using WhereToSpendYourTime.Api.Exceptions.Auth;
 using WhereToSpendYourTime.Api.Models.Auth;
 using WhereToSpendYourTime.Api.Services.Auth;
 using WhereToSpendYourTime.Data.Entities;
@@ -25,78 +26,129 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task RegisterAsync_ShouldReturnSuccess_WhenUserIsCreated()
+    public async Task RegisterAsync_DoesNotThrow_WhenUserIsCreated()
     {
-        var request = new RegisterRequest { Email = "test@example.com", Password = "Test123!", DisplayName = "TestUser" };
-        _userManagerMock.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
-                        .ReturnsAsync(IdentityResult.Success);
-        _userManagerMock.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), "User"))
-                        .ReturnsAsync(IdentityResult.Success);
+        var request = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "Test123!",
+            DisplayName = "TestUser"
+        };
 
-        var (succeeded, errors) = await _authService.RegisterAsync(request);
+        _userManagerMock
+            .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
+            .ReturnsAsync(IdentityResult.Success);
 
-        Assert.True(succeeded);
-        Assert.Empty(errors);
+        _userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), "User"))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var exception = await Record.ExceptionAsync(() =>
+            _authService.RegisterAsync(request));
+
+        Assert.Null(exception);
     }
 
     [Fact]
-    public async Task RegisterAsync_ShouldReturnFailure_WhenCreationFails()
+    public async Task RegisterAsync_ThrowsRegisterFailedException_WhenCreationFails()
     {
-        var errors = new List<IdentityError> { new IdentityError { Code = "PasswordTooShort", Description = "Password is too short." } };
-        _userManagerMock.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-                        .ReturnsAsync(IdentityResult.Failed(errors.ToArray()));
+        var errors = new[]
+        {
+            new IdentityError
+            {
+                Code = "PasswordTooShort",
+                Description = "Password is too short."
+            }
+        };
 
-        var request = new RegisterRequest { Email = "fail@example.com", Password = "123", DisplayName = "BadUser" };
+        _userManagerMock
+            .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed(errors));
 
-        var (succeeded, returnedErrors) = await _authService.RegisterAsync(request);
+        var request = new RegisterRequest
+        {
+            Email = "fail@example.com",
+            Password = "123",
+            DisplayName = "BadUser"
+        };
 
-        Assert.False(succeeded);
-        Assert.Equal(errors, returnedErrors);
+        var ex = await Assert.ThrowsAsync<RegisterFailedException>(() =>
+            _authService.RegisterAsync(request));
+
+        Assert.Contains(ex.Errors, e => e.Code == "PasswordTooShort");
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnTrue_WhenCredentialsAreValid()
+    public async Task LoginAsync_DoesNotThrow_WhenCredentialsAreValid()
     {
-        var user = new ApplicationUser { Id = "1", Email = "user@example.com", DisplayName = "User" };
+        var user = new ApplicationUser
+        {
+            Id = "1",
+            Email = "user@example.com"
+        };
 
-        _userManagerMock.Setup(um => um.FindByEmailAsync(user.Email)).ReturnsAsync(user);
-        _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
-                          .ReturnsAsync(SignInResult.Success);
-        _userManagerMock.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
+        _userManagerMock
+            .Setup(um => um.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
 
-        var request = new LoginRequest { Email = user.Email, Password = "ValidPass123" };
+        _signInManagerMock
+            .Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
+            .ReturnsAsync(SignInResult.Success);
 
-        var response = await _authService.LoginAsync(request);
+        var request = new LoginRequest
+        {
+            Email = user.Email,
+            Password = "ValidPass123"
+        };
 
-        Assert.True(response);
+        var exception = await Record.ExceptionAsync(() =>
+            _authService.LoginAsync(request));
+
+        Assert.Null(exception);
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnFalse_WhenUserNotFound()
+    public async Task LoginAsync_ThrowsInvalidCredentialsException_WhenUserNotFound()
     {
-        _userManagerMock.Setup(um => um.FindByEmailAsync("unknown@example.com"))
-                        .ReturnsAsync((ApplicationUser)null!);
+        _userManagerMock
+            .Setup(um => um.FindByEmailAsync("unknown@example.com"))
+            .ReturnsAsync((ApplicationUser?)null);
 
-        var request = new LoginRequest { Email = "unknown@example.com", Password = "123" };
+        var request = new LoginRequest
+        {
+            Email = "unknown@example.com",
+            Password = "123"
+        };
 
-        var result = await _authService.LoginAsync(request);
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+            _authService.LoginAsync(request));
     }
 
     [Fact]
-    public async Task LoginAsync_ShouldReturnFalse_WhenPasswordIsIncorrect()
+    public async Task LoginAsync_ThrowsInvalidCredentialsException_WhenPasswordIsIncorrect()
     {
-        var user = new ApplicationUser { Id = "1", Email = "user@example.com" };
-        _userManagerMock.Setup(um => um.FindByEmailAsync(user.Email)).ReturnsAsync(user);
-        _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
-                          .ReturnsAsync(SignInResult.Failed);
+        var user = new ApplicationUser
+        {
+            Id = "1",
+            Email = "user@example.com"
+        };
 
-        var request = new LoginRequest { Email = user.Email, Password = "WrongPass" };
+        _userManagerMock
+            .Setup(um => um.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
 
-        var result = await _authService.LoginAsync(request);
+        _signInManagerMock
+            .Setup(sm => sm.PasswordSignInAsync(user, It.IsAny<string>(), true, false))
+            .ReturnsAsync(SignInResult.Failed);
 
-        Assert.False(result);
+        var request = new LoginRequest
+        {
+            Email = user.Email,
+            Password = "WrongPass"
+        };
+
+        await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+            _authService.LoginAsync(request));
     }
 
     private static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class

@@ -19,24 +19,14 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var (succeeded, errors) = await _authService.RegisterAsync(request);
-        if (!succeeded)
-        {
-            return BadRequest(errors);
-        }
-
+        await _authService.RegisterAsync(request);
         return Ok();
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        bool success = await _authService.LoginAsync(request);
-        if (!success)
-        {
-            return Unauthorized("Invalid credentials");
-        }
-
+        await _authService.LoginAsync(request);
         return Ok();
     }
 
