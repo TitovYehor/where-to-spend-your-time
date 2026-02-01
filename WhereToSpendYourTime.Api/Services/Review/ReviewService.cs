@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Items;
+using WhereToSpendYourTime.Api.Exceptions.Reviews;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
 using WhereToSpendYourTime.Data;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Review;
 
@@ -53,80 +56,122 @@ public class ReviewService : IReviewService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
-    public async Task<ReviewDto?> GetMyReviewForItemAsync(string userId, int itemId)
+    public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
     {
-        var review = await _db.Reviews
+        return await _db.Reviews
             .AsNoTracking()
             .Where(r => r.ItemId == itemId && r.UserId == userId)
             .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-
-        return review;
+            .FirstOrDefaultAsync()
+            ?? throw new UserItemReviewNotFoundException(userId, itemId);
     }
 
-    public async Task<ReviewDto?> GetByIdAsync(int id)
+    public async Task<ReviewDto> GetByIdAsync(int id)
     {
-        var review = await _db.Reviews
+        return await _db.Reviews
             .AsNoTracking()
             .Where(r => r.Id == id)
             .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-
-        return review;
+            .FirstOrDefaultAsync()
+            ?? throw new ReviewNotFoundException(id);
     }
 
-    public async Task<(bool Success, ReviewDto? Review, string? Error)> CreateReviewAsync(string userId, ReviewCreateRequest request)
+    public async Task<ReviewDto> CreateReviewAsync(string userId, ReviewCreateRequest request)
     {
+        if (request.ItemId < 1)
+        {
+            throw new InvalidReviewException("Review itemId is invalid");
+        }
+        ValidateReview(request.Title, request.Content, request.Rating);
+
+        var itemExists = await _db.Items.AnyAsync(i => i.Id == request.ItemId);
+        if (!itemExists)
+        {
+            throw new ItemNotFoundException(request.ItemId);
+        }
+
         var hasReviewed = await _db.Reviews
             .AnyAsync(r => r.ItemId == request.ItemId && r.UserId == userId);
 
         if (hasReviewed)
         {
-            return (false, null, "User already reviewed this item");
+            throw new ReviewAlreadyExistsException(request.ItemId);
         }
 
         var review = new Data.Entities.Review
         {
-            Title = request.Title,
-            Content = request.Content,
+            Title = request.Title.Trim(),
+            Content = request.Content.Trim(),
             Rating = request.Rating,
             ItemId = request.ItemId,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
-
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        return (true, _mapper.Map<ReviewDto>(review), null);
+        return await _db.Reviews
+            .AsNoTracking()
+            .Where(c => c.Id == review.Id)
+            .ProjectTo<ReviewDto>(_mapper.ConfigurationProvider)
+            .FirstAsync();
     }
 
-    public async Task<bool> UpdateReviewAsync(int reviewId, string userId, ReviewUpdateRequest request)
+    public async Task UpdateReviewAsync(int reviewId, string userId, ReviewUpdateRequest request)
     {
-        var review = await _db.Reviews.FindAsync(reviewId);
-        if (review == null || review.UserId != userId)
+        ValidateReview(request.Title, request.Content, request.Rating);
+
+        var review = await _db.Reviews.SingleOrDefaultAsync(r => r.Id == reviewId);
+
+        if (review == null)
         {
-            return false;
+            throw new ReviewNotFoundException(reviewId);
+        }
+        if (review.UserId != userId)
+        {
+            throw new ReviewForbiddenException();
         }
 
-        review.Title = request.Title;
-        review.Content = request.Content;
+        review.Title = request.Title.Trim();
+        review.Content = request.Content.Trim();
         review.Rating = request.Rating;
-
         await _db.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> DeleteReviewAsync(int reviewId, string userId, bool isManager)
+    public async Task DeleteReviewAsync(int reviewId, ApplicationUser user)
     {
-        var review = await _db.Reviews.FindAsync(reviewId);
-        if (review == null || (review.UserId != userId && !isManager))
+        var review = await _db.Reviews.FindAsync(reviewId) ?? throw new ReviewNotFoundException(reviewId);
+
+        var isAdmin = await _db.UserRoles
+            .AnyAsync(r => r.UserId == user.Id && r.Role.Name == "Admin");
+
+        var isModerator = await _db.UserRoles
+            .AnyAsync(r => r.UserId == user.Id && r.Role.Name == "Moderator");
+
+        if (review.UserId != user.Id && !isAdmin && !isModerator)
         {
-            return false;
+            throw new ReviewForbiddenException();
         }
 
         _db.Reviews.Remove(review);
         await _db.SaveChangesAsync();
-        return true;
+    }
+
+    private static void ValidateReview(string title, string content, int rating)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new InvalidReviewException("Review title cannot be empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new InvalidReviewException("Review content cannot be empty");
+        }
+
+        if (rating < 1 || rating > 5)
+        {
+            throw new InvalidReviewException("Review rating must be between 1 and 5");
+        }
     }
 }

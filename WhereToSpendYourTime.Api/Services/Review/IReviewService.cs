@@ -1,5 +1,6 @@
 ﻿using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.Review;
+using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Review;
 
@@ -11,13 +12,13 @@ public interface IReviewService
 
     Task<PagedResult<ReviewDto>> GetPagedReviewsForUserAsync(string userId, ReviewFilterRequest filter);
 
-    Task<ReviewDto?> GetMyReviewForItemAsync(string userId, int itemId);
+    Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId);
 
-    Task<ReviewDto?> GetByIdAsync(int id);
+    Task<ReviewDto> GetByIdAsync(int id);
 
-    Task<(bool Success, ReviewDto? Review, string? Error)> CreateReviewAsync(string userId, ReviewCreateRequest request);
+    Task<ReviewDto> CreateReviewAsync(string userId, ReviewCreateRequest request);
 
-    Task<bool> UpdateReviewAsync(int reviewId, string userId, ReviewUpdateRequest request);
+    Task UpdateReviewAsync(int reviewId, string userId, ReviewUpdateRequest request);
 
-    Task<bool> DeleteReviewAsync(int reviewId, string userId, bool isManager);
+    Task DeleteReviewAsync(int reviewId, ApplicationUser user);
 }
