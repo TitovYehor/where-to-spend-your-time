@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Categories;
+using WhereToSpendYourTime.Api.Exceptions.Items;
+using WhereToSpendYourTime.Api.Exceptions.Tags;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.Item;
 using WhereToSpendYourTime.Api.Services.Item;
@@ -76,17 +79,16 @@ public class ItemServiceTests
 
         var result = await _service.GetByIdAsync(item.Id);
 
-        Assert.NotNull(result);
         Assert.Equal("Inception", result!.Title);
         Assert.Equal("Movies", result.CategoryName);
         Assert.Equal(4.5, result.AverageRating);
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    public async Task GetByIdAsync_ThrowsItemNotFoundException_WhenNotFound()
     {
-        var result = await _service.GetByIdAsync(999);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ItemNotFoundException>(() =>
+            _service.GetByIdAsync(999));
     }
 
     [Fact]
@@ -98,32 +100,31 @@ public class ItemServiceTests
 
         var result = await _service.AddTagForItemAsync(item.Id, "NewTag");
 
-        Assert.NotNull(result);
         Assert.Equal("NewTag", result!.Name);
         Assert.Single(_db.Tags);
         Assert.Single(_db.ItemTags);
     }
 
     [Fact]
-    public async Task AddTagForItemAsync_ReturnsNull_WhenItemNotFound()
+    public async Task AddTagForItemAsync_ThrowsItemNotFoundException_WhenItemNotFound()
     {
-        var result = await _service.AddTagForItemAsync(999, "SomeTag");
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ItemNotFoundException>(() =>
+            _service.AddTagForItemAsync(999, "SomeTag"));
     }
 
     [Fact]
-    public async Task AddTagForItemAsync_ReturnsNull_WhenTagNameEmpty()
+    public async Task AddTagForItemAsync_ThrowsInvalidTagException_WhenTagNameEmpty()
     {
         var item = new Item { Title = "TestItem" };
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var result = await _service.AddTagForItemAsync(item.Id, "  ");
-        Assert.Null(result);
+        await Assert.ThrowsAsync<InvalidTagException>(() =>
+            _service.AddTagForItemAsync(item.Id, "  "));
     }
 
     [Fact]
-    public async Task AddTagForItemAsync_ReturnsNull_WhenTagAlreadyExistsForItem()
+    public async Task AddTagForItemAsync_ThrowsItemTagAlreadyExistsException_WhenTagAlreadyExistsForItem()
     {
         var tag = new Tag { Name = "Existing" };
         var item = new Item
@@ -135,8 +136,8 @@ public class ItemServiceTests
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var result = await _service.AddTagForItemAsync(item.Id, "Existing");
-        Assert.Null(result);
+        await Assert.ThrowsAsync<ItemTagAlreadyExistsException>(() =>
+            _service.AddTagForItemAsync(item.Id, "Existing"));
     }
 
     [Fact]
@@ -152,43 +153,42 @@ public class ItemServiceTests
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var result = await _service.RemoveTagFromItemAsync(item.Id, "Removable");
+        await _service.RemoveTagFromItemAsync(item.Id, "Removable");
 
-        Assert.True(result);
         Assert.Empty(item.ItemTags);
     }
 
     [Fact]
-    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenItemNotFound()
+    public async Task RemoveTagFromItemAsync_ThrowsItemNotFoundException_WhenItemNotFound()
     {
-        var result = await _service.RemoveTagFromItemAsync(999, "SomeTag");
-        Assert.False(result);
+        await Assert.ThrowsAsync<ItemNotFoundException>(() =>
+            _service.RemoveTagFromItemAsync(999, "SomeTag"));
     }
 
     [Fact]
-    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagNameEmpty()
-    {
-        var item = new Item { Title = "TestItem" };
-        _db.Items.Add(item);
-        await _db.SaveChangesAsync();
-
-        var result = await _service.RemoveTagFromItemAsync(item.Id, "  ");
-        Assert.False(result);
-    }
-
-    [Fact]
-    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagDoesNotExist()
+    public async Task RemoveTagFromItemAsync_ThrowsInvalidTagException_WhenTagNameEmpty()
     {
         var item = new Item { Title = "TestItem" };
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var result = await _service.RemoveTagFromItemAsync(item.Id, "NoSuchTag");
-        Assert.False(result);
+        await Assert.ThrowsAsync<InvalidTagException>(() =>
+            _service.RemoveTagFromItemAsync(item.Id, "  "));
     }
 
     [Fact]
-    public async Task RemoveTagFromItemAsync_ReturnsFalse_WhenTagNotAssignedToItem()
+    public async Task RemoveTagFromItemAsync_ThrowsItemTagNotFoundException_WhenTagDoesNotExist()
+    {
+        var item = new Item { Title = "TestItem" };
+        _db.Items.Add(item);
+        await _db.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<ItemTagNotFoundException>(() =>
+            _service.RemoveTagFromItemAsync(item.Id, "NoSuchTag"));
+    }
+
+    [Fact]
+    public async Task RemoveTagFromItemAsync_ThrowsItemTagNotFoundException_WhenTagNotAssignedToItem()
     {
         var tag = new Tag { Name = "Unlinked" };
         var item = new Item { Title = "TestItem" };
@@ -196,8 +196,8 @@ public class ItemServiceTests
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync();
 
-        var result = await _service.RemoveTagFromItemAsync(item.Id, "Unlinked");
-        Assert.False(result);
+        await Assert.ThrowsAsync<ItemTagNotFoundException>(() =>
+            _service.RemoveTagFromItemAsync(item.Id, "Unlinked"));
     }
 
     [Fact]
@@ -216,13 +216,12 @@ public class ItemServiceTests
 
         var result = await _service.CreateAsync(request);
 
-        Assert.NotNull(result);
         Assert.Equal("Music", result!.CategoryName);
         Assert.Single(_db.Items);
     }
 
     [Fact]
-    public async Task CreateAsync_ReturnsNull_WhenCategoryMissing()
+    public async Task CreateAsync_ThrowsCategoryNotFoundException_WhenCategoryMissing()
     {
         var request = new ItemCreateRequest
         {
@@ -231,9 +230,8 @@ public class ItemServiceTests
             CategoryId = 999
         };
 
-        var result = await _service.CreateAsync(request);
-
-        Assert.Null(result);
+        await Assert.ThrowsAsync<CategoryNotFoundException>(() =>
+            _service.CreateAsync(request));
     }
 
     [Fact]
@@ -253,16 +251,15 @@ public class ItemServiceTests
             CategoryId = cat2.Id
         };
 
-        var result = await _service.UpdateAsync(item.Id, request);
+        await _service.UpdateAsync(item.Id, request);
         var updatedItem = await _db.Items.FirstAsync();
 
-        Assert.True(result);
         Assert.Equal("Updated", updatedItem.Title);
         Assert.Equal(cat2.Id, updatedItem.CategoryId);
     }
 
     [Fact]
-    public async Task UpdateAsync_ReturnsFalse_WhenItemNotFound()
+    public async Task UpdateAsync_ThrowsItemNotFoundException_WhenItemNotFound()
     {
         var request = new ItemUpdateRequest
         {
@@ -271,13 +268,12 @@ public class ItemServiceTests
             CategoryId = 1
         };
 
-        var result = await _service.UpdateAsync(123, request);
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<ItemNotFoundException>(() =>
+            _service.UpdateAsync(123, request));
     }
 
     [Fact]
-    public async Task UpdateAsync_ReturnsFalse_WhenCategoryInvalid()
+    public async Task UpdateAsync_ThrowsCategoryNotFoundException_WhenCategoryInvalid()
     {
         var cat = new Category { Name = "Valid" };
         var item = new Item { Title = "Old", Description = "OldDesc", Category = cat };
@@ -285,14 +281,13 @@ public class ItemServiceTests
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var result = await _service.UpdateAsync(item.Id, new ItemUpdateRequest
-        {
-            Title = "Test",
-            Description = "Fail",
-            CategoryId = 999
-        });
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<CategoryNotFoundException>(() =>
+            _service.UpdateAsync(item.Id, new ItemUpdateRequest
+            {
+                Title = "Test",
+                Description = "Fail",
+                CategoryId = 999
+            }));
     }
 
     [Fact]
@@ -302,16 +297,15 @@ public class ItemServiceTests
         _db.Items.Add(item);
         await _db.SaveChangesAsync();
 
-        var result = await _service.DeleteAsync(item.Id);
+        await _service.DeleteAsync(item.Id);
 
-        Assert.True(result);
         Assert.Empty(_db.Items);
     }
 
     [Fact]
-    public async Task DeleteAsync_ReturnsFalse_WhenNotFound()
+    public async Task DeleteAsync_ThrowsItemNotFoundException_WhenNotFound()
     {
-        var result = await _service.DeleteAsync(123);
-        Assert.False(result);
+        await Assert.ThrowsAsync<ItemNotFoundException>(() =>
+            _service.DeleteAsync(123));
     }
 }

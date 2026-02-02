@@ -18,58 +18,56 @@ public class ItemsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetItems([FromQuery] ItemFilterRequest filter)
+    public async Task<ActionResult<Models.Pagination.PagedResult<ItemDto>>> GetItems([FromQuery] ItemFilterRequest filter)
     {
         var items = await _itemService.GetFilteredItemsAsync(filter);
         return Ok(items);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetItemById(int id)
+    public async Task<ActionResult<ItemDto>> GetItemById(int id)
     {
         var item = await _itemService.GetByIdAsync(id);
-        return item == null ? NotFound() : Ok(item);
+        return Ok(item);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> CreateItem(ItemCreateRequest request)
+    public async Task<IActionResult> CreateItem([FromBody] ItemCreateRequest request)
     {
         var item = await _itemService.CreateAsync(request);
-        return item == null
-            ? BadRequest("Invalid CategoryId")
-            : CreatedAtAction(nameof(GetItemById), new { id = item.Id }, item);
+        return CreatedAtAction(nameof(GetItemById), new { id = item.Id }, item);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateItem(int id, ItemUpdateRequest request)
+    public async Task<IActionResult> UpdateItem(int id, [FromBody] ItemUpdateRequest request)
     {
-        var result = await _itemService.UpdateAsync(id, request);
-        return result ? NoContent() : BadRequest("Invalid Id or CategoryId");
+        await _itemService.UpdateAsync(id, request);
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteItem(int id)
     {
-        var result = await _itemService.DeleteAsync(id);
-        return result ? NoContent() : NotFound();
+        await _itemService.DeleteAsync(id);
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost("{id}/tags")]
-    public async Task<IActionResult> AddTagForItem(int id, [FromBody] TagRequest tag) 
+    public async Task<ActionResult<TagDto>> AddTagForItem(int id, [FromBody] TagRequest tag)
     {
         var result = await _itemService.AddTagForItemAsync(id, tag.Name);
-        return result != null ? Ok(result) : BadRequest("Could not add tag to the item");
+        return Ok(result);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}/tags/remove/{tagName}")]
     public async Task<IActionResult> RemoveTagFromItem(int id, string tagName)
     {
-        var result = await _itemService.RemoveTagFromItemAsync(id, tagName);
-        return result ? NoContent() : NotFound("Tag or item not found, or tag is not associated with item");
-    } 
+        await _itemService.RemoveTagFromItemAsync(id, tagName);
+        return NoContent();
+    }
 }
