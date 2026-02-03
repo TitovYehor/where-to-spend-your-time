@@ -6,5 +6,5 @@ public interface IMediaService
 {
     Task<MediaDto> UploadAsync(CreateMediaDto dto);
 
-    Task<bool> DeleteAsync(int mediaId);
+    Task DeleteAsync(int mediaId);
 }
