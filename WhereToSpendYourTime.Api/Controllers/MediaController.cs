@@ -16,6 +16,9 @@ public class MediaController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(MediaDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UploadMedia([FromForm] CreateMediaDto dto)
     {
         var media = await _mediaService.UploadAsync(dto);
@@ -23,15 +26,12 @@ public class MediaController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteMedia(int id)
     {
-        var deleted = await _mediaService.DeleteAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
-
-        return Ok(deleted);
+        await _mediaService.DeleteAsync(id);
+        return NoContent();
     }
 }
