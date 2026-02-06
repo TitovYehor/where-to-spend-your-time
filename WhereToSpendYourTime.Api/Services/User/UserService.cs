@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WhereToSpendYourTime.Api.Exceptions.Users;
 using WhereToSpendYourTime.Api.Extensions;
 using WhereToSpendYourTime.Api.Models.Pagination;
 using WhereToSpendYourTime.Api.Models.User;
@@ -66,7 +67,7 @@ public class UserService : IUserService
         return pagedResult;
     }
 
-    public async Task<ApplicationUserDto?> GetProfileAsync(string userId, bool isSelf)
+    public async Task<ApplicationUserDto> GetProfileAsync(string userId, bool isSelf)
     {
         var userDto = await _db.Users
             .AsNoTracking()
@@ -78,9 +79,10 @@ public class UserService : IUserService
             .Include(u => u.Comments)
                 .ThenInclude(c => c.Review)
             .ProjectTo<ApplicationUserDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new UserNotFoundException(userId);
 
-        if (userDto != null && !isSelf)
+        if (!isSelf)
         {
             userDto.Email = null;
         }
@@ -88,81 +90,120 @@ public class UserService : IUserService
         return userDto;
     }
 
-    public async Task<IEnumerable<string?>> GetRolesAsync()
+    public async Task<IEnumerable<string>> GetRolesAsync()
     {
         return await _db.Roles
             .AsNoTracking()
             .OrderBy(r => r.Name)
-            .Select(r => r.Name)
+            .Select(r => r.Name!)
             .ToListAsync();
     }
 
-    public async Task<bool> UpdateProfileAsync(string userId, string displayName)
+    public async Task UpdateProfileAsync(string userId, string displayName)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null || user.Email == "demo@example.com")
+        if (string.IsNullOrWhiteSpace(displayName) || displayName.Length < 2)
         {
-            return false;
+            throw new InvalidUserDisplayNameException("Display name must be at least 2 characters");
         }
 
-        user.DisplayName = displayName;
-        var result = await _userManager.UpdateAsync(user);
-        return result.Succeeded;
-    }
-
-    public async Task<(bool Succeeded, IEnumerable<IdentityError> Errors)> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
-    {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return (false, new[] { new IdentityError { Description = "User not found" } });
+            throw new UserNotFoundException(userId);
         }
-
         if (user.Email == "demo@example.com")
         {
-            return (false, new[] { new IdentityError { Description = "Password change is disabled for the demo account" } });
+            throw new DemoAccountOperationForbiddenException();
+        }
+
+        user.DisplayName = displayName;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new UserProfileUpdateFailedException(result.Errors);
+        }
+    }
+
+    public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new UserNotFoundException(userId);
+        if (user.Email == "demo@example.com")
+        {
+            throw new DemoAccountOperationForbiddenException();
         }
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
-        return (result.Succeeded, result.Errors);
+        if (!result.Succeeded)
+        {
+            throw new PasswordChangeFailedException(result.Errors);
+        }
     }
 
-    public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
+    public async Task UpdateUserRoleAsync(string userId, string newRole)
     {
         if (string.IsNullOrWhiteSpace(newRole))
         {
-            return false;
+            throw new InvalidRoleException("Role cannot be null or empty");
+        }
+        if (newRole != "User" && newRole != "Moderator" && newRole != "Admin")
+        {
+            throw new InvalidRoleException("Role must be either 'User' or 'Moderator' or 'Admin'");
+        }
+
+        if (!await _db.Roles.AnyAsync(r => r.Name == newRole))
+        {
+            throw new RoleNotFoundException(newRole);
         }
 
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null || await _userManager.IsInRoleAsync(user, "Admin"))
+        if (user == null)
         {
-            return false;
+            throw new UserNotFoundException(userId);
+        }
+        if (await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            throw new UserRoleForbiddenException();
         }
 
         var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Count == 1 && currentRoles[0] == newRole)
+        {
+            return;
+        }
         if (currentRoles.Any())
         {
             var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!removeResult.Succeeded)
             {
-                return false;
+                throw new UserRoleUpdateFailedException(removeResult.Errors);
             }
         }
 
         var addResult = await _userManager.AddToRoleAsync(user, newRole);
-        return addResult.Succeeded;
+        if (!addResult.Succeeded)
+        {
+            throw new UserRoleUpdateFailedException(addResult.Errors);
+        }
     }
 
-    public async Task<bool> DeleteUserAsync(string userId)
+    public async Task DeleteUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null || await _userManager.IsInRoleAsync(user, "Admin"))
+        if (user == null)
         {
-            return false;
+            throw new UserNotFoundException(userId);
+        }
+        if (await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            throw new UserDeleteForbiddenException();
         }
 
         var result = await _userManager.DeleteAsync(user);
-        return result.Succeeded;
+
+        if (!result.Succeeded)
+        {
+            throw new UserDeleteFailedException(result.Errors);
+        }
     }
 }
