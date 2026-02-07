@@ -22,7 +22,7 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<ActionResult<IEnumerable<ApplicationUserDto>>> GetAllUsers()
     {
         var users = await _userService.GetAllUsersAsync();
         return Ok(users);
@@ -30,40 +30,32 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet("paged")]
-    public async Task<IActionResult> GetPagedUsers([FromQuery] UserFilterRequest filter)
+    public async Task<ActionResult<Models.Pagination.PagedResult<ApplicationUserDto>>> GetPagedUsers([FromQuery] UserFilterRequest filter)
     {
         var pagedUsers = await _userService.GetPagedUsersAsync(filter);
-
         return Ok(pagedUsers);
     }
 
     [Authorize]
     [HttpGet("me")]
-    public async Task<IActionResult> GetMyProfile()
+    public async Task<ActionResult<ApplicationUserDto>> GetMyProfile()
     {
         var userId = _userManager.GetUserId(User)!;
         var dto = await _userService.GetProfileAsync(userId, isSelf: true);
-
-        return dto == null ? NotFound() : Ok(dto);
+        return Ok(dto);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(string id)
+    public async Task<ActionResult<ApplicationUserDto>> GetProfile(string id)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest("User ID cannot be null or empty");
-        }
-
         var isSelf = _userManager.GetUserId(User) == id;
         var dto = await _userService.GetProfileAsync(id, isSelf);
-
-        return dto == null ? NotFound() : Ok(dto);
+        return Ok(dto);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("roles")]
-    public async Task<IActionResult> GetRoles()
+    public async Task<ActionResult<IEnumerable<string>>> GetRoles()
     {
         var roles = await _userService.GetRolesAsync();
         return Ok(roles);
@@ -71,71 +63,35 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPut("me")]
-    public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Length < 2)
-        {
-            return BadRequest("Display name must be at least 2 characters");
-        }
-
         var userId = _userManager.GetUserId(User)!;
-        
-        var success = await _userService.UpdateProfileAsync(userId, request.DisplayName);
-
-        return success ? NoContent() : BadRequest("Failed to update profile");
+        await _userService.UpdateProfileAsync(userId, request.DisplayName);
+        return NoContent();
     }
 
     [Authorize]
     [HttpPut("me/change-password")]
-    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        if (!string.IsNullOrWhiteSpace(request.NewPassword) && request.NewPassword.Length < 6)
-        {
-            return BadRequest("Password must be at least 6 characters");
-        }
-
         var userId = _userManager.GetUserId(User)!;
-        
-        var (succeeded, errors) = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
-        if (!succeeded)
-        {
-            return BadRequest(errors);
-        }
-
-        return succeeded ? NoContent() : BadRequest("Failed to update password");
+        await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{userId}/role")]
     public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateUserRoleRequest request)
     {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return BadRequest("User Id cannot be null or empty");
-        }
-        if (string.IsNullOrWhiteSpace(request.Role))
-        {
-            return BadRequest("Role cannot be null or empty");
-        }
-        if (request.Role != "User" && request.Role != "Moderator" && request.Role != "Admin")
-        {
-            return BadRequest("Role must be either 'User' or 'Moderator' or 'Admin'");
-        }
-
-        var success = await _userService.UpdateUserRoleAsync(userId, request.Role);
-        return success ? NoContent() : BadRequest("Failed to update user role");
+        await _userService.UpdateUserRoleAsync(userId, request.Role);
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser(string userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return BadRequest("User Id cannot be null or empty");
-        }
-
-        var success = await _userService.DeleteUserAsync(userId);
-        return success ? NoContent() : NotFound();
+        await _userService.DeleteUserAsync(userId);
+        return NoContent();
     }
 }

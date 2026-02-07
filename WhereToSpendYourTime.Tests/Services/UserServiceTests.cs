@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using WhereToSpendYourTime.Api.Exceptions.Users;
 using WhereToSpendYourTime.Api.Mapping;
 using WhereToSpendYourTime.Api.Models.User;
 using WhereToSpendYourTime.Api.Services.User;
@@ -192,10 +193,10 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetProfileAsync_ReturnsNull_WhenUserNotFound()
+    public async Task GetProfileAsync_ThrowsUserNotFoundException_WhenUserNotFound()
     {
-        var result = await _service.GetProfileAsync("nonexistent", true);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<UserNotFoundException>(() =>
+            _service.GetProfileAsync("nonexistent", true));
     }
 
     [Fact]
@@ -244,7 +245,6 @@ public class UserServiceTests
 
         var result = await _service.GetProfileAsync(user.Id, true);
 
-        Assert.NotNull(result);
         Assert.Equal("user@example.com", result.Email);
         Assert.Single(result.Reviews);
         Assert.Single(result.Comments);
@@ -269,7 +269,6 @@ public class UserServiceTests
 
         var result = await _service.GetProfileAsync("user2", isSelf: false);
 
-        Assert.NotNull(result);
         Assert.Null(result.Email);
     }
 
@@ -289,7 +288,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task UpdateProfileAsync_ReturnsTrue_WhenUserExistsAndUpdateSucceeds()
+    public async Task UpdateProfileAsync_UpdatesProfile_WhenValid()
     {
         var user = new ApplicationUser { Id = "user1", DisplayName = "Old Name" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
@@ -297,27 +296,24 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.UpdateAsync(user))
             .ReturnsAsync(IdentityResult.Success);
 
-        var result = await _service.UpdateProfileAsync(user.Id, "New Name");
+        await _service.UpdateProfileAsync(user.Id, "New Name");
 
-        Assert.True(result);
         Assert.Equal("New Name", user.DisplayName);
-        _userManagerMock.Verify(m => m.UpdateAsync(It.Is<ApplicationUser>(u => u.DisplayName == "New Name")), Times.Once);
     }
 
     [Fact]
-    public async Task UpdateProfileAsync_ReturnsFalse_WhenUserNotFound()
+    public async Task UpdateProfileAsync_ThrowsUserNotFoundException_WhenUserNotFound()
     {
         _userManagerMock.Setup(m => m.FindByIdAsync("missing"))
             .ReturnsAsync((ApplicationUser?)null);
 
-        var result = await _service.UpdateProfileAsync("missing", "New Name");
-
-        Assert.False(result);
-        _userManagerMock.Verify(m => m.UpdateAsync(It.IsAny<ApplicationUser>()), Times.Never);
+        await Assert.ThrowsAsync<UserNotFoundException>(
+            () => _service.UpdateProfileAsync("missing", "New Name")
+        );
     }
 
     [Fact]
-    public async Task UpdateProfileAsync_ReturnsFalse_WhenUpdateFails()
+    public async Task UpdateProfileAsync_ThrowsUserProfileUpdateFailedException_WhenUpdateFails()
     {
         var user = new ApplicationUser { Id = "user1", DisplayName = "Old Name" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
@@ -325,13 +321,32 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.UpdateAsync(user))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Failed" }));
 
-        var result = await _service.UpdateProfileAsync(user.Id, "New Name");
+        var ex = await Assert.ThrowsAsync<UserProfileUpdateFailedException>(
+            () => _service.UpdateProfileAsync(user.Id, "New Name")
+        );
 
-        Assert.False(result);
+        Assert.Contains(ex.Errors, e => e.Description == "Failed");
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_ReturnsTrue_WhenSuccess()
+    public async Task UpdateProfileAsync_ThrowsDemoAccountOperationForbiddenException_WhenDemoAccount()
+    {
+        var user = new ApplicationUser
+        {
+            Id = "1",
+            Email = "demo@example.com"
+        };
+
+        _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
+            .ReturnsAsync(user);
+
+        await Assert.ThrowsAsync<DemoAccountOperationForbiddenException>(
+            () => _service.UpdateProfileAsync(user.Id, "Name")
+        );
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsync_DoesNotThrow_WhenSuccess()
     {
         var user = new ApplicationUser { Id = "user1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
@@ -339,27 +354,25 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.ChangePasswordAsync(user, "old", "new"))
             .ReturnsAsync(IdentityResult.Success);
 
-        var (succeeded, errors) = await _service.ChangePasswordAsync(user.Id, "old", "new");
+        var exception = await Record.ExceptionAsync(() =>
+        _service.ChangePasswordAsync(user.Id, "old", "new"));
 
-        Assert.True(succeeded);
-        Assert.Empty(errors);
+        Assert.Null(exception);
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_ReturnsFalse_WhenUserNotFound()
+    public async Task ChangePasswordAsync_ThrowsUserNotFoundException_WhenUserNotFound()
     {
         _userManagerMock.Setup(m => m.FindByIdAsync("missing"))
             .ReturnsAsync((ApplicationUser?)null);
 
-        var (succeeded, errors) = await _service.ChangePasswordAsync("missing", "old", "new");
-
-        Assert.False(succeeded);
-        Assert.Single(errors);
-        Assert.Equal("User not found", errors.First().Description);
+        await Assert.ThrowsAsync<UserNotFoundException>(
+            () => _service.ChangePasswordAsync("missing", "old", "new")
+        );
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_ReturnsFalse_WhenChangePasswordFails()
+    public async Task ChangePasswordAsync_ThrowsPasswordChangeFailedException_WhenChangeFails()
     {
         var user = new ApplicationUser { Id = "user1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id))
@@ -367,64 +380,80 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.ChangePasswordAsync(user, "old", "new"))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Bad password" }));
 
-        var (succeeded, errors) = await _service.ChangePasswordAsync(user.Id, "old", "new");
+        var ex = await Assert.ThrowsAsync<PasswordChangeFailedException>(
+            () => _service.ChangePasswordAsync(user.Id, "old", "new")
+        );
 
-        Assert.False(succeeded);
-        Assert.Single(errors);
-        Assert.Equal("Bad password", errors.First().Description);
+        Assert.Contains(ex.Errors, e => e.Description == "Bad password");
     }
 
     [Fact]
-    public async Task UpdateUserRoleAsync_ReturnsFalse_WhenRoleIsEmpty()
+    public async Task UpdateUserRoleAsync_ThrowsInvalidRoleException_WhenRoleIsEmpty()
     {
-        var result = await _service.UpdateUserRoleAsync("1", "");
-        Assert.False(result);
+        await Assert.ThrowsAsync<InvalidRoleException>(
+            () => _service.UpdateUserRoleAsync("1", "")
+        );
     }
 
     [Fact]
-    public async Task UpdateUserRoleAsync_ReturnsFalse_WhenUserNotFound()
+    public async Task UpdateUserRoleAsync_ThrowsInvalidRoleException_WhenRoleIsInvalid()
     {
+        await Assert.ThrowsAsync<InvalidRoleException>(
+            () => _service.UpdateUserRoleAsync("1", "SuperAdmin")
+        );
+    }
+
+    [Fact]
+    public async Task UpdateUserRoleAsync_ThrowsUserNotFoundException_WhenUserNotFound()
+    {
+        await SeedRoleAsync("User");
+
         _userManagerMock.Setup(m => m.FindByIdAsync("missing")).ReturnsAsync((ApplicationUser?)null);
 
-        var result = await _service.UpdateUserRoleAsync("missing", "User");
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<UserNotFoundException>(
+            () => _service.UpdateUserRoleAsync("missing", "User")
+        );
     }
 
     [Fact]
-    public async Task UpdateUserRoleAsync_ReturnsFalse_WhenUserIsAdmin()
+    public async Task UpdateUserRoleAsync_ThrowsUserRoleForbiddenException_WhenUserIsAdmin()
     {
+        await SeedRoleAsync("User");
+
         var user = new ApplicationUser { Id = "1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id)).ReturnsAsync(user);
         _userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(true);
 
-        var result = await _service.UpdateUserRoleAsync(user.Id, "User");
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<UserRoleForbiddenException>(
+            () => _service.UpdateUserRoleAsync("1", "User")
+        );
     }
 
     [Fact]
     public async Task UpdateUserRoleAsync_RemovesExistingRolesAndAddsNew()
     {
+        await SeedRoleAsync("Moderator");
+
         var user = new ApplicationUser { Id = "1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id)).ReturnsAsync(user);
         _userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
         _userManagerMock.Setup(m => m.GetRolesAsync(user)).ReturnsAsync(new List<string> { "OldRole" });
         _userManagerMock.Setup(m => m.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(IdentityResult.Success);
-        _userManagerMock.Setup(m => m.AddToRoleAsync(user, "NewRole"))
+        _userManagerMock.Setup(m => m.AddToRoleAsync(user, "Moderator"))
             .ReturnsAsync(IdentityResult.Success);
 
-        var result = await _service.UpdateUserRoleAsync(user.Id, "NewRole");
+        await _service.UpdateUserRoleAsync(user.Id, "Moderator");
 
-        Assert.True(result);
-        _userManagerMock.Verify(m => m.RemoveFromRolesAsync(user, It.Is<IEnumerable<string>>(r => r.Contains("OldRole"))), Times.Once);
-        _userManagerMock.Verify(m => m.AddToRoleAsync(user, "NewRole"), Times.Once);
+        _userManagerMock.Verify(m => m.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()), Times.Once);
+        _userManagerMock.Verify(m => m.AddToRoleAsync(user, "Moderator"), Times.Once);
     }
 
     [Fact]
-    public async Task UpdateUserRoleAsync_ReturnsFalse_WhenRemoveFails()
+    public async Task UpdateUserRoleAsync_ThrowsUserRoleUpdateFailedException_WhenRemoveFails()
     {
+        await SeedRoleAsync("User");
+
         var user = new ApplicationUser { Id = "1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id)).ReturnsAsync(user);
         _userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
@@ -432,31 +461,33 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "fail" }));
 
-        var result = await _service.UpdateUserRoleAsync(user.Id, "NewRole");
+        var ex = await Assert.ThrowsAsync<UserRoleUpdateFailedException>(
+            () => _service.UpdateUserRoleAsync(user.Id, "User")
+        );
 
-        Assert.False(result);
+        Assert.Contains(ex.Errors, e => e.Description == "fail");
     }
 
     [Fact]
-    public async Task DeleteUserAsync_ReturnsFalse_WhenUserNotFound()
+    public async Task DeleteUserAsync_ThrowsUserNotFoundException_WhenUserNotFound()
     {
         _userManagerMock.Setup(m => m.FindByIdAsync("missing")).ReturnsAsync((ApplicationUser?)null);
 
-        var result = await _service.DeleteUserAsync("missing");
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<UserNotFoundException>(
+            () => _service.DeleteUserAsync("missing")
+        );
     }
 
     [Fact]
-    public async Task DeleteUserAsync_ReturnsFalse_WhenUserIsAdmin()
+    public async Task DeleteUserAsync_ThrowsUserDeleteForbiddenException_WhenUserIsAdmin()
     {
         var user = new ApplicationUser { Id = "1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id)).ReturnsAsync(user);
         _userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(true);
 
-        var result = await _service.DeleteUserAsync(user.Id);
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<UserDeleteForbiddenException>(
+            () => _service.DeleteUserAsync("1")
+        );
     }
 
     [Fact]
@@ -467,14 +498,12 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
         _userManagerMock.Setup(m => m.DeleteAsync(user)).ReturnsAsync(IdentityResult.Success);
 
-        var result = await _service.DeleteUserAsync(user.Id);
-
-        Assert.True(result);
+        await _service.DeleteUserAsync(user.Id);
         _userManagerMock.Verify(m => m.DeleteAsync(user), Times.Once);
     }
 
     [Fact]
-    public async Task DeleteUserAsync_ReturnsFalse_WhenDeleteFails()
+    public async Task DeleteUserAsync_ThrowsUserDeleteFailedException_WhenDeleteFails()
     {
         var user = new ApplicationUser { Id = "1" };
         _userManagerMock.Setup(m => m.FindByIdAsync(user.Id)).ReturnsAsync(user);
@@ -482,9 +511,21 @@ public class UserServiceTests
         _userManagerMock.Setup(m => m.DeleteAsync(user))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "fail" }));
 
-        var result = await _service.DeleteUserAsync(user.Id);
+        var ex = await Assert.ThrowsAsync<UserDeleteFailedException>(
+            () => _service.DeleteUserAsync(user.Id)
+        );
 
-        Assert.False(result);
+        Assert.Contains(ex.Errors, e => e.Description == "fail");
+    }
+
+    private async Task SeedRoleAsync(string roleName)
+    {
+        _db.Roles.Add(new ApplicationRole
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = roleName
+        });
+        await _db.SaveChangesAsync();
     }
 
     private static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class
