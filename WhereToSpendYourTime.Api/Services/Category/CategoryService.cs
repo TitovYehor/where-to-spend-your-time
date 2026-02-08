@@ -71,7 +71,6 @@ public class CategoryService : ICategoryService
         ValidateCategory(request.Name);
 
         var name = request.Name.Trim();
-
         if (await _db.Categories.AnyAsync(c => c.Name == name))
         {
             throw new CategoryAlreadyExistsException(name);
@@ -98,8 +97,13 @@ public class CategoryService : ICategoryService
             throw new CategoryNotFoundException(id);
         }
 
-        category.Name = request.Name.Trim();
+        var name = request.Name.Trim();
+        if (await _db.Categories.AnyAsync(c => c.Name == name))
+        {
+            throw new CategoryAlreadyExistsException(name);
+        }
 
+        category.Name = name;
         await _db.SaveChangesAsync();
     }
 
