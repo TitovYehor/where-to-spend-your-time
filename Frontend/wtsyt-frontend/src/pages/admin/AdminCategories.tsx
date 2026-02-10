@@ -5,6 +5,7 @@ import { handleApiError } from "../../utils/handleApi";
 import { Search, PlusCircle, ChevronLeft, ChevronRight, Folders } from "lucide-react";
 import CategoryAdminCard from "../../components/categories/CategoryAdminCard";
 import Alert from "../../components/common/Alerts";
+import { extractProblemDetailsError } from "../../utils/extractProblemDetailsError";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,10 +38,10 @@ export default function AdminCategories() {
       );
       setCategories(data.items);
       setTotalCount(data.totalCount);
-    } catch (err) {
+    } catch (err: any) {
       if (!signal?.aborted) {
         handleApiError(err);
-        setError("Failed to load categories");
+        setError(extractProblemDetailsError(err));
       }
     } finally {
       if (!signal?.aborted) {
@@ -86,9 +87,9 @@ export default function AdminCategories() {
       setName("");
       fetchCategories();
       setError("");
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to save category");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -117,7 +118,7 @@ export default function AdminCategories() {
       setName("");
     } catch (err) {
       handleApiError(err);
-      setError("Failed to delete category");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };

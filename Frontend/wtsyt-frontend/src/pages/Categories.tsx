@@ -5,6 +5,7 @@ import { handleApiError } from '../utils/handleApi';
 import { Search, Folders } from "lucide-react";
 import CategoryCard from '../components/categories/CategoryCard';
 import Alert from '../components/common/Alerts';
+import { extractProblemDetailsError } from '../utils/extractProblemDetailsError';
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -23,9 +24,10 @@ export default function Categories() {
 
         const result = await getCategories(controller.signal);
         setCategories(result);
-      } catch (e) {
+      } catch (err: any) {
         if (!controller.signal.aborted) {
-          setError(handleApiError(e));
+          handleApiError(err);
+          setError(extractProblemDetailsError(err));
         }
       } finally {
         if (!controller.signal.aborted) {
