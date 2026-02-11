@@ -6,6 +6,7 @@ import type { TagPagedResult } from "../../types/pagination/pagedResult.ts";
 import { Tags as TagsIcon, Search, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import TagAdminCard from "../../components/tags/TagAdminCard.tsx";
 import Alert from "../../components/common/Alerts.tsx";
+import { extractProblemDetailsError } from "../../utils/extractProblemDetailsError.ts";
 
 export default function AdminTags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -38,10 +39,10 @@ export default function AdminTags() {
       );
       setTags(data.items);
       setTotalCount(data.totalCount);
-    } catch (err) {
+    } catch (err: any) {
       if (!signal?.aborted) {
         handleApiError(err);
-        setError("Failed to load tags");
+        setError(extractProblemDetailsError(err));
       }
     } finally {
       if (!signal?.aborted) {
@@ -89,9 +90,9 @@ export default function AdminTags() {
       setName("");
       fetchTags();
       setError("");
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to save tag");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -118,9 +119,9 @@ export default function AdminTags() {
       setMessage("Tag deleted");
       setEditingId(null);
       setName("");
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to delete tag");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };

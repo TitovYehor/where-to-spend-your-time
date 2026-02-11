@@ -5,6 +5,7 @@ import { handleApiError } from '../utils/handleApi';
 import { Tags as TagsIcon, Search as SearchIcon } from "lucide-react";
 import TagCard from '../components/tags/TagCard';
 import Alert from '../components/common/Alerts';
+import { extractProblemDetailsError } from '../utils/extractProblemDetailsError';
 
 export default function Tags() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -23,9 +24,10 @@ export default function Tags() {
       try {
         const result = await getTags(controller.signal);
         setTags(result);
-      } catch (e) {
+      } catch (err: any) {
         if (!controller.signal.aborted) {
-          setError(handleApiError(e));
+          handleApiError(err);
+          setError(extractProblemDetailsError(err));
         }
       } finally {
         if (!controller.signal.aborted) {
