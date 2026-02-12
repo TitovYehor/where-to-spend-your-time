@@ -20,7 +20,7 @@ export default function AdminCategories() {
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
   const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);

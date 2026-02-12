@@ -12,7 +12,7 @@ export default function Tags() {
   const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
 
   useEffect(() => {
     const controller = new AbortController();
