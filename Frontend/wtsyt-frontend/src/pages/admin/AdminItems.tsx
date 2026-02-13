@@ -13,6 +13,7 @@ import { deleteMedia, getMediaUrl, uploadMedia } from "../../services/mediaServi
 import { Boxes, ChevronLeft, ChevronRight, PlusCircle, Search } from "lucide-react";
 import ItemAdminCard from "../../components/items/ItemAdminCard";
 import Alert from "../../components/common/Alerts";
+import { extractProblemDetailsError } from "../../utils/extractProblemDetailsError";
 
 export default function AdminItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -49,7 +50,7 @@ export default function AdminItems() {
     ...tags.map(tag => ({ value: tag.name, label: tag.name }))
   ];
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
   const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -75,10 +76,10 @@ export default function AdminItems() {
       setTotalCount(itemList.totalCount);
       setCategories(categoryList);
       setTags(tagList);
-    } catch (err) {
+    } catch (err: any) {
       if (!signal?.aborted) {
         handleApiError(err);
-        setError("Failed to fetch data");
+        setError(extractProblemDetailsError(err));
       }
     } finally {
       if (!signal?.aborted) {
@@ -141,9 +142,9 @@ export default function AdminItems() {
       }
 
       setError("");
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to save item");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -175,8 +176,9 @@ export default function AdminItems() {
       setError("");
       setMessage("Item deleted");
       fetchItemsAndMeta();
-    } catch {
-      setError("Failed to delete item");
+    } catch (err: any) {
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -198,8 +200,9 @@ export default function AdminItems() {
       setTagInput("");
       setError("");
       setMessage("Tag added");
-    } catch {
-      setError("Failed to add tag");
+    } catch (err: any) {
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -220,8 +223,9 @@ export default function AdminItems() {
 
       setError("");
       setMessage("Tag removed");
-    } catch {
-      setError("Failed to remove tag");
+    } catch (err: any) {
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -245,9 +249,9 @@ export default function AdminItems() {
       setError("");
       setMediaFile(null);
       setMediaPreview(null);
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to upload media");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -269,9 +273,9 @@ export default function AdminItems() {
         setError("Failed to delete media");
         setMessage("");
       }
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Error deleting media");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };

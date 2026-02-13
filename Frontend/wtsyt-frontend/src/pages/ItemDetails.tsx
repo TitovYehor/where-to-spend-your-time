@@ -13,6 +13,7 @@ import ReviewCard from "../components/reviews/ReviewCard";
 import { Image as ImageIcon, Video, Tag as TagIcon, FileText, Star, FolderOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatRating } from "../utils/formatters";
 import Alert from "../components/common/Alerts";
+import { extractProblemDetailsError } from "../utils/extractProblemDetailsError";
 
 interface ItemDetailsProps {
   setDisableBackground?: (disabled: boolean) => void;
@@ -33,7 +34,7 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
   const [message, setMessage] = useState("");
 
   const itemId = Number(id);
@@ -45,9 +46,10 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
     try {
       const itemData = await getItemById(itemId, signal);
       setItem(itemData);
-    } catch (e) {
+    } catch (err: any) {
       if (!signal?.aborted) {
-        setError(handleApiError(e));
+        handleApiError(err);
+        setError(extractProblemDetailsError(err));
       }
     }
   };
@@ -58,9 +60,10 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       const reviewsData = await getPagedReviewsForItem(itemId, { page, pageSize }, signal);
       setReviews(reviewsData.items);
       setTotalReviews(reviewsData.totalCount);
-    } catch (e) {
+    } catch (err: any) {
       if (!signal?.aborted) {
-        setError(handleApiError(e));
+        handleApiError(err);
+        setError(extractProblemDetailsError(err));
       }
     }
   };
@@ -73,13 +76,14 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
       setTitle(myReviewData.title);
       setContent(myReviewData.content);
       setRating(myReviewData.rating);
-    } catch (e) {
+    } catch (err: any) {
       if (!signal?.aborted) {
         setMyReview(null);
         setTitle("");
         setContent("");
         setRating(0);
-        setError(handleApiError(e));
+        handleApiError(err);
+        setError(extractProblemDetailsError(err));
       }
     }
   };
@@ -124,10 +128,10 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
 
       await fetchReviews();
       await fetchMyReview();
-    } catch (e: any) {
+    } catch (err: any) {
       setMessage("");
-      const message = handleApiError(e);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
@@ -144,9 +148,9 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
 
       await fetchReviews();
       await fetchMyReview();
-    } catch (e) {
-      const message = handleApiError(e);
-      setError(message);
+    } catch (err: any) {
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
