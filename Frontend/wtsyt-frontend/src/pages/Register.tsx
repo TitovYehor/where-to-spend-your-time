@@ -4,6 +4,7 @@ import { register } from "../services/authService";
 import { handleApiError } from "../utils/handleApi";
 import { User, Mail, Lock, LogIn } from "lucide-react";
 import Alert from "../components/common/Alerts";
+import { extractProblemDetailsError } from "../utils/extractProblemDetailsError";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -14,7 +15,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [errors, setErrors] = useState<string[]>([]);
+  const [error, setError] = useState<string | string[]>("");
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
@@ -36,13 +37,13 @@ const Register = () => {
       newErrors.push("Passwords do not match");
     }
 
-    setErrors(newErrors);
+    setError(newErrors);
     return newErrors.length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors([]);
+    setError("");
 
     if (!validate()) return;
 
@@ -52,22 +53,8 @@ const Register = () => {
 
       window.location.replace("/login?register=true");
     } catch (err: any) {
-      const data = err?.response?.data;
-
-      let errorList: string[] = [];
-
-      if (Array.isArray(data)) {
-        errorList = data.map((e: any) => e.description || e.toString());
-      } else if (typeof data === "string") {
-        errorList = [data];
-      } else if (data?.message) {
-        errorList = [data.message];
-      } else {
-        const message = handleApiError(err);
-        errorList = [message];
-      }
-      
-      setErrors(errorList);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     } finally {
       setLoading(false);
     }
@@ -78,7 +65,7 @@ const Register = () => {
       <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
         
-        <Alert type="error" message={errors} onClose={() => setErrors([])} />
+        <Alert type="error" message={error} autoClose={false} onClose={() => setError("")} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

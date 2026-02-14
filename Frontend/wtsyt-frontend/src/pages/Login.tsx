@@ -6,6 +6,7 @@ import { getMyProfile } from "../services/userService";
 import { handleApiError } from "../utils/handleApi";
 import { Mail, Lock, LogIn } from "lucide-react";
 import Alert from "../components/common/Alerts";
+import { extractProblemDetailsError } from "../utils/extractProblemDetailsError";
 
 const Login = () => {
   const { setUser } = useAuth();
@@ -13,7 +14,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -33,8 +34,8 @@ const Login = () => {
 
       window.location.replace("/");
     } catch (err: any) {
-      const message = handleApiError(err);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
