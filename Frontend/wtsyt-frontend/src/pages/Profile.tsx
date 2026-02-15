@@ -10,6 +10,7 @@ import { getPagedReviewsForUser } from "../services/reviewService";
 import { getPagedCommentsForUser } from "../services/commentService";
 import { Edit3, FileText, KeyRound, Loader2, Mail, MessageSquare, Save, User, Lock, Settings, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import Alert from "../components/common/Alerts";
+import { extractProblemDetailsError } from "../utils/extractProblemDetailsError";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
@@ -29,7 +30,7 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   
   const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [error, setError] = useState<string | string[]>("");
 
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const commentsRef = useRef<HTMLDivElement | null>(null);
@@ -53,7 +54,8 @@ const Profile = () => {
         setTotalReviews(reviewsData.totalCount);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setErrorMessages([handleApiError(err)]);
+          handleApiError(err);
+          setError(extractProblemDetailsError(err));
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -80,7 +82,8 @@ const Profile = () => {
         setTotalComments(commentsData.totalCount);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setErrorMessages([handleApiError(err)]);
+          handleApiError(err);
+          setError(extractProblemDetailsError(err));
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -115,42 +118,42 @@ const Profile = () => {
 
   const handleProfileUpdate = async () => {
     setSuccessMessage("");
-    setErrorMessages([]);
+    setError("");
 
     const trimmedName = newDisplayName.trim();
 
     if (trimmedName.length < 2) {
-      setErrorMessages(["Display name must be at least 2 characters."]);
+      setError("Display name must be at least 2 characters");
       return;
     }
 
     if (trimmedName === user?.displayName) {
-      return setSuccessMessage("No changes to update.");
+      return setSuccessMessage("No changes to update");
     }
 
     try {
       await updateProfile({ displayName: trimmedName });
       await refreshUser();
 
-      setSuccessMessage("Profile updated successfully!");
+      setSuccessMessage("Profile updated successfully");
     } catch (err: any) {
-      const message = handleApiError(err);
-      setErrorMessages([message]);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
   const handlePasswordChange = async () => {
       setSuccessMessage("");
-      setErrorMessages([]);
+      setError("");
 
       if (!newPassword || newPassword.length < 6) {
-        setErrorMessages(["Password must be at least 6 characters."]);
+        setError("Password must be at least 6 characters");
         return;
       }
 
       try {
         await updatePassword({ currentPassword, newPassword });
-        setSuccessMessage("Password changed successfully!");
+        setSuccessMessage("Password changed successfully");
         setCurrentPassword("");
         setNewPassword("");
       } catch (err: any) {
@@ -169,7 +172,7 @@ const Profile = () => {
           errorList = [message];
         }
 
-        setErrorMessages(errorList);
+        setError(errorList);
       }
   };
 
@@ -227,7 +230,7 @@ const Profile = () => {
         </h2>
 
         <Alert type="success" message={successMessage} onClose={() => setSuccessMessage("")} />
-        <Alert type="error" message={errorMessages} onClose={() => setErrorMessages([])} />
+        <Alert type="error" message={error} onClose={() => setError("")} />
 
         <div className="space-y-6">
           <div className="space-y-2">
