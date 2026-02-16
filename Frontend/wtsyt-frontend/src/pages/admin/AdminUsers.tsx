@@ -8,6 +8,7 @@ import type { UserPagedResult } from "../../types/pagination/pagedResult.ts";
 import { Users as UsersIcon, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import UserAdminCard from "../../components/users/UserAdminCard.tsx";
 import Alert from "../../components/common/Alerts.tsx";
+import { extractProblemDetailsError } from "../../utils/extractProblemDetailsError.ts";
 
 export default function AdminUsers() {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ export default function AdminUsers() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
   const [message, setMessage] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -47,10 +48,10 @@ export default function AdminUsers() {
       }, signal);
       setUsers(data.items);
       setTotalCount(data.totalCount);
-    } catch (err) {
+    } catch (err: any) {
       if (!signal?.aborted) {
         handleApiError(err);
-        setError("Failed to load data");
+        setError(extractProblemDetailsError(err));
       }
     } finally {
       if (!signal?.aborted) {
@@ -75,9 +76,10 @@ export default function AdminUsers() {
       {
         const roles = await getRoles(controller.signal);
         setRoles(roles);
-      } catch (e) {
+      } catch (err: any) {
         if (!controller.signal.aborted) {
-          handleApiError(e);
+          handleApiError(err);
+          setError(extractProblemDetailsError(err));
         }
       }
     };
@@ -104,9 +106,9 @@ export default function AdminUsers() {
       setRole("");
       fetchData();
       setError("");
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to update user role");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -132,9 +134,9 @@ export default function AdminUsers() {
       setError("");
       setMessage("User deleted");
       setEditingId(null);
-    } catch (err) {
+    } catch (err: any) {
       handleApiError(err);
-      setError("Failed to delete user");
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
