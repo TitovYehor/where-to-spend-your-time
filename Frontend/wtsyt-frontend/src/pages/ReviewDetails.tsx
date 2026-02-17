@@ -11,6 +11,7 @@ import UserProfileLink from "../components/users/UserProfileLinks";
 import { Star, Pencil, Trash2, MessageSquare, PlusCircle, ChevronLeft, ChevronRight, Box } from "lucide-react";
 import CommentManagementCard from "../components/comments/CommentManagementCard";
 import Alert from "../components/common/Alerts";
+import { extractProblemDetailsError } from "../utils/extractProblemDetailsError";
 
 export default function ReviewDetails() {
   const { reviewId } = useParams();
@@ -21,7 +22,7 @@ export default function ReviewDetails() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
 
   const [totalComments, setTotalComments] = useState(0);
   const [page, setPage] = useState(1);
@@ -82,8 +83,8 @@ export default function ReviewDetails() {
       setPage(1);
       await fetchData();
     } catch (err: any) {
-      const message = handleApiError(err);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -97,8 +98,8 @@ export default function ReviewDetails() {
 
       navigate(-1);
     } catch (err: any) {
-      const message = handleApiError(err);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
@@ -117,8 +118,8 @@ export default function ReviewDetails() {
       setMessage("Comment deleted");
       await fetchData();
     } catch (err: any) {
-      const message = handleApiError(err);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
       setMessage("");
     }
   };
@@ -136,8 +137,8 @@ export default function ReviewDetails() {
       setIsEditing(false);
       fetchData();
     } catch (err: any) {
-      const message = handleApiError(err);
-      setError(message);
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
 
