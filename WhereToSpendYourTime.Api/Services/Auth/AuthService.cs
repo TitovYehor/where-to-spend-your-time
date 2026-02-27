@@ -5,6 +5,17 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Auth;
 
+/// <summary>
+/// Provides authentication and user management functionality
+/// using ASP.NET Core Identity
+/// </summary>
+/// <remarks>
+/// This service is responsible for:
+/// - User registration
+/// - User authentication
+/// - Default role assignment
+/// - User logout
+/// </remarks>
 public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -19,6 +30,7 @@ public class AuthService : IAuthService
         _signInManager = signInManager;
     }
 
+    /// <inheritdoc />
     public async Task RegisterAsync(RegisterRequest request)
     {
         if (request == null)
@@ -58,6 +70,7 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <inheritdoc />
     public async Task LoginAsync(LoginRequest request)
     {
         if (request == null)
@@ -83,6 +96,7 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <inheritdoc />
     public async Task LogoutAsync()
     {
         await _signInManager.SignOutAsync();
