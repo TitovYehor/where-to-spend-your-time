@@ -10,6 +10,17 @@ using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Services.Category;
 
+/// <summary>
+/// Implements category management logic using Entity Framework Core
+/// and AutoMapper projections
+/// </summary>
+/// <remarks>
+/// This service:
+/// - Uses AutoMapper's <see cref="ProjectTo{T}(IConfigurationProvider)"/>
+///   for efficient database projection
+/// - Enforces uniqueness of category names
+/// - Throws domain-specific exceptions handled by the global exception handler
+/// </remarks>
 public class CategoryService : ICategoryService
 {
     private readonly AppDbContext _db;
@@ -21,6 +32,7 @@ public class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
     {
         return await _db.Categories
@@ -30,6 +42,7 @@ public class CategoryService : ICategoryService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(CategoryFilterRequest filter)
     {
         var query = _db.Categories.AsNoTracking();
@@ -47,6 +60,7 @@ public class CategoryService : ICategoryService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<CategoryDto> GetByIdAsync(int id)
     {
         return await _db.Categories
@@ -57,6 +71,7 @@ public class CategoryService : ICategoryService
             ?? throw new CategoryNotFoundException(id);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ItemDto>> GetItemsByCategoryIdAsync(int categoryId)
     {
         return await _db.Items
@@ -66,6 +81,7 @@ public class CategoryService : ICategoryService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<CategoryDto> CreateCategoryAsync(CategoryCreateRequest request)
     {
         ValidateCategory(request.Name);
@@ -87,6 +103,7 @@ public class CategoryService : ICategoryService
             .FirstAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateCategoryAsync(int id, CategoryUpdateRequest request)
     {
         ValidateCategory(request.Name);
@@ -107,6 +124,7 @@ public class CategoryService : ICategoryService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task DeleteCategoryAsync(int id)
     {
         var category = await _db.Categories.FindAsync(id) ?? throw new CategoryNotFoundException(id);
