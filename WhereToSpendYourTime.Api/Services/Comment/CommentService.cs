@@ -11,6 +11,18 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Comment;
 
+/// <summary>
+/// Implements comment management logic using Entity Framework Core
+/// and AutoMapper projections
+/// </summary>
+/// <remarks>
+/// This service:
+/// - Retrieves comments with pagination support
+/// - Validates comment content
+/// - Ensures related review existence when creating comments
+/// - Enforces ownership and role-based authorization for updates and deletions
+/// - Throws domain-specific exceptions handled by the global exception handler
+/// </remarks>
 public class CommentService : ICommentService
 {
     private readonly AppDbContext _db;
@@ -22,6 +34,7 @@ public class CommentService : ICommentService
         _mapper = mapper;
     }
 
+    /// <inheritdoc />
     public async Task<List<CommentDto>> GetCommentsByReviewIdAsync(int reviewId)
     {
         return await _db.Comments
@@ -32,6 +45,7 @@ public class CommentService : ICommentService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<CommentDto>> GetPagedCommentsByReviewIdAsync(int reviewId, CommentFilterRequest filter)
     {
         var query = _db.Comments
@@ -43,6 +57,7 @@ public class CommentService : ICommentService
         return await query.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<CommentDto>> GetPagedCommentsByUserIdAsync(string userId, CommentFilterRequest filter)
     {
         var query = _db.Comments
@@ -54,6 +69,7 @@ public class CommentService : ICommentService
         return await query.ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<CommentDto> AddCommentAsync(int reviewId, string userId, string content)
     {
         if (string.IsNullOrWhiteSpace(content))
@@ -85,6 +101,7 @@ public class CommentService : ICommentService
             .FirstAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateCommentAsync(int commentId, string userId, string newContent)
     {
         if (string.IsNullOrWhiteSpace(newContent))
@@ -107,6 +124,7 @@ public class CommentService : ICommentService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task DeleteCommentAsync(int commentId, ApplicationUser user)
     {
         var comment = await _db.Comments.FindAsync(commentId) ?? throw new CommentNotFoundException(commentId);
