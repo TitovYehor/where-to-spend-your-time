@@ -13,6 +13,19 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Item;
 
+/// <summary>
+/// Implements item management logic using Entity Framework Core
+/// and AutoMapper projections
+/// </summary>
+/// <remarks>
+/// This service:
+/// - Supports advanced filtering by search term, category and tags
+/// - Provides dynamic sorting (title, rating, popularity)
+/// - Calculates popularity using weighted rating and review count
+/// - Manages many-to-many relationships between items and tags
+/// - Validates category existence before creation or update
+/// - Throws domain-specific exceptions handled by the global exception handler
+/// </remarks>
 public class ItemService : IItemService
 {
     private const double RatingWeight = 2.0;
@@ -27,6 +40,7 @@ public class ItemService : IItemService
         _mapper = mapper;
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<ItemDto>> GetFilteredItemsAsync(ItemFilterRequest filter)
     {
         var query = _db.Items.AsNoTracking();
@@ -79,6 +93,7 @@ public class ItemService : IItemService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<ItemDto> GetByIdAsync(int id)
     {
         return await _db.Items
@@ -89,6 +104,7 @@ public class ItemService : IItemService
             ?? throw new ItemNotFoundException(id);
     }
 
+    /// <inheritdoc />
     public async Task<TagDto> AddTagForItemAsync(int id, string tagName)
     {
         tagName = tagName.Trim();
@@ -131,6 +147,7 @@ public class ItemService : IItemService
         return _mapper.Map<TagDto>(tag);
     }
 
+    /// <inheritdoc />
     public async Task RemoveTagFromItemAsync(int id, string tagName)
     {
         tagName = tagName.Trim();
@@ -161,6 +178,7 @@ public class ItemService : IItemService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task<ItemDto> CreateAsync(ItemCreateRequest request)
     {
         ValidateItem(request.Title, request.Description);
@@ -186,6 +204,7 @@ public class ItemService : IItemService
         return _mapper.Map<ItemDto>(item);
     }
 
+    /// <inheritdoc />
     public async Task UpdateAsync(int id, ItemUpdateRequest request)
     {
         ValidateItem(request.Title, request.Description);
@@ -211,6 +230,7 @@ public class ItemService : IItemService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(int id)
     {
         var item = await _db.Items.FindAsync(id) ?? throw new ItemNotFoundException(id);
