@@ -6,6 +6,11 @@ using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Services.Media;
 
+/// <summary>
+/// Provides functionality for managing media files, including
+/// uploading to Azure Blob Storage and maintaining media metadata
+/// within the application database
+/// </summary>
 public class MediaService : IMediaService
 {
     private readonly AppDbContext _db;
@@ -20,6 +25,7 @@ public class MediaService : IMediaService
         _containerClient.CreateIfNotExists();
     }
 
+    /// <inheritdoc />
     public async Task<MediaDto> UploadAsync(CreateMediaDto dto)
     {
         if (dto == null)
@@ -60,6 +66,7 @@ public class MediaService : IMediaService
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(int mediaId)
     {
         var media = await _db.Media.FindAsync(mediaId) ?? throw new MediaNotFoundException(mediaId);
