@@ -11,6 +11,10 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Review;
 
+/// <summary>
+/// Provides review management functionality, including querying,
+/// creation, modification, and deletion with validation and authorization checks
+/// </summary>
 public class ReviewService : IReviewService
 {
     private readonly AppDbContext _db;
@@ -22,6 +26,7 @@ public class ReviewService : IReviewService
         _mapper = mapper;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ReviewDto>> GetReviewsForItemAsync(int itemId)
     {
         return await _db.Reviews
@@ -32,6 +37,7 @@ public class ReviewService : IReviewService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<ReviewDto>> GetPagedReviewsForItemAsync(int itemId, ReviewFilterRequest filter)
     {
         var query = _db.Reviews
@@ -44,6 +50,7 @@ public class ReviewService : IReviewService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<ReviewDto>> GetPagedReviewsForUserAsync(string userId, ReviewFilterRequest filter)
     {
         var query = _db.Reviews
@@ -56,6 +63,7 @@ public class ReviewService : IReviewService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<ReviewDto> GetMyReviewForItemAsync(string userId, int itemId)
     {
         return await _db.Reviews
@@ -66,6 +74,7 @@ public class ReviewService : IReviewService
             ?? throw new UserItemReviewNotFoundException(userId, itemId);
     }
 
+    /// <inheritdoc />
     public async Task<ReviewDto> GetByIdAsync(int id)
     {
         return await _db.Reviews
@@ -76,6 +85,7 @@ public class ReviewService : IReviewService
             ?? throw new ReviewNotFoundException(id);
     }
 
+    /// <inheritdoc />
     public async Task<ReviewDto> CreateReviewAsync(string userId, ReviewCreateRequest request)
     {
         if (request.ItemId < 1)
@@ -117,6 +127,7 @@ public class ReviewService : IReviewService
             .FirstAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateReviewAsync(int reviewId, string userId, ReviewUpdateRequest request)
     {
         ValidateReview(request.Title, request.Content, request.Rating);
@@ -138,6 +149,7 @@ public class ReviewService : IReviewService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task DeleteReviewAsync(int reviewId, ApplicationUser user)
     {
         var review = await _db.Reviews.FindAsync(reviewId) ?? throw new ReviewNotFoundException(reviewId);
