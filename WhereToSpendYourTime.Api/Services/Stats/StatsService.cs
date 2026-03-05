@@ -7,6 +7,10 @@ using WhereToSpendYourTime.Data;
 
 namespace WhereToSpendYourTime.Api.Services.Stats;
 
+/// <summary>
+/// Provides statistical data aggregation by querying the database
+/// for item performance, user activity, and recent review information
+/// </summary>
 public class StatsService : IStatsService
 {
     private readonly AppDbContext _db;
@@ -18,6 +22,7 @@ public class StatsService : IStatsService
         _mapper = mapper;
     }
 
+    /// <inheritdoc />
     public async Task<StatsDto> GetStatsAsync()
     {
         var topRatedItems = await _db.Items
