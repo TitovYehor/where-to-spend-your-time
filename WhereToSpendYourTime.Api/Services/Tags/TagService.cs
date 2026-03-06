@@ -10,6 +10,10 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.Tags;
 
+/// <summary>
+/// Provides tag management functionality, including querying,
+/// filtering, creation, modification, and deletion of tags
+/// </summary>
 public class TagService : ITagService
 {
     private readonly AppDbContext _db;
@@ -21,6 +25,7 @@ public class TagService : ITagService
         this._mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TagDto>> GetTagsAsync()
     {
         return await _db.Tags
@@ -30,6 +35,7 @@ public class TagService : ITagService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<TagDto>> GetPagedTagsAsync(TagFilterRequest filter)
     {
         var query = _db.Tags.AsNoTracking();
@@ -47,6 +53,7 @@ public class TagService : ITagService
             .ToPagedResultAsync(filter.Page, filter.PageSize);
     }
 
+    /// <inheritdoc />
     public async Task<TagDto> GetTagByIdAsync(int id)
     {
         return await _db.Tags
@@ -57,6 +64,7 @@ public class TagService : ITagService
             ?? throw new TagNotFoundException(id);
     }
 
+    /// <inheritdoc />
     public async Task<TagDto> CreateTagAsync(TagCreateRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -82,6 +90,7 @@ public class TagService : ITagService
             .FirstAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateTagAsync(int id, TagUpdateRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -100,6 +109,7 @@ public class TagService : ITagService
         await _db.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task DeleteTagAsync(int id)
     {
         var tag = await _db.Tags.FindAsync(id) ?? throw new TagNotFoundException(id);
