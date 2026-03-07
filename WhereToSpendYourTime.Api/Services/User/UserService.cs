@@ -11,6 +11,11 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Services.User;
 
+/// <summary>
+/// Provides user management functionality including
+/// profile retrieval, credential management,
+/// and administrative role operations
+/// </summary>
 public class UserService : IUserService
 {
     private readonly AppDbContext _db;
@@ -24,6 +29,7 @@ public class UserService : IUserService
         this._userManager = userManager;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ApplicationUserDto>> GetAllUsersAsync()
     {
         var users = await _db.Users
@@ -37,6 +43,7 @@ public class UserService : IUserService
         return users.OrderBy(u => u.Role);
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<ApplicationUserDto>> GetPagedUsersAsync(UserFilterRequest filter)
     {
         var query = _db.Users
@@ -67,6 +74,7 @@ public class UserService : IUserService
         return pagedResult;
     }
 
+    /// <inheritdoc />
     public async Task<ApplicationUserDto> GetProfileAsync(string userId, bool isSelf)
     {
         var userDto = await _db.Users
@@ -90,6 +98,7 @@ public class UserService : IUserService
         return userDto;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<string>> GetRolesAsync()
     {
         return await _db.Roles
@@ -99,6 +108,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task UpdateProfileAsync(string userId, string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName) || displayName.Length < 2)
@@ -125,6 +135,7 @@ public class UserService : IUserService
         }
     }
 
+    /// <inheritdoc />
     public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
         var user = await _userManager.FindByIdAsync(userId) ?? throw new UserNotFoundException(userId);
@@ -140,6 +151,7 @@ public class UserService : IUserService
         }
     }
 
+    /// <inheritdoc />
     public async Task UpdateUserRoleAsync(string userId, string newRole)
     {
         if (string.IsNullOrWhiteSpace(newRole))
@@ -187,6 +199,7 @@ public class UserService : IUserService
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
