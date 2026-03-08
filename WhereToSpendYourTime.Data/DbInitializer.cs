@@ -5,8 +5,25 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Data;
 
+/// <summary>
+/// Provides database initialization and seed data logic.
+///
+/// Applies pending migrations and seeds:
+/// - Default roles
+/// - Default users
+/// - Categories
+/// - Tags
+/// - Items
+/// - Reviews and comments.
+///
+/// The seeding process is idempotent and safe to run multiple times.
+/// Intended primarily for development and demo environments
+/// </summary>
 public static class DbInitializer
 {
+    /// <summary>
+    /// Applies migrations and seeds initial data
+    /// </summary>
     public static async Task SeedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();

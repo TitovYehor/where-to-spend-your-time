@@ -5,6 +5,13 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Data;
 
+/// <summary>
+/// Application database context integrating ASP.NET Core Identity
+/// with domain entities such as items, reviews, comments, tags, and media.
+/// 
+/// Configures relationships, constraints, composite keys,
+/// and cascade delete behaviors
+/// </summary>
 public class AppDbContext
     : IdentityDbContext<ApplicationUser, ApplicationRole, string,
         IdentityUserClaim<string>, ApplicationUserRole,
@@ -13,14 +20,31 @@ public class AppDbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    /// <summary>Categories available in the system</summary>
     public DbSet<Category> Categories { get; set; }
+
+    /// <summary>Items that can be reviewed and tagged</summary>
     public DbSet<Item> Items { get; set; }
+
+    /// <summary>User reviews for items</summary>
     public DbSet<Review> Reviews { get; set; }
+
+    /// <summary>Comments attached to reviews</summary>
     public DbSet<Comment> Comments { get; set; }
+
+    /// <summary>Tags used to classify items</summary>
     public DbSet<Tag> Tags { get; set; }
+
+    /// <summary>Many-to-many join entity between items and tags</summary>
     public DbSet<ItemTag> ItemTags { get; set; }
+
+    /// <summary>Media files associated with items</summary>
     public DbSet<Media> Media { get; set; }
 
+    /// <summary>
+    /// Configures entity relationships, composite keys, indexes,
+    /// and delete behaviors
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
