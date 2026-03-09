@@ -11,6 +11,17 @@ using WhereToSpendYourTime.Api.Exceptions.Users;
 
 namespace WhereToSpendYourTime.Api.Handlers;
 
+/// <summary>
+/// Global exception handler responsible for converting application
+/// and domain exceptions into standardized HTTP responses
+/// </summary>
+/// <remarks>
+/// Maps custom domain exceptions to appropriate HTTP status codes
+/// and returns responses using the RFC7807 ProblemDetails format.
+/// 
+/// This handler centralizes API error handling and ensures
+/// consistent error responses across all endpoints
+/// </remarks>
 public class CustomExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<CustomExceptionHandler> _logger;
@@ -24,6 +35,28 @@ public class CustomExceptionHandler : IExceptionHandler
         _problemDetailsService = problemDetailsService;
     }
 
+    /// <summary>
+    /// Attempts to handle an unhandled exception that occurred
+    /// during request processing
+    /// </summary>
+    /// <remarks>
+    /// Logs the exception, maps it to an HTTP status code,
+    /// and returns a ProblemDetails response to the client.
+    /// Returns true if the exception was handled
+    /// </remarks>
+    /// <param name="httpContext">
+    /// The current HTTP context
+    /// </param>
+    /// <param name="exception">
+    /// The thrown exception
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Cancellation token for the request
+    /// </param>
+    /// <returns>
+    /// True if the exception was handled and a response was written;
+    /// otherwise false
+    /// </returns>
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
