@@ -10,6 +10,17 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Api.Mapping;
 
+/// <summary>
+/// AutoMapper profile responsible for configuring mappings
+/// between database entities and API DTOs
+/// </summary>
+/// <remarks>
+/// Centralizes transformation logic used to shape domain entities
+/// into response models returned by the API.
+/// 
+/// Includes computed fields and fallback values required for
+/// presentation purposes
+/// </remarks>
 public class MappingProfile : Profile
 {
     private const string Unknown = "Unknown";
