@@ -15,6 +15,19 @@ using WhereToSpendYourTime.Api.Services.User;
 using WhereToSpendYourTime.Data;
 using WhereToSpendYourTime.Data.Entities;
 
+/// <summary>
+/// Application entry point and configuration for the WhereToSpendYourTime API.
+/// 
+/// Responsible for:
+/// - configuring services and dependency injection
+/// - setting up Entity Framework Core and ASP.NET Core Identity
+/// - registering application services
+/// - configuring CORS, authentication, and authorization
+/// - enabling global exception handling
+/// - running database migrations and seeding initial data
+/// - starting the web application
+/// </summary>
+
 var builder = WebApplication.CreateBuilder(args);
 
 string? connStr = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -26,9 +39,11 @@ if (!string.IsNullOrWhiteSpace(connStr) && connStr.StartsWith("postgresql://"))
     connStr = PostgreUrlConverter.ConvertPostgresUrlToConnectionString(connStr);
 }
 
+// Configure database connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
 
+// Configure ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
@@ -41,6 +56,7 @@ builder.Services.AddScoped(provider =>
     return new BlobContainerClient(connectionString, containerName);
 });
 
+// Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
@@ -62,7 +78,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -78,12 +99,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
-
 builder.Services.AddAuthorization();
 
 builder.Services.AddProblemDetails();
@@ -91,9 +106,9 @@ builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
 
+// Configure middleware pipeline
 app.UseExceptionHandler();
 app.UseRouting();
-
 app.UseCors("AllowFrontend");
 
 using (var scope = app.Services.CreateScope())
