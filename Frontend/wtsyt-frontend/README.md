@@ -1,69 +1,138 @@
-# React + TypeScript + Vite
+# Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend built with Vite and TailwindCSS.
+The application communicates with a **.NET Web API** backend to handle authentication and application data.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Tech Stack
 
-## Expanding the ESLint configuration
+* React
+* TypeScript
+* Vite
+* TailwindCSS
+* Axios
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## Install dependencies
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+npm install
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Run development server
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+npm run dev
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The application will start on:
+
+http://localhost:5173
+
+---
+
+# Environment Variables
+
+This project uses environment variables for configuration.
+
+## Local Development
+
+Create a `.env.local` file in the project root:
+
+VITE_API_URL=https://localhost:7005
+
+This variable defines the base URL of the backend API.
+
+Example request:
+
+https://localhost:7005/api/auth/login
+
+`.env.local` should **not be committed** to the repository.
+
+---
+
+## Production
+
+In production the `VITE_API_URL` variable is provided by the hosting platform.
+
+Example:
+
+VITE_API_URL=https://where-to-spend-your-time-backend.onrender.com
+
+---
+
+# Project Structure
+
+src/
+├── api/            # Axios configuration and API endpoints
+├── services/       # Backend communication layer
+├── components/     # Reusable UI components
+├── pages/          # Page-level components
+├── contexts/       # React Context providers (authentication, global state)
+├── hooks/          # Custom React hooks
+├── types/          # TypeScript interfaces and models
+├── utils/          # Utility functions
+
+---
+
+# API Communication
+
+All communication with the backend API is handled through **service modules**.
+
+Example service:
+
+services/authService.ts
+
+Components should call **services**, not Axios directly.
+
+---
+
+# Axios Configuration
+
+Axios is configured in:
+
+src/api/axios.ts
+
+The configuration uses the `VITE_API_URL` environment variable as the API base URL.
+
+---
+
+# Authentication
+
+Authentication is handled by the backend API.
+
+Typical login flow:
+
+1. User submits login form
+2. Frontend calls `authService.login`
+3. Backend validates credentials
+4. Backend sets authentication cookie
+5. Axios sends the cookie automatically in future requests
+
+---
+
+# Build for Production
+
+Create a production build:
+
+npm run build
+
+Preview the production build locally:
+
+npm run preview
+
+---
+
+# Linting
+
+Run ESLint:
+
+npm run lint
+
+---
+
+# Notes
+
+* API requests should always be implemented through the `services` layer.
+* Components should focus on UI logic and avoid direct API calls.
+* TypeScript types are stored in the `types` directory.
