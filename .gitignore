@@ -418,3 +418,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/WhereToSpendYourTime.Api/appsettings.Development.json
+/WhereToSpendYourTime.Api/appsettings.Development.json
