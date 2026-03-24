@@ -1,5 +1,9 @@
 ﻿namespace WhereToSpendYourTime.Data.Entities;
 
+/// <summary>
+/// Join entity representing a many-to-many relationship
+/// between items and tags
+/// </summary>
 public class ItemTag
 {
     public int ItemId { get; set; }
