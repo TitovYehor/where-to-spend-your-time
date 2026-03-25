@@ -11,6 +11,15 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="CommentService"/>.
+/// 
+/// Verifies comment operations including:
+/// - retrieving comments by review or user
+/// - pagination and ordering
+/// - creating, updating, and deleting comments
+/// - permission checks for owners, moderators, and admins
+/// </summary>
 public class CommentServiceTests
 {
     private readonly AppDbContext _db;
@@ -33,8 +42,17 @@ public class CommentServiceTests
         _service = new CommentService(_db, _mapper);
     }
 
-    public delegate Task<PagedResult<CommentDto>> CommentQueryDelegate(CommentService service, string userId, int reviewId, CommentFilterRequest filter);
+    /// <summary>
+    /// Delegate used to execute comment pagination queries
+    /// for review-based or user-based comment retrieval
+    /// </summary>
+    public delegate Task<PagedResult<CommentDto>> CommentQueryDelegate(
+        CommentService service, string userId, int reviewId, CommentFilterRequest filter);
 
+    /// <summary>
+    /// Provides query methods used in parameterized tests
+    /// to verify pagination logic for comments by review or by user
+    /// </summary>
     public static TheoryData<string, CommentQueryDelegate> GetCommentQueryMethods =>
         new()
         {

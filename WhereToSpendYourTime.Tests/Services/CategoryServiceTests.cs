@@ -9,6 +9,15 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="CategoryService"/>.
+/// 
+/// Verifies category operations including:
+/// - retrieving categories
+/// - filtering and pagination
+/// - creating, updating, and deleting categories
+/// - handling validation and not-found scenarios
+/// </summary>
 public class CategoryServiceTests
 {
     private readonly AppDbContext _db;

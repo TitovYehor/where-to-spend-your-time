@@ -7,6 +7,12 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="StatsService"/>.
+/// 
+/// Verifies statistics generation including top-rated items,
+/// most-reviewed items, top reviewers, and recent reviews
+/// </summary>
 public class StatsServiceTests
 {
     private readonly AppDbContext _db;
