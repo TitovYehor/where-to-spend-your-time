@@ -10,6 +10,12 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="ReviewService"/>.
+/// 
+/// Verifies review retrieval, pagination, creation, updates,
+/// deletion, and authorization rules for owners and administrators
+/// </summary>
 public class ReviewServiceTests
 {
     private readonly AppDbContext _db;
@@ -32,8 +38,17 @@ public class ReviewServiceTests
         _service = new ReviewService(_db, _mapper);
     }
 
-    public delegate Task<PagedResult<ReviewDto>> ReviewQueryDelegate(ReviewService service, string userId, int itemId, ReviewFilterRequest filter);
+    /// <summary>
+    /// Represents a query method used to retrieve paged reviews
+    /// for either an item or a user
+    /// </summary>
+    public delegate Task<PagedResult<ReviewDto>> ReviewQueryDelegate(
+        ReviewService service, string userId, int itemId, ReviewFilterRequest filter);
 
+    /// <summary>
+    /// Provides query methods used for parameterized tests that verify
+    /// pagination behavior for both item reviews and user reviews
+    /// </summary>
     public static TheoryData<string, ReviewQueryDelegate> GetReviewQueryMethods =>
         new()
         {

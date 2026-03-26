@@ -11,6 +11,16 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="ItemService"/>.
+/// 
+/// Verifies item operations including:
+/// - filtering, sorting, and pagination
+/// - retrieving items by id
+/// - creating, updating, and deleting items
+/// - managing item tags
+/// - handling validation and not-found scenarios
+/// </summary>
 public class ItemServiceTests
 {
     private readonly AppDbContext _db;

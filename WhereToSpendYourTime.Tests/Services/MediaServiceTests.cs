@@ -14,6 +14,15 @@ using WhereToSpendYourTime.ShareLib.Enums;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="MediaService"/>.
+/// 
+/// Verifies media operations including:
+/// - uploading files to blob storage
+/// - creating database records for uploaded media
+/// - deleting media and associated blobs
+/// - handling invalid media and storage failures
+/// </summary>
 public class MediaServiceTests
 {
     private readonly AppDbContext _db;
