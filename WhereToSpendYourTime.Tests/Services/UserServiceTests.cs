@@ -13,6 +13,17 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="UserService"/>.
+/// 
+/// Verifies user management functionality including:
+/// - retrieving users and roles
+/// - pagination and search
+/// - profile access and updates
+/// - password changes
+/// - role management
+/// - user deletion and authorization rules
+/// </summary>
 public class UserServiceTests
 {
     private readonly AppDbContext _db;

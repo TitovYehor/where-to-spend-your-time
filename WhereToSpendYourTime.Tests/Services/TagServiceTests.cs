@@ -9,6 +9,12 @@ using WhereToSpendYourTime.Data.Entities;
 
 namespace WhereToSpendYourTime.Tests.Services;
 
+/// <summary>
+/// Unit tests for <see cref="TagService"/>.
+/// 
+/// Verifies tag retrieval, pagination, creation,
+/// updates, deletion, and validation behavior
+/// </summary>
 public class TagServiceTests
 {
     private readonly AppDbContext _db;
