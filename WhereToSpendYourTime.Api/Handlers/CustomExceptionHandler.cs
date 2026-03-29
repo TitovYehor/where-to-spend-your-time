@@ -118,6 +118,14 @@ public class CustomExceptionHandler : IExceptionHandler
                 StatusCodes.Status400BadRequest,
                 "Invalid login data"
             ),
+            InvalidPasswordResetRequestException => (
+                StatusCodes.Status400BadRequest,
+                "Invalid password reset data"
+            ),
+            InvalidPasswordResetTokenException => (
+                StatusCodes.Status400BadRequest,
+                "Invalid password reset token"
+            ),
             RegisterFailedException => (
                 StatusCodes.Status400BadRequest,
                 "Registration failed"
@@ -223,6 +231,10 @@ public class CustomExceptionHandler : IExceptionHandler
                 StatusCodes.Status500InternalServerError,
                 "User role assignment failed"
             ),
+            PasswordResetFailedException => (
+                StatusCodes.Status500InternalServerError,
+                "Password reset failed"
+            ),
             MediaUploadFailedException => (
                 StatusCodes.Status500InternalServerError,
                 "Media upload failed"
@@ -279,6 +291,12 @@ public class CustomExceptionHandler : IExceptionHandler
         if (exception is UserRoleAssignmentFailedException urafe)
         {
             problemDetails.Extensions[extErrors] = urafe.Errors
+                .Select(e => e.Description);
+        }
+
+        if (exception is PasswordResetFailedException prfe)
+        {
+            problemDetails.Extensions[extErrors] = prfe.Errors
                 .Select(e => e.Description);
         }
 
