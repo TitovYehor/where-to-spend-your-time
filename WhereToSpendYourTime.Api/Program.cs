@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using WhereToSpendYourTime.Api.Handlers;
@@ -6,6 +7,8 @@ using WhereToSpendYourTime.Api.Helpers;
 using WhereToSpendYourTime.Api.Services.Auth;
 using WhereToSpendYourTime.Api.Services.Category;
 using WhereToSpendYourTime.Api.Services.Comment;
+using WhereToSpendYourTime.Api.Services.Email;
+using WhereToSpendYourTime.Api.Services.Email.Config;
 using WhereToSpendYourTime.Api.Services.Item;
 using WhereToSpendYourTime.Api.Services.Media;
 using WhereToSpendYourTime.Api.Services.Review;
@@ -45,7 +48,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Configure ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddScoped(provider =>
 {
@@ -55,6 +59,11 @@ builder.Services.AddScoped(provider =>
 
     return new BlobContainerClient(connectionString, containerName);
 });
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("Email"));
+builder.Services.Configure<FrontendSettings>(
+    builder.Configuration.GetSection("Frontend"));
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -66,6 +75,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
