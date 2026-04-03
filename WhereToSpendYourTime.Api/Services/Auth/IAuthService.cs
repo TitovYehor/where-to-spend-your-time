@@ -49,4 +49,26 @@ public interface IAuthService
     /// Clears the authentication session or cookie
     /// </remarks>
     Task LogoutAsync();
+
+    /// <summary>
+    /// Sends a password reset email to the user containing a reset token
+    /// </summary>
+    /// <param name="email">The email of the user requesting a password reset</param>
+    /// <exception cref="InvalidPasswordResetRequestException">
+    /// Thrown when the email is null, empty or invalid
+    /// </exception>
+    Task RequestPasswordResetAsync(string email);
+
+    /// <summary>
+    /// Resets a user's password using the provided token
+    /// </summary>
+    /// <param name="token">The password reset token received by the user</param>
+    /// <param name="newPassword">The new password to set</param>
+    /// <exception cref="InvalidPasswordResetTokenException">
+    /// Thrown when the token is invalid or expired
+    /// </exception>
+    /// <exception cref="PasswordResetFailedException">
+    /// Thrown when resetting the password fails
+    /// </exception>
+    Task ResetPasswordAsync(string email, string token, string newPassword);
 }
