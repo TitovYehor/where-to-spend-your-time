@@ -75,4 +75,38 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync();
         return Ok();
     }
+
+    /// <summary>
+    /// Sends a password reset email to the user
+    /// </summary>
+    /// <param name="request">The email of the user requesting password reset</param>
+    /// <returns>Status 200 even if the email does not exist</returns>
+    [HttpPost("request-password-reset")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RequestPasswordReset(PasswordResetRequest request)
+    {
+        await _authService.RequestPasswordResetAsync(request.Email);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Resets the user's password using the provided token
+    /// </summary>
+    /// <param name="request">Email, token and new password</param>
+    /// <returns>Status 200 if password was reset</returns>
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> ResetPassword(PasswordResetConfirmRequest request)
+    {
+        await _authService.ResetPasswordAsync(
+            request.Email,
+            request.Token,
+            request.NewPassword
+        );
+
+        return Ok();
+    }
 }
