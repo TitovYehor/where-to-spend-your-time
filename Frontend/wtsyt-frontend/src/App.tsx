@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from "./components/Layout.js";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword.tsx";
+import ResetPasswordConfirm from './pages/ResetPasswordConfirm.tsx';
 import Register from './pages/Register.tsx';
 import Home from './pages/Home.tsx';
 import Profile from './pages/Profile.tsx';
@@ -36,6 +38,8 @@ export default function App() {
           <Route element={ <GuestOnlyRoute/> }>
             <Route path="/login" element={ <Login/> } />
             <Route path="/register" element={ <Register/> } />
+            <Route path="/request-password-reset" element={ <ResetPassword/> } />
+            <Route path="/reset-password-confirm" element={ <ResetPasswordConfirm/> } />
           </Route>
 
           <Route element={ <Layout/> }>
