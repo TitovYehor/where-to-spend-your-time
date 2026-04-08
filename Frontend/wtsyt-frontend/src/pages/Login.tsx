@@ -100,6 +100,13 @@ const Login = () => {
             Register
           </Link>
         </p>
+
+        <p className="mt-4 text-center text-sm">
+          Forgot password?{" "}
+          <Link to="/request-password-reset" className="text-blue-600 hover:underline">
+            Reset password
+          </Link>
+        </p>
       </div>
     </div>
   );
