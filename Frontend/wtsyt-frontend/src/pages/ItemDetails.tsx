@@ -83,7 +83,6 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
         setContent("");
         setRating(0);
         handleApiError(err);
-        setError(extractProblemDetailsError(err));
       }
     }
   };

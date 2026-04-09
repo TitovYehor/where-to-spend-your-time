@@ -157,22 +157,7 @@ const Profile = () => {
         setCurrentPassword("");
         setNewPassword("");
       } catch (err: any) {
-        const data = err?.response?.data;
-
-        let errorList: string[] = [];
-
-        if (Array.isArray(data)) {
-          errorList = data.map((e: any) => e.description || e.toString());
-        } else if (typeof data === "string") {
-          errorList = [data];
-        } else if (data?.message) {
-          errorList = [data.message];
-        } else {
-          const message = handleApiError(err);
-          errorList = [message];
-        }
-
-        setError(errorList);
+        setError(extractProblemDetailsError(err));
       }
   };
 
