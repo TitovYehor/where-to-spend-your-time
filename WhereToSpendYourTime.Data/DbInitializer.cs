@@ -135,7 +135,9 @@ public static class DbInitializer
         db.Categories.AddRange(
             new Category { Name = "Games" },
             new Category { Name = "Movies" },
-            new Category { Name = "Books" }
+            new Category { Name = "Books" },
+            new Category { Name = "Music" },
+            new Category { Name = "Podcasts" }
         );
 
         await db.SaveChangesAsync();
@@ -154,7 +156,8 @@ public static class DbInitializer
             new Tag { Name = "Fantasy" },
             new Tag { Name = "Detective" },
             new Tag { Name = "Sci-fi" },
-            new Tag { Name = "Management" }
+            new Tag { Name = "Management" },
+            new Tag { Name = "Horror" }
         );
 
         await db.SaveChangesAsync();
@@ -176,10 +179,13 @@ public static class DbInitializer
         var detectiveTag = tags.First(t => t.Name == "Detective");
         var scifiTag = tags.First(t => t.Name == "Sci-fi");
         var managementTag = tags.First(t => t.Name == "Management");
+        var horrorTag = tags.First(t => t.Name == "Horror");
 
         var games = categories.First(c => c.Name == "Games");
         var movies = categories.First(c => c.Name == "Movies");
         var books = categories.First(c => c.Name == "Books");
+        var music = categories.First(c => c.Name == "Music");
+        var podcasts = categories.First(c => c.Name == "Podcasts");
 
         db.Items.AddRange(
             new Item
@@ -296,6 +302,59 @@ public static class DbInitializer
                     new ItemTag { Tag = adventureTag },
                     new ItemTag { Tag = fantasyTag }
                 }
+            },
+            new Item
+            {
+                Title = "Cyberpunk 2077",
+                Description = "An open-world action RPG set in the dystopian Night City",
+                CategoryId = games.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = actionTag },
+                    new ItemTag { Tag = scifiTag }
+                }
+            },
+            new Item
+            {
+                Title = "Interstellar",
+                Description = "Sci-fi film about space exploration and humanity’s survival",
+                CategoryId = movies.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = scifiTag },
+                    new ItemTag { Tag = adventureTag }
+                }
+            },
+            new Item
+            {
+                Title = "Dracula",
+                Description = "Classic gothic horror novel featuring Count Dracula",
+                CategoryId = books.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = horrorTag },
+                    new ItemTag { Tag = fantasyTag }
+                }
+            },
+            new Item
+            {
+                Title = "Random Access Memories",
+                Description = "Grammy-winning electronic music album by Daft Punk",
+                CategoryId = music.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = adventureTag }
+                }
+            },
+            new Item
+            {
+                Title = "Some Podcast",
+                Description = "Long-form conversational podcast covering many topics",
+                CategoryId = podcasts.Id,
+                ItemTags = new List<ItemTag>
+                {
+                    new ItemTag { Tag = detectiveTag }
+                }
             }
         );
 
@@ -317,12 +376,19 @@ public static class DbInitializer
         var witcher3 = await db.Items.FirstAsync(i => i.Title == "The Witcher 3");
         var witcher2 = await db.Items.FirstAsync(i => i.Title == "The Witcher 2");
         var factorio = await db.Items.FirstAsync(i => i.Title == "Factorio");
+        var cyberpunk = await db.Items.FirstAsync(i => i.Title == "Cyberpunk 2077");
 
         var avatar = await db.Items.FirstAsync(i => i.Title == "Avatar");
         var django = await db.Items.FirstAsync(i => i.Title == "Django Unchained");
+        var interstellar = await db.Items.FirstAsync(i => i.Title == "Interstellar");
 
         var lotr = await db.Items.FirstAsync(i => i.Title == "The Lord of the Rings");
         var sherlock = await db.Items.FirstAsync(i => i.Title == "The Adventures of Sherlock Holmes");
+        var dracula = await db.Items.FirstAsync(i => i.Title == "Dracula");
+
+        var ram = await db.Items.FirstAsync(i => i.Title == "Random Access Memories");
+
+        var sp = await db.Items.FirstAsync(i => i.Title == "Some Podcast");
 
         var reviewGame1 = new Review
         {
@@ -387,6 +453,15 @@ public static class DbInitializer
             UserId = demoUser.Id,
             ItemId = witcher2.Id
         };
+        var reviewGame8 = new Review
+        {
+            Title = "Great world but buggy",
+            Content = "Night City is amazing, but bugs still exist",
+            Rating = 4,
+            CreatedAt = DateTime.UtcNow,
+            UserId = user1.Id,
+            ItemId = cyberpunk.Id
+        };
 
         var reviewMovie1 = new Review
         {
@@ -414,6 +489,15 @@ public static class DbInitializer
             CreatedAt = DateTime.UtcNow.AddDays(-1),
             UserId = demoUser.Id,
             ItemId = django.Id
+        };
+        var reviewMovie4 = new Review
+        {
+            Title = "Masterpiece",
+            Content = "Beautiful visuals, emotional story",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow,
+            UserId = demoUser.Id,
+            ItemId = interstellar.Id
         };
 
         var reviewBook1 = new Review
@@ -443,8 +527,39 @@ public static class DbInitializer
             UserId = demoUser.Id,
             ItemId = lotr.Id
         };
+        var reviewBook4 = new Review
+        {
+            Title = "Classic horror",
+            Content = "Creepy atmosphere and iconic storytelling",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow,
+            UserId = user2.Id,
+            ItemId = dracula.Id
+        };
 
-        db.Reviews.AddRange(reviewGame1, reviewGame2, reviewGame3, reviewGame4, reviewGame5, reviewGame6, reviewGame7, reviewMovie1, reviewMovie2, reviewMovie3, reviewBook1, reviewBook2, reviewBook3);
+        var reviewMusic1 = new Review
+        {
+            Title = "Great album",
+            Content = "Very relaxing electronic music",
+            Rating = 5,
+            CreatedAt = DateTime.UtcNow,
+            UserId = user1.Id,
+            ItemId = ram.Id
+        };
+
+        var reviewPodcast1 = new Review
+        {
+            Title = "Interesting podcast",
+            Content = "Long but full of interesting conversations",
+            Rating = 4,
+            CreatedAt = DateTime.UtcNow,
+            UserId = demoUser.Id,
+            ItemId = sp.Id
+        };
+
+        db.Reviews.AddRange(reviewGame1, reviewGame2, reviewGame3, reviewGame4, reviewGame5, reviewGame6, reviewGame7,
+            reviewGame8, reviewMovie1, reviewMovie2, reviewMovie3, reviewMovie4, reviewBook1, reviewBook2, reviewBook3,
+            reviewBook4, reviewMusic1, reviewPodcast1);
 
         db.Comments.AddRange(
             new Comment
@@ -468,7 +583,6 @@ public static class DbInitializer
                 Review = reviewGame3,
                 UserId = user1.Id
             },
-
             new Comment
             {
                 Content = "Awesome film!",
@@ -476,7 +590,6 @@ public static class DbInitializer
                 Review = reviewMovie1,
                 UserId = user2.Id
             },
-
             new Comment
             {
                 Content = "The masterpiece!",
@@ -484,7 +597,6 @@ public static class DbInitializer
                 Review = reviewBook2,
                 UserId = user1.Id
             },
-
             new Comment
             {
                 Content = "Agree, but optimization is really bad there",
@@ -492,7 +604,6 @@ public static class DbInitializer
                 Review = reviewGame3,
                 UserId = demoUser.Id
             },
-
             new Comment
             {
                 Content = "meh",
@@ -500,7 +611,6 @@ public static class DbInitializer
                 Review = reviewMovie1,
                 UserId = demoUser.Id
             },
-
             new Comment
             {
                 Content = "Agree",
@@ -508,7 +618,6 @@ public static class DbInitializer
                 Review = reviewBook2,
                 UserId = demoUser.Id
             },
-
             new Comment
             {
                 Content = "+",
@@ -516,13 +625,47 @@ public static class DbInitializer
                 Review = reviewMovie2,
                 UserId = demoUser.Id
             },
-
             new Comment
             {
                 Content = "ok",
                 CreatedAt = DateTime.UtcNow,
                 Review = reviewBook1,
                 UserId = demoUser.Id
+            },
+            new Comment
+            {
+                Content = "Totally agree!",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewGame8,
+                UserId = user2.Id
+            },
+            new Comment
+            {
+                Content = "Masterpiece indeed",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewMovie4,
+                UserId = admin.Id
+            },
+            new Comment
+            {
+                Content = "Dracula is a timeless novel",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewBook4,
+                UserId = user1.Id
+            },
+            new Comment
+            {
+                Content = "Love this album!",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewMusic1,
+                UserId = user2.Id
+            },
+            new Comment
+            {
+                Content = "Some episodes are too long for me",
+                CreatedAt = DateTime.UtcNow,
+                Review = reviewPodcast1,
+                UserId = user1.Id
             }
         );
 
