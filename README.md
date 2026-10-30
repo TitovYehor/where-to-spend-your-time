@@ -55,11 +55,6 @@
 * **EF Core migrations** used for schema management
 * Entities: Users, Items, Categories, Reviews, Comments, Tags, Media
 
-### **Deployment**
-
-* **Backend, Frontend, Database:** Deployed on [Render](https://render.com)
-* **Media Storage:** Azure Storage Account
-
 ---
 
 ## Database Schema (ERD)
@@ -176,5 +171,4 @@ http://localhost:10000
 
 ## Links
 
-* **Live App:** [where-to-spend-your-time.onrender.com](https://where-to-spend-your-time.onrender.com)
 * **Database Schema:** see ERD diagram above
