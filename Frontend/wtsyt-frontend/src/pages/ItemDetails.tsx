@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { useAutoResizeTextareas } from "../hooks/useAutoResizeTextareas";
 import { useParams } from "react-router-dom";
@@ -68,24 +69,38 @@ export default function ItemDetails({ setDisableBackground }: ItemDetailsProps) 
     }
   };
 
+  
   const fetchMyReview = async (signal?: AbortSignal) => {
-    if (!user || isNaN(itemId)) return;
+    if (!user || isNaN(itemId)) {
+      setMyReview(null);
+      return;
+    }
+
     try {
       const myReviewData = await getMyReviewForItem(itemId, signal);
+
+      if (signal?.aborted) return;
+
       setMyReview(myReviewData);
       setTitle(myReviewData.title);
       setContent(myReviewData.content);
       setRating(myReviewData.rating);
-    } catch (err: any) {
-      if (!signal?.aborted) {
+    } catch (err: unknown) {
+      if (signal?.aborted || axios.isCancel(err)) return;
+
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
         setMyReview(null);
         setTitle("");
         setContent("");
         setRating(0);
-        handleApiError(err);
+        return;
       }
+
+      handleApiError(err);
+      setError(extractProblemDetailsError(err));
     }
   };
+
 
   useAutoResizeTextareas([reviewContentRef], [content]);
 
