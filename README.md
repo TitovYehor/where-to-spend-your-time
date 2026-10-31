@@ -1,5 +1,12 @@
 # Where To Spend Your Time
 
+## Demo Video
+
+Watch a short demonstration of Where To Spend Your Time's main features, including browsing and filtering books, movies, and games, user reviews and ratings, comments, authentication, and role-based access control (RBAC).
+
+https://github.com/user-attachments/assets/98f5e501-b3ca-4316-a5b0-45d4b954f6cf
+
+
 ## Features
 
 * **Role-based access control**
